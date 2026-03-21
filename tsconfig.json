@@ -2,5 +2,36 @@
   "extends": "./tsconfig.base.json",
   "compileOnSave": false,
   "files": [],
-  "references": []
+  "references": [
+    {
+      "path": "./apps/frontend"
+    },
+    {
+      "path": "./apps/api"
+    },
+    {
+      "path": "./libs/shared/prisma-client"
+    },
+    {
+      "path": "./libs/shared/types"
+    },
+    {
+      "path": "./libs/shared/utils"
+    },
+    {
+      "path": "./libs/api/core"
+    },
+    {
+      "path": "./libs/api/features"
+    },
+    {
+      "path": "./libs/frontend/ui"
+    },
+    {
+      "path": "./libs/frontend/features"
+    },
+    {
+      "path": "./libs/frontend/data-access"
+    }
+  ]
 }
