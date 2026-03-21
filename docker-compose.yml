@@ -5,9 +5,9 @@ services:
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_USER: canipotes
-      POSTGRES_PASSWORD: canipotes
-      POSTGRES_DB: canipotes42
+      POSTGRES_USER: canifed
+      POSTGRES_PASSWORD: canifed
+      POSTGRES_DB: canifed
     volumes:
       - pgdata:/var/lib/postgresql/data
 

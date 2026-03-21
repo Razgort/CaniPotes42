@@ -3,7 +3,7 @@
 # Version: 6.2.0
 # Date: 2026-03-21T06:26:50.884Z
 
-project_name: CaniPotes42
+project_name: CaniFed
 user_skill_level: intermediate
 planning_artifacts: "{project-root}/_bmad-output/planning-artifacts"
 implementation_artifacts: "{project-root}/_bmad-output/implementation-artifacts"
