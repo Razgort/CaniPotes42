@@ -1,10 +1,7 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
@@ -19,9 +16,7 @@
     {
       "plugin": "@nx/js/typescript",
       "options": {
-        "typecheck": {
-          "targetName": "typecheck"
-        },
+        "typecheck": { "targetName": "typecheck" },
         "build": {
           "targetName": "build",
           "configName": "tsconfig.lib.json",
@@ -55,32 +50,16 @@
         "serveStaticTargetName": "serve-static"
       }
     },
-    {
-      "plugin": "@nx/eslint/plugin",
-      "options": {
-        "targetName": "lint"
-      }
-    }
+    { "plugin": "@nx/eslint/plugin", "options": { "targetName": "lint" } }
   ],
-  "nxCloudId": "69be330590a1f73840033b6d",
+  "nxCloudId": "69c01f02d96c7f3e33736ef4",
   "analytics": false,
-  "sync": {
-    "applyChanges": true
-  },
+  "sync": { "applyChanges": true },
   "generators": {
     "@nx/react": {
-      "application": {
-        "babel": true,
-        "style": "css",
-        "bundler": "vite"
-      },
-      "component": {
-        "style": "css"
-      },
-      "library": {
-        "style": "css",
-        "unitTestRunner": "none"
-      }
+      "application": { "babel": true, "style": "css", "bundler": "vite" },
+      "component": { "style": "css" },
+      "library": { "style": "css", "unitTestRunner": "none" }
     }
   }
 }
