@@ -1,6 +1,6 @@
 # Story 2.2: User Login & JWT Session
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -22,58 +22,58 @@ So that I can securely access my club's data.
 
 ### Backend
 
-- [ ] Create auth module structure (AC: 1, 2, 3)
-  - [ ] Create `libs/api/features/src/lib/auth/auth.module.ts`
-  - [ ] Create `libs/api/features/src/lib/auth/auth.service.ts`
-  - [ ] Create `libs/api/features/src/lib/auth/auth.controller.ts`
-  - [ ] Create `libs/api/features/src/lib/auth/dto/login.dto.ts`
-  - [ ] Register `AuthModule` in `FeaturesModule` imports
-- [ ] Implement login endpoint `POST /auth/login` (AC: 1, 2, 3)
-  - [ ] Validate request body with `loginSchema` via `ZodValidationPipe`
-  - [ ] Look up user by email (case-insensitive)
-  - [ ] Compare password with `bcrypt.compare()` against `user.passwordHash`
-  - [ ] Return generic "INVALID_CREDENTIALS" error for both email-not-found AND wrong-password
-  - [ ] Query `ClubMember` to determine `activeClubId` and `role` for JWT payload
-  - [ ] Sign access token with `{ sub: userId, email, activeClubId, role }` using `JwtService`
-  - [ ] Sign refresh token with `{ sub: userId }` using `JWT_REFRESH_SECRET`
-  - [ ] Set refresh token as httpOnly cookie using `jwtConstants.refreshTokenCookieOptions`
-  - [ ] Return `{ data: { accessToken, user: { id, email, firstName, lastName, avatarUrl }, activeClub: { id, name, role } | null } }`
-- [ ] Apply rate limiting on login endpoint (AC: 3)
-  - [ ] Use `@Throttle({ default: { limit: 5, ttl: 60000 } })` decorator on login route
-- [ ] Write unit tests (AC: 1, 2, 3)
-  - [ ] `auth.service.spec.ts` — valid login, invalid email, wrong password, no club membership, multi-club
-  - [ ] `auth.controller.spec.ts` — endpoint validation, response format, rate limiting
+- [x] Create auth module structure (AC: 1, 2, 3)
+  - [x] Create `libs/api/features/src/lib/auth/auth.module.ts`
+  - [x] Create `libs/api/features/src/lib/auth/auth.service.ts`
+  - [x] Create `libs/api/features/src/lib/auth/auth.controller.ts`
+  - [x] Create `libs/api/features/src/lib/auth/dto/login.dto.ts`
+  - [x] Register `AuthModule` in `FeaturesModule` imports
+- [x] Implement login endpoint `POST /auth/login` (AC: 1, 2, 3)
+  - [x] Validate request body with `loginSchema` via `ZodValidationPipe`
+  - [x] Look up user by email (case-insensitive)
+  - [x] Compare password with `bcrypt.compare()` against `user.passwordHash`
+  - [x] Return generic "INVALID_CREDENTIALS" error for both email-not-found AND wrong-password
+  - [x] Query `ClubMember` to determine `activeClubId` and `role` for JWT payload
+  - [x] Sign access token with `{ sub: userId, email, activeClubId, role }` using `JwtService`
+  - [x] Sign refresh token with `{ sub: userId }` using `JWT_REFRESH_SECRET`
+  - [x] Set refresh token as httpOnly cookie using `jwtConstants.refreshTokenCookieOptions`
+  - [x] Return `{ data: { accessToken, user: { id, email, firstName, lastName, avatarUrl }, activeClub: { id, name, role } | null } }`
+- [x] Apply rate limiting on login endpoint (AC: 3)
+  - [x] Use `@Throttle({ default: { limit: 5, ttl: 60000 } })` decorator on login route
+- [x] Write unit tests (AC: 1, 2, 3)
+  - [x] `auth.service.spec.ts` — valid login, invalid email, wrong password, no club membership, multi-club
+  - [x] `auth.controller.spec.ts` — endpoint validation, response format, rate limiting
 
 ### Frontend
 
-- [ ] Create AuthContext provider (AC: 2, 4)
-  - [ ] Create/update `apps/frontend/src/app/providers/auth-provider.tsx`
-  - [ ] Provide `{ user, accessToken, activeClub, role, login(), logout(), isAuthenticated }`
-  - [ ] Store `accessToken` in memory (NOT localStorage — XSS risk)
-  - [ ] On login success, populate context from API response
-  - [ ] On logout or token failure, clear context and redirect to `/login`
-- [ ] Create LoginForm component (AC: 1, 3)
-  - [ ] Create `libs/frontend/features/src/lib/auth/LoginForm.tsx`
-  - [ ] Use React Hook Form with `loginSchema` from `@canifed/shared-types`
-  - [ ] Validate on blur (`mode: "onBlur"`)
-  - [ ] Single column layout, labels above inputs, 16px min font size
-  - [ ] Required fields marked with asterisk (*)
-  - [ ] Error messages below fields in red
-  - [ ] Submit button full width, disabled during submission with loading indicator
-  - [ ] On error: display French message "Email ou mot de passe incorrect", preserve input
-  - [ ] On success: green toast (auto-dismiss 3s), redirect based on club membership
-- [ ] Create login route page (AC: 1, 4)
-  - [ ] Create `apps/frontend/src/app/routes/login.tsx` (lazy-loaded via `React.lazy()`)
-  - [ ] Render `LoginForm` centered on page
-  - [ ] Link to registration page
-- [ ] Update API client with auth header injection (AC: 2)
-  - [ ] Update `libs/frontend/data-access/src/lib/api-client.ts`
-  - [ ] Inject `Authorization: Bearer <accessToken>` on all requests when token available
-  - [ ] Handle 401 responses (clear auth, redirect to login)
-- [ ] Create ProtectedRoute wrapper (AC: 4)
-  - [ ] Redirect unauthenticated users to `/login`
-  - [ ] After login, redirect back to originally requested page
-- [ ] Create `libs/frontend/features/src/lib/auth/hooks/useAuth.ts` TanStack Query mutation for login
+- [x] Create AuthContext provider (AC: 2, 4)
+  - [x] Create/update `apps/frontend/src/app/providers/auth-provider.tsx`
+  - [x] Provide `{ user, accessToken, activeClub, role, login(), logout(), isAuthenticated }`
+  - [x] Store `accessToken` in memory (NOT localStorage — XSS risk)
+  - [x] On login success, populate context from API response
+  - [x] On logout or token failure, clear context and redirect to `/login`
+- [x] Create LoginForm component (AC: 1, 3)
+  - [x] Create `libs/frontend/features/src/lib/auth/LoginForm.tsx`
+  - [x] Use React Hook Form with `loginSchema` from `@canifed/shared-types`
+  - [x] Validate on blur (`mode: "onBlur"`)
+  - [x] Single column layout, labels above inputs, 16px min font size
+  - [x] Required fields marked with asterisk (*)
+  - [x] Error messages below fields in red
+  - [x] Submit button full width, disabled during submission with loading indicator
+  - [x] On error: display French message "Email ou mot de passe incorrect", preserve input
+  - [x] On success: green toast (auto-dismiss 3s), redirect based on club membership
+- [x] Create login route page (AC: 1, 4)
+  - [x] Create `apps/frontend/src/app/routes/login.tsx` (lazy-loaded via `React.lazy()`)
+  - [x] Render `LoginForm` centered on page
+  - [x] Link to registration page
+- [x] Update API client with auth header injection (AC: 2)
+  - [x] Update `libs/frontend/data-access/src/lib/api-client.ts`
+  - [x] Inject `Authorization: Bearer <accessToken>` on all requests when token available
+  - [x] Handle 401 responses (clear auth, redirect to login)
+- [x] Create ProtectedRoute wrapper (AC: 4)
+  - [x] Redirect unauthenticated users to `/login`
+  - [x] After login, redirect back to originally requested page
+- [x] Create `libs/frontend/features/src/lib/auth/hooks/useAuth.ts` TanStack Query mutation for login
 
 ## Dev Notes
 
@@ -259,8 +259,48 @@ This story depends on Story 2.1 (User Registration) for the User records to exis
 
 ### Agent Model Used
 
+Claude Opus 4.6 (1M context)
+
 ### Debug Log References
+
+- Fixed `ReferenceError: Cannot access 'logout' before initialization` in AuthContext by reordering useCallback definitions before useEffect hooks
+- Fixed existing `features.test.tsx` — ProtectedRoute requires AuthProvider wrapping; updated test to use `getByRole('heading')` for disambiguating "Se connecter" text
+- Fixed existing `api-client.test.ts` — added `credentials: 'include'` to expected fetch calls after adding cookie support
 
 ### Completion Notes List
 
+- Backend: Extended existing auth module (from story 2.1) with login endpoint. Added `login()` method to AuthService with bcrypt verification, club membership lookup, JWT access/refresh token signing. Controller sets refresh token as httpOnly cookie and returns access token + user + active club in response body.
+- Backend: Rate limiting applied via `@Throttle({ default: { limit: 5, ttl: 60000 } })` on login route (5 req/min/IP). Generic INVALID_CREDENTIALS error returned for both wrong email and wrong password (no info leakage).
+- Backend: 25 unit tests passing (16 service + 9 controller) covering valid login, invalid email, wrong password, no club membership, multi-club, case-insensitive email, no passwordHash leakage, refresh token signing, and registration tests preserved.
+- Frontend: Fully implemented AuthContext with login/logout state management, token injection via setTokenGetter, and 401 auto-logout via setOnUnauthorized.
+- Frontend: LoginForm component with React Hook Form + Zod (loginSchema), onBlur validation, French UI, error toast "Email ou mot de passe incorrect", success toast + redirect logic (1 club → /, no clubs → /club-setup, preserve original path).
+- Frontend: ProtectedRoute wrapper redirects unauthenticated users to /login with `state.from` for post-login redirect.
+- Frontend: Login route page lazy-loaded, AppRoutes updated with /login route and ProtectedRoute on /.
+- Frontend: API client updated with `credentials: 'include'` for cookie support and 401 handler.
+- Frontend: 17 tests passing (7 LoginForm + 7 RegisterForm + 3 routing) covering form rendering, validation, successful login, club-based redirect, error handling, input preservation.
+- All 7 projects pass tests (42 total tests). All 10 projects pass lint.
+
 ### File List
+
+- libs/api/features/src/lib/auth/auth.service.ts (modified - added login method with JwtService dependency)
+- libs/api/features/src/lib/auth/auth.controller.ts (modified - added POST /auth/login endpoint with rate limiting and cookie setting)
+- libs/api/features/src/lib/auth/dto/login.dto.ts (new - login DTO re-exporting loginSchema from @org/types)
+- libs/api/features/src/lib/auth/auth.service.spec.ts (modified - added 10 login tests)
+- libs/api/features/src/lib/auth/auth.controller.spec.ts (modified - added 5 login tests)
+- libs/frontend/data-access/src/lib/AuthContext.tsx (modified - full implementation with login/logout/token injection/401 handler)
+- libs/frontend/data-access/src/lib/api-client.ts (modified - added credentials:include, setOnUnauthorized, 401 auto-logout)
+- libs/frontend/data-access/src/lib/api-client.test.ts (modified - updated expected fetch calls with credentials:include)
+- libs/frontend/data-access/src/index.ts (modified - exported LoginResponse and setOnUnauthorized)
+- libs/frontend/features/src/lib/auth/LoginForm.tsx (new - login form component)
+- libs/frontend/features/src/lib/auth/LoginForm.test.tsx (new - 7 tests for login form)
+- libs/frontend/features/src/lib/auth/hooks/useLogin.ts (new - TanStack Query mutation for login)
+- libs/frontend/features/src/lib/auth/ProtectedRoute.tsx (new - redirects unauthenticated users to /login)
+- libs/frontend/features/src/lib/pages/LoginPage.tsx (new - login route page)
+- libs/frontend/features/src/lib/features.tsx (modified - added /login route, ProtectedRoute on /)
+- libs/frontend/features/src/lib/features.test.tsx (modified - updated for AuthProvider wrapping and new routing)
+- _bmad-output/implementation-artifacts/2-2-user-login-jwt-session.md (modified - tasks checked, status review)
+- _bmad-output/implementation-artifacts/sprint-status.yaml (modified - story status updated)
+
+## Change Log
+
+- 2026-03-22: Implemented story 2.2 - User Login & JWT Session. Backend login endpoint with bcrypt verification, JWT signing, rate limiting. Frontend AuthContext, LoginForm, ProtectedRoute, useLogin hook, login page. All 42 tests passing across 7 projects, all lint passing.

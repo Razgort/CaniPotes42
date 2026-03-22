@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-03-22
-last_updated: 2026-03-22  # Story 1.6 completed, moved to review
+last_updated: 2026-03-22  # Story 2.2 completed, moved to review
 project: CaniFed
 project_key: NOKEY
 tracking_system: file-system
@@ -55,7 +55,7 @@ development_status:
   # Epic 2: Authentication & User Accounts
   epic-2: in-progress
   2-1-user-registration-with-privacy-notice: review
-  2-2-user-login-jwt-session: in-progress
+  2-2-user-login-jwt-session: review
   2-3-token-refresh-session-management: ready-for-dev
   epic-2-retrospective: optional
 
