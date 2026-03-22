@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#2563EB" />
+  <title>Tableau vaccins — CaniFed Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #dbeafe;
+      --background: #fafafa;
+      --card: #ffffff;
+      --foreground: #18181b;
+      --muted: #71717a;
+      --border: #e4e4e7;
+      --ok: #16a34a; --ok-light: #dcfce7; --ok-border: #86efac;
+      --warn: #d97706; --warn-light: #fef3c7; --warn-border: #fcd34d;
+      --crit: #dc2626; --crit-light: #fee2e2; --crit-border: #fca5a5;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--foreground);
+      background: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+    .phone {
+      width: 390px;
+      min-height: 100vh;
+      background: var(--background);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 0 1px #cbd5e1, 0 20px 60px rgba(0,0,0,.15);
+      overflow: hidden;
+    }
+    @media (max-width: 420px) { .phone { width: 100%; box-shadow: none; } }
+
+    /* Header */
+    .nav-header {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 10;
+      gap: 8px;
+    }
+    .back-btn {
+      width: 36px; height: 36px;
+      border: none; background: transparent;
+      border-radius: 8px; cursor: pointer;
+      font-size: 20px; color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .back-btn:hover { background: var(--primary-light); }
+    .nav-title { font-weight: 700; font-size: 16px; flex: 1; }
+    .admin-badge {
+      padding: 3px 8px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* Scroll */
+    .scroll-content { flex: 1; overflow-y: auto; }
+
+    /* KPI strip */
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      padding: 16px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+    }
+    .kpi-card {
+      border-radius: 12px;
+      padding: 12px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform .1s, box-shadow .1s;
+      border: 1.5px solid transparent;
+    }
+    .kpi-card:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .kpi-card.selected { border-color: currentColor; }
+    .kpi-ok   { background: var(--ok-light); color: var(--ok); }
+    .kpi-warn { background: var(--warn-light); color: var(--warn); }
+    .kpi-crit { background: var(--crit-light); color: var(--crit); }
+    .kpi-num {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      opacity: .85;
+    }
+
+    /* Filters */
+    .filters {
+      padding: 12px 16px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      position: sticky;
+      top: 53px; z-index: 9;
+    }
+    .search-box {
+      flex: 1;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 8px 12px 8px 34px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      background: var(--background);
+      outline: none;
+      transition: border-color .15s;
+    }
+    .search-box input:focus { border-color: var(--primary); }
+    .search-icon {
+      position: absolute;
+      left: 10px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+    .filter-select {
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 12px;
+      background: var(--background);
+      cursor: pointer;
+      outline: none;
+      color: var(--foreground);
+      min-width: 100px;
+    }
+    .filter-select:focus { border-color: var(--primary); }
+
+    /* Dog list */
+    .dog-list { padding: 8px 0; }
+    .section-label {
+      padding: 6px 16px 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+    }
+    .dog-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background .1s;
+    }
+    .dog-row:hover { background: #f8fafc; }
+    .dog-avatar {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      background: #f4f4f5;
+    }
+    .dog-info { flex: 1; min-width: 0; }
+    .dog-name {
+      font-weight: 600;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .dog-owner {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0;
+      border: 1px solid transparent;
+    }
+    .status-ok   { background: var(--ok-light);   color: var(--ok);   border-color: var(--ok-border); }
+    .status-warn { background: var(--warn-light); color: var(--warn); border-color: var(--warn-border); }
+    .status-crit { background: var(--crit-light); color: var(--crit); border-color: var(--crit-border); }
+    .days-badge {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: right;
+      flex-shrink: 0;
+      min-width: 40px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state .title { font-weight: 600; font-size: 15px; margin-bottom: 6px; color: var(--foreground); }
+
+    /* Drawer overlay */
+    .drawer-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.4);
+      z-index: 100;
+      display: flex; align-items: flex-end;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s;
+    }
+    .drawer-overlay.open { opacity: 1; pointer-events: all; }
+    .drawer-sheet {
+      background: var(--card);
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-width: 390px;
+      margin: 0 auto;
+      padding: 20px 20px 32px;
+      transform: translateY(100%);
+      transition: transform .25s cubic-bezier(.32,.72,0,1);
+    }
+    .drawer-overlay.open .drawer-sheet { transform: translateY(0); }
+    .drawer-handle {
+      width: 36px; height: 4px;
+      background: #d1d5db;
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+    .drawer-dog-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+    }
+    .drawer-avatar {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: #f4f4f5;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+    }
+    .drawer-dog-name { font-size: 18px; font-weight: 700; }
+    .drawer-dog-owner { font-size: 13px; color: var(--muted); }
+    .drawer-section { margin-bottom: 14px; }
+    .drawer-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .vax-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      background: var(--background);
+      border-radius: 10px;
+      margin-bottom: 6px;
+      border: 1px solid var(--border);
+    }
+    .vax-name { font-size: 13px; font-weight: 500; }
+    .vax-date { font-size: 12px; color: var(--muted); }
+    .drawer-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .drawer-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all .15s;
+    }
+    .drawer-btn-primary { background: var(--primary); color: white; }
+    .drawer-btn-primary:hover { background: var(--primary-hover); }
+    .drawer-btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--foreground);
+    }
+    .drawer-btn-outline:hover { background: var(--background); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1e293b; color: white;
+      padding: 10px 18px; border-radius: 10px;
+      font-size: 13px; font-weight: 500;
+      opacity: 0; transition: all .25s; z-index: 200;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- Nav header -->
+  <div class="nav-header">
+    <button class="back-btn" onclick="showToast('← Retour admin')">←</button>
+    <span class="nav-title">Suivi vaccinal</span>
+    <span class="admin-badge">Admin</span>
+  </div>
+
+  <div class="scroll-content">
+
+    <!-- KPI strip -->
+    <div class="kpi-strip">
+      <div class="kpi-card kpi-ok selected" id="kpi-ok" onclick="filterStatus('ok')">
+        <div class="kpi-num" id="count-ok">42</div>
+        <div class="kpi-label">À jour</div>
+      </div>
+      <div class="kpi-card kpi-warn" id="kpi-warn" onclick="filterStatus('warn')">
+        <div class="kpi-num" id="count-warn">8</div>
+        <div class="kpi-label">À renouveler</div>
+      </div>
+      <div class="kpi-card kpi-crit" id="kpi-crit" onclick="filterStatus('crit')">
+        <div class="kpi-num" id="count-crit">3</div>
+        <div class="kpi-label">Expiré</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Chien ou propriétaire…" oninput="applyFilters()" />
+      </div>
+      <select class="filter-select" id="status-filter" onchange="applyFilters()">
+        <option value="all">Tous</option>
+        <option value="ok">À jour</option>
+        <option value="warn">À renouveler</option>
+        <option value="crit">Expiré</option>
+      </select>
+    </div>
+
+    <!-- Dog list -->
+    <div class="dog-list" id="dog-list"></div>
+
+  </div>
+</div>
+
+<!-- Drawer -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer(event)">
+  <div class="drawer-sheet" id="drawer-sheet">
+    <div class="drawer-handle"></div>
+    <div id="drawer-content"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const DOGS = [
+    { name: 'Balto', owner: 'Marie D.', status: 'warn', days: 12, emoji: '🐺', vaccines: [
+      { name: 'Rage', exp: '10 avr. 2026', status: 'warn' },
+      { name: 'Parvovirose', exp: '15 jan. 2027', status: 'ok' },
+    ]},
+    { name: 'Luna', owner: 'Julie C.', status: 'ok', days: 145, emoji: '🐕', vaccines: [
+      { name: 'Rage', exp: '15 août 2026', status: 'ok' },
+      { name: 'Leptospirose', exp: '02 juil. 2026', status: 'ok' },
+    ]},
+    { name: 'Rocky', owner: 'Thomas B.', status: 'crit', days: -8, emoji: '🦮', vaccines: [
+      { name: 'Rage', exp: '18 mar. 2026', status: 'crit' },
+      { name: 'Toux du chenil', exp: '18 mar. 2026', status: 'crit' },
+    ]},
+    { name: 'Nala', owner: 'Sophie R.', status: 'ok', days: 210, emoji: '🐶', vaccines: [
+      { name: 'Rage', exp: '19 oct. 2026', status: 'ok' },
+    ]},
+    { name: 'Max', owner: 'Patrick L.', status: 'warn', days: 28, emoji: '🐕‍🦺', vaccines: [
+      { name: 'Rage', exp: '19 avr. 2026', status: 'warn' },
+      { name: 'Parvovirose', exp: '30 avr. 2026', status: 'warn' },
+    ]},
+    { name: 'Bella', owner: 'Aude M.', status: 'crit', days: -2, emoji: '🐩', vaccines: [
+      { name: 'Rage', exp: '20 mar. 2026', status: 'crit' },
+    ]},
+    { name: 'Thor', owner: 'Romain F.', status: 'ok', days: 180, emoji: '🐕', vaccines: [
+      { name: 'Rage', exp: '19 sep. 2026', status: 'ok' },
+    ]},
+    { name: 'Cleo', owner: 'Camille V.', status: 'warn', days: 6, emoji: '🦊', vaccines: [
+      { name: 'Leptospirose', exp: '28 mar. 2026', status: 'warn' },
+      { name: 'Rage', exp: '15 mai 2026', status: 'ok' },
+    ]},
+    { name: 'Diesel', owner: 'Marc T.', status: 'ok', days: 90, emoji: '🐕', vaccines: [
+      { name: 'Rage', exp: '21 juin 2026', status: 'ok' },
+    ]},
+    { name: 'Zara', owner: 'Perrine O.', status: 'crit', days: -15, emoji: '🐺', vaccines: [
+      { name: 'Rage', exp: '07 mar. 2026', status: 'crit' },
+      { name: 'Parvovirose', exp: '07 jan. 2026', status: 'crit' },
+    ]},
+  ];
+
+  let activeFilter = 'all';
+  let searchQuery = '';
+
+  function statusLabel(s) {
+    if (s === 'ok')   return { text: '✓ À jour',       cls: 'status-ok' };
+    if (s === 'warn') return { text: '⚠ À renouveler', cls: 'status-warn' };
+    return                   { text: '✕ Expiré',        cls: 'status-crit' };
+  }
+
+  function daysLabel(days) {
+    if (days < 0)  return `Exp. il y a ${Math.abs(days)}j`;
+    if (days === 0) return 'Expire aujourd'hui';
+    return `${days}j restants`;
+  }
+
+  function applyFilters() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    const sel = document.getElementById('status-filter').value;
+    searchQuery = q;
+    activeFilter = sel;
+
+    // Sync KPI selection
+    ['ok','warn','crit'].forEach(s => {
+      document.getElementById('kpi-'+s).classList.toggle('selected', sel === s);
+    });
+
+    renderList();
+  }
+
+  function filterStatus(s) {
+    const sel = document.getElementById('status-filter');
+    sel.value = s === activeFilter ? 'all' : s;
+    applyFilters();
+  }
+
+  function renderList() {
+    const list = document.getElementById('dog-list');
+    const filtered = DOGS.filter(d => {
+      const matchStatus = activeFilter === 'all' || d.status === activeFilter;
+      const matchSearch = !searchQuery || d.name.toLowerCase().includes(searchQuery) || d.owner.toLowerCase().includes(searchQuery);
+      return matchStatus && matchSearch;
+    });
+
+    // Sort: crit first, then warn, then ok
+    const order = { crit: 0, warn: 1, ok: 2 };
+    filtered.sort((a,b) => order[a.status] - order[b.status] || a.days - b.days);
+
+    if (!filtered.length) {
+      list.innerHTML = `<div class="empty-state">
+        <div class="icon">🔍</div>
+        <div class="title">Aucun résultat</div>
+        <div>Modifiez vos critères de recherche.</div>
+      </div>`;
+      return;
+    }
+
+    // Group by status
+    const groups = [
+      { key: 'crit', label: 'Expiré' },
+      { key: 'warn', label: 'À renouveler (< 30j)' },
+      { key: 'ok',   label: 'À jour' },
+    ];
+
+    let html = '';
+    groups.forEach(g => {
+      const dogs = filtered.filter(d => d.status === g.key);
+      if (!dogs.length) return;
+      if (activeFilter === 'all') html += `<div class="section-label">${g.label} (${dogs.length})</div>`;
+      dogs.forEach(d => {
+        const sl = statusLabel(d.status);
+        html += `<div class="dog-row" onclick="openDrawer(${DOGS.indexOf(d)})">
+          <div class="dog-avatar">${d.emoji}</div>
+          <div class="dog-info">
+            <div class="dog-name">${d.name}</div>
+            <div class="dog-owner">${d.owner}</div>
+          </div>
+          <span class="status-badge ${sl.cls}">${sl.text}</span>
+          <div class="days-badge">${daysLabel(d.days)}</div>
+        </div>`;
+      });
+    });
+    list.innerHTML = html;
+
+    // Update KPI counts
+    document.getElementById('count-ok').textContent   = DOGS.filter(d=>d.status==='ok').length;
+    document.getElementById('count-warn').textContent = DOGS.filter(d=>d.status==='warn').length;
+    document.getElementById('count-crit').textContent = DOGS.filter(d=>d.status==='crit').length;
+  }
+
+  function openDrawer(idx) {
+    const d = DOGS[idx];
+    const sl = statusLabel(d.status);
+    const vaxRows = d.vaccines.map(v => {
+      const vs = statusLabel(v.status);
+      return `<div class="vax-item">
+        <div><div class="vax-name">${v.name}</div><div class="vax-date">Expiration : ${v.exp}</div></div>
+        <span class="status-badge ${vs.cls}" style="font-size:10px">${vs.text}</span>
+      </div>`;
+    }).join('');
+
+    document.getElementById('drawer-content').innerHTML = `
+      <div class="drawer-dog-header">
+        <div class="drawer-avatar">${d.emoji}</div>
+        <div>
+          <div class="drawer-dog-name">${d.name}</div>
+          <div class="drawer-dog-owner">Propriétaire : ${d.owner}</div>
+        </div>
+      </div>
+      <div class="drawer-section">
+        <div class="drawer-section-title">Statut vaccinal</div>
+        ${vaxRows}
+      </div>
+      <div class="drawer-actions">
+        <button class="drawer-btn drawer-btn-outline" onclick="showToast('Ouverture messagerie…'); closeDrawer()">✉ Contacter</button>
+        <button class="drawer-btn drawer-btn-primary" onclick="showToast('→ Fiche vaccinale (04.4)'); closeDrawer()">Ouvrir le dossier</button>
+      </div>
+    `;
+    document.getElementById('drawer-overlay').classList.add('open');
+  }
+
+  function closeDrawer(e) {
+    if (!e || e.target === document.getElementById('drawer-overlay') || !e.target.closest('.drawer-sheet')) {
+      document.getElementById('drawer-overlay').classList.remove('open');
+    }
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // Init
+  renderList();
+</script>
+</body>
+</html>

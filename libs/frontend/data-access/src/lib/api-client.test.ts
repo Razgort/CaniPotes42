@@ -1,4 +1,4 @@
-import { apiClient, ApiClientError, setTokenGetter } from './api-client';
+import { apiClient, ApiClientError, setTokenGetter, setTokenSetter, setOnUnauthorized } from './api-client';
 
 const mockFetch = vi.fn();
 globalThis.fetch = mockFetch;
@@ -6,6 +6,8 @@ globalThis.fetch = mockFetch;
 beforeEach(() => {
   mockFetch.mockReset();
   setTokenGetter(null as unknown as () => string | null);
+  setTokenSetter(null as unknown as (token: string) => void);
+  setOnUnauthorized(null as unknown as () => void);
 });
 
 describe('apiClient', () => {
@@ -83,11 +85,6 @@ describe('apiClient', () => {
     });
 
     await expect(apiClient.post('/clubs', {})).rejects.toThrow(ApiClientError);
-    try {
-      await apiClient.post('/clubs', {});
-    } catch {
-      // re-mock for second call
-    }
 
     mockFetch.mockResolvedValueOnce({
       ok: false,
@@ -111,7 +108,7 @@ describe('apiClient', () => {
     }
   });
 
-  it('throws ApiClientError with French message on 401', async () => {
+  it('throws ApiClientError with French message on 401 (no token)', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 401,
@@ -171,6 +168,150 @@ describe('apiClient', () => {
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: undefined,
+    });
+  });
+
+  describe('token refresh interceptor', () => {
+    it('attempts refresh on 401 when token is present, then retries original request', async () => {
+      let currentToken = 'expired-token';
+      setTokenGetter(() => currentToken);
+      setTokenSetter((t) => { currentToken = t; });
+
+      // First call: 401
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: () => Promise.resolve({ error: 'EXPIRED_TOKEN' }),
+      });
+
+      // Refresh call: success
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: { accessToken: 'new-token' } }),
+      });
+
+      // Retry call: success
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: { items: [] } }),
+      });
+
+      const result = await apiClient.get<{ data: { items: unknown[] } }>('/clubs');
+
+      expect(result).toEqual({ data: { items: [] } });
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+
+      // Verify refresh was called
+      expect(mockFetch).toHaveBeenNthCalledWith(2,
+        '/api/auth/refresh',
+        expect.objectContaining({ method: 'POST', credentials: 'include' })
+      );
+
+      // Verify retry used new token
+      expect(mockFetch).toHaveBeenNthCalledWith(3,
+        '/api/clubs',
+        expect.objectContaining({
+          headers: expect.objectContaining({ Authorization: 'Bearer new-token' }),
+        })
+      );
+    });
+
+    it('calls onUnauthorized when refresh fails', async () => {
+      setTokenGetter(() => 'expired-token');
+      const onUnauth = vi.fn();
+      setOnUnauthorized(onUnauth);
+
+      // First call: 401
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: () => Promise.resolve({ error: 'EXPIRED_TOKEN' }),
+      });
+
+      // Refresh call: also fails
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: () => Promise.resolve({ error: 'INVALID_REFRESH_TOKEN' }),
+      });
+
+      await expect(apiClient.get('/clubs')).rejects.toThrow(ApiClientError);
+      expect(onUnauth).toHaveBeenCalled();
+    });
+
+    it('does not attempt refresh for auth/login endpoint', async () => {
+      setTokenGetter(() => 'some-token');
+
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: () => Promise.resolve({ error: 'INVALID_CREDENTIALS' }),
+      });
+
+      await expect(apiClient.post('/auth/login', { email: 'a@b.com', password: 'wrong' }))
+        .rejects.toThrow(ApiClientError);
+
+      // Should only have made 1 call (no refresh attempt)
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not attempt refresh when no token is present', async () => {
+      // No token getter set
+
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: () => Promise.resolve({ error: 'UNAUTHORIZED' }),
+      });
+
+      await expect(apiClient.get('/clubs')).rejects.toThrow(ApiClientError);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('queues concurrent requests during refresh', async () => {
+      let currentToken = 'expired-token';
+      setTokenGetter(() => currentToken);
+      setTokenSetter((t) => { currentToken = t; });
+
+      // Both requests get 401
+      mockFetch.mockResolvedValueOnce({
+        ok: false, status: 401,
+        json: () => Promise.resolve({ error: 'EXPIRED' }),
+      });
+      mockFetch.mockResolvedValueOnce({
+        ok: false, status: 401,
+        json: () => Promise.resolve({ error: 'EXPIRED' }),
+      });
+
+      // One refresh call
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: { accessToken: 'refreshed-token' } }),
+      });
+
+      // Two retry calls
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: 'result-a' }),
+      });
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: 'result-b' }),
+      });
+
+      const [resultA, resultB] = await Promise.all([
+        apiClient.get('/endpoint-a'),
+        apiClient.get('/endpoint-b'),
+      ]);
+
+      expect(resultA).toEqual({ data: 'result-a' });
+      expect(resultB).toEqual({ data: 'result-b' });
+
+      // Count refresh calls — should only be 1 refresh, not 2
+      const refreshCalls = mockFetch.mock.calls.filter(
+        (call) => typeof call[0] === 'string' && call[0].includes('/auth/refresh')
+      );
+      expect(refreshCalls.length).toBe(1);
     });
   });
 });

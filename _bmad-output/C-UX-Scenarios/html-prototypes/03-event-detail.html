@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#2563EB" />
+  <title>Détail événement — CaniFed</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #dbeafe;
+      --background: #fafafa;
+      --card: #ffffff;
+      --foreground: #18181b;
+      --muted: #71717a;
+      --border: #e4e4e7;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --warning: #d97706;
+      --warning-light: #fef3c7;
+      --danger: #dc2626;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--foreground);
+      background: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .phone {
+      width: 390px;
+      min-height: 100vh;
+      background: var(--background);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 0 1px #cbd5e1, 0 20px 60px rgba(0,0,0,.15);
+      overflow: hidden;
+    }
+    @media (max-width: 420px) { .phone { width: 100%; box-shadow: none; } }
+
+    /* Header nav */
+    .nav-header {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0; z-index: 10;
+      gap: 8px;
+    }
+    .back-btn {
+      width: 36px; height: 36px;
+      border: none; background: transparent;
+      border-radius: 8px; cursor: pointer;
+      font-size: 20px; display: flex;
+      align-items: center; justify-content: center;
+      color: var(--primary);
+    }
+    .back-btn:hover { background: var(--primary-light); }
+    .nav-title {
+      flex: 1;
+      font-weight: 600;
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Scrollable content */
+    .scroll-content {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 100px;
+    }
+
+    /* Summary block */
+    .summary-block {
+      background: var(--card);
+      padding: 20px 16px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .event-title-main {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 12px;
+    }
+    .meta-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .meta-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .meta-text { font-size: 14px; }
+    .meta-text strong { font-weight: 600; }
+    .meta-text .sub { color: var(--muted); font-size: 12px; }
+
+    /* Map section */
+    .map-section {
+      position: relative;
+      margin: 0;
+      height: 200px;
+      overflow: hidden;
+      background: #bfdbfe;
+    }
+    .map-bg {
+      width: 100%; height: 100%;
+      background: linear-gradient(160deg, #eff6ff 0%, #bfdbfe 40%, #93c5fd 70%, #60a5fa 100%);
+      position: relative;
+    }
+    /* Fake map grid lines */
+    .map-bg::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(99,148,255,.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99,148,255,.12) 1px, transparent 1px);
+      background-size: 30px 30px;
+    }
+    /* Fake road */
+    .map-bg::after {
+      content: '';
+      position: absolute;
+      top: 40%; left: 0; right: 0;
+      height: 6px;
+      background: rgba(255,255,255,.7);
+      border-radius: 3px;
+      transform: rotate(-5deg);
+    }
+    .map-pin-container {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .map-pin-bubble {
+      background: var(--primary);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(37,99,235,.4);
+      margin-bottom: 4px;
+    }
+    .map-pin-dot {
+      width: 14px; height: 14px;
+      background: var(--primary);
+      border: 2.5px solid white;
+      border-radius: 50%;
+      box-shadow: 0 0 0 4px rgba(37,99,235,.2);
+    }
+    .map-pin-arrow {
+      width: 0; height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--primary);
+      margin-top: -1px;
+    }
+
+    /* No GPS banner */
+    .no-gps-banner {
+      margin: 12px 16px;
+      padding: 12px 14px;
+      background: var(--primary-light);
+      border: 1px solid #93c5fd;
+      border-radius: 10px;
+      font-size: 13px;
+      color: #1e40af;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    /* Actions bar */
+    .actions-bar {
+      position: sticky;
+      bottom: 0;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+      display: flex;
+      gap: 10px;
+      z-index: 10;
+    }
+    .btn {
+      flex: 1;
+      padding: 13px 16px;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:active { transform: scale(.98); }
+    .btn-outline {
+      background: transparent;
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+    }
+    .btn-outline:hover { background: var(--primary-light); }
+    .btn-going {
+      background: var(--success-light);
+      color: var(--success);
+      border: 1.5px solid #86efac;
+    }
+
+    /* Content sections */
+    .content-section {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+      margin-top: 8px;
+    }
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .description-text {
+      font-size: 14px;
+      line-height: 1.65;
+      color: #374151;
+    }
+
+    /* Participants */
+    .participants-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .avatar-stack-lg {
+      display: flex;
+    }
+    .avatar-md {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: 2px solid var(--card);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: white;
+      margin-left: -8px;
+    }
+    .avatar-md:first-child { margin-left: 0; }
+    .avatar-more {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: #f4f4f5;
+      border: 2px solid var(--card);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-left: -8px;
+    }
+    .participants-label {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .see-all {
+      font-size: 12px;
+      color: var(--primary);
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .see-all:hover { text-decoration: underline; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.4);
+      display: flex; align-items: flex-end;
+      z-index: 100;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-sheet {
+      background: var(--card);
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-width: 390px;
+      margin: 0 auto;
+      padding: 20px 16px 32px;
+      transform: translateY(100%);
+      transition: transform .25s cubic-bezier(.32,.72,0,1);
+    }
+    .modal-overlay.open .modal-sheet { transform: translateY(0); }
+    .modal-handle {
+      width: 36px; height: 4px;
+      background: #d1d5db;
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+    .modal-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .nav-option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: background .1s;
+    }
+    .nav-option:hover { background: var(--primary-light); }
+    .nav-option-icon { font-size: 28px; }
+    .nav-option-label { font-weight: 600; font-size: 14px; }
+    .nav-option-sub { font-size: 12px; color: var(--muted); }
+    .btn-cancel {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      background: #f4f4f5;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 4px;
+      color: var(--foreground);
+    }
+    .btn-cancel:hover { background: var(--border); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 100px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1e293b; color: white;
+      padding: 10px 18px; border-radius: 10px;
+      font-size: 13px; font-weight: 500;
+      opacity: 0; transition: all .25s; z-index: 200;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Toggle demo */
+    .demo-bar {
+      background: #1e293b; color: white;
+      padding: 8px 16px;
+      display: flex; gap: 8px; align-items: center;
+      flex-wrap: wrap;
+    }
+    .demo-bar span { font-size: 11px; font-weight: 500; opacity: .7; }
+    .demo-toggle {
+      padding: 4px 12px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,.3);
+      background: transparent;
+      color: white;
+      font-family: inherit;
+      font-size: 11px;
+      cursor: pointer;
+      transition: background .1s;
+    }
+    .demo-toggle.active { background: var(--primary); border-color: var(--primary); }
+    .demo-toggle:hover { background: rgba(255,255,255,.1); }
+  </style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- Demo bar -->
+  <div class="demo-bar">
+    <span>Démo :</span>
+    <button class="demo-toggle active" id="tog-map" onclick="setMap(true)">Avec GPS</button>
+    <button class="demo-toggle" id="tog-nomap" onclick="setMap(false)">Sans GPS</button>
+    <button class="demo-toggle" id="tog-going" onclick="setRsvp('going')">Je viens</button>
+    <button class="demo-toggle" id="tog-none" onclick="setRsvp('none')">Pas répondu</button>
+  </div>
+
+  <!-- Nav header -->
+  <div class="nav-header">
+    <button class="back-btn" onclick="showToast('← Retour au feed (03-event-feed.html)')">←</button>
+    <span class="nav-title" id="nav-title">Canitrail Forêt de Sénart</span>
+  </div>
+
+  <!-- Scroll content -->
+  <div class="scroll-content" id="scroll-content">
+
+    <!-- Summary -->
+    <div class="summary-block">
+      <h1 class="event-title-main">Canitrail Forêt de Sénart — Compétition FFSLC</h1>
+      <div class="meta-row">
+        <span class="meta-icon">📅</span>
+        <div class="meta-text">
+          <strong>Samedi 29 mars 2026</strong><br>
+          <span class="sub">08:00 – 13:00</span>
+        </div>
+      </div>
+      <div class="meta-row">
+        <span class="meta-icon">📍</span>
+        <div class="meta-text">
+          Parking du Carrefour, Brunoy<br>
+          <span class="sub">Coordonnées GPS disponibles</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map or no-GPS -->
+    <div id="map-container"></div>
+
+    <!-- Description -->
+    <div class="content-section" style="margin-top:0;border-top:0">
+      <div class="section-title">Description</div>
+      <p class="description-text">
+        Course officielle FFSLC sur 6 km et 12 km. Départ en vague toutes les 5 min à partir de 8h. Inscription préalable sur Canicompet obligatoire. Prévoir eau et gamelle pour votre chien.
+        <br><br>
+        Les résultats seront publiés dans le chat du club le soir même. Covoiturages à organiser dans le canal #canitrail-sénart.
+      </p>
+    </div>
+
+    <!-- Participants -->
+    <div class="content-section">
+      <div class="section-title">Participants</div>
+      <div class="participants-row">
+        <div class="avatar-stack-lg">
+          <div class="avatar-md" style="background:#2563eb">J</div>
+          <div class="avatar-md" style="background:#dc2626">P</div>
+          <div class="avatar-md" style="background:#16a34a">S</div>
+          <div class="avatar-md" style="background:#9333ea">M</div>
+          <div class="avatar-more">+4</div>
+        </div>
+        <span class="participants-label">8 participants</span>
+        <span class="see-all" onclick="showToast('→ Tous les participants (03.4 RSVP)')">Voir tout →</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Actions bar -->
+  <div class="actions-bar">
+    <button class="btn btn-primary" id="nav-cta" onclick="openNavModal()">
+      🧭 S'y rendre
+    </button>
+    <button class="btn btn-outline" id="rsvp-cta" onclick="toggleRsvp()">
+      Participer
+    </button>
+  </div>
+
+</div>
+
+<!-- Navigation modal -->
+<div class="modal-overlay" id="nav-modal" onclick="closeNavModal(event)">
+  <div class="modal-sheet" onclick="e => e.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Ouvrir avec…</div>
+    <div class="nav-option" onclick="showToast('Ouverture dans Waze…'); closeNavModal()">
+      <span class="nav-option-icon">🗺</span>
+      <div>
+        <div class="nav-option-label">Waze</div>
+        <div class="nav-option-sub">Navigation en temps réel</div>
+      </div>
+    </div>
+    <div class="nav-option" onclick="showToast('Ouverture dans Google Maps…'); closeNavModal()">
+      <span class="nav-option-icon">📍</span>
+      <div>
+        <div class="nav-option-label">Google Maps</div>
+        <div class="nav-option-sub">Itinéraire et trafic</div>
+      </div>
+    </div>
+    <div class="nav-option" onclick="showToast('Ouverture dans Plans (Apple)…'); closeNavModal()">
+      <span class="nav-option-icon">🍎</span>
+      <div>
+        <div class="nav-option-label">Plans</div>
+        <div class="nav-option-sub">Application Apple</div>
+      </div>
+    </div>
+    <button class="btn-cancel" onclick="closeNavModal()">Annuler</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  let showMap = true;
+  let rsvpState = 'none';
+
+  function renderMap() {
+    const container = document.getElementById('map-container');
+    if (showMap) {
+      container.innerHTML = `
+        <div class="map-section">
+          <div class="map-bg">
+            <div class="map-pin-container">
+              <div class="map-pin-bubble">📍 Point de RDV</div>
+              <div class="map-pin-arrow"></div>
+              <div class="map-pin-dot"></div>
+            </div>
+          </div>
+        </div>`;
+    } else {
+      container.innerHTML = `
+        <div class="no-gps-banner">
+          <span style="font-size:16px">ℹ️</span>
+          <span>Pas de point GPS pour cet événement — le lieu indiqué ci-dessus fait foi.</span>
+        </div>`;
+    }
+  }
+
+  function renderActions() {
+    const navCta = document.getElementById('nav-cta');
+    const rsvpCta = document.getElementById('rsvp-cta');
+
+    if (!showMap) {
+      navCta.disabled = true;
+      navCta.style.opacity = '.4';
+      navCta.style.cursor = 'not-allowed';
+      navCta.title = 'Aucun GPS pour cet événement';
+    } else {
+      navCta.disabled = false;
+      navCta.style.opacity = '1';
+      navCta.style.cursor = 'pointer';
+      navCta.title = '';
+    }
+
+    if (rsvpState === 'going') {
+      rsvpCta.className = 'btn btn-going';
+      rsvpCta.textContent = '✓ Vous participez';
+    } else {
+      rsvpCta.className = 'btn btn-outline';
+      rsvpCta.textContent = 'Participer';
+    }
+  }
+
+  function setMap(val) {
+    showMap = val;
+    document.getElementById('tog-map').classList.toggle('active', val);
+    document.getElementById('tog-nomap').classList.toggle('active', !val);
+    renderMap();
+    renderActions();
+  }
+
+  function setRsvp(val) {
+    rsvpState = val;
+    document.getElementById('tog-going').classList.toggle('active', val === 'going');
+    document.getElementById('tog-none').classList.toggle('active', val === 'none');
+    renderActions();
+  }
+
+  function toggleRsvp() {
+    rsvpState = rsvpState === 'going' ? 'none' : 'going';
+    document.getElementById('tog-going').classList.toggle('active', rsvpState === 'going');
+    document.getElementById('tog-none').classList.toggle('active', rsvpState === 'none');
+    renderActions();
+    showToast(rsvpState === 'going' ? '✓ Participation confirmée !' : 'Participation annulée');
+  }
+
+  function openNavModal() {
+    document.getElementById('nav-modal').classList.add('open');
+  }
+  function closeNavModal(e) {
+    if (!e || e.target === document.getElementById('nav-modal') || e.target.closest('.btn-cancel') || !e.target.closest('.modal-sheet')) {
+      document.getElementById('nav-modal').classList.remove('open');
+    }
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // Init
+  renderMap();
+  renderActions();
+</script>
+</body>
+</html>

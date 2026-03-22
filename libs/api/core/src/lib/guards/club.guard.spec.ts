@@ -72,13 +72,34 @@ describe('ClubGuard', () => {
       }),
     } as unknown as ExecutionContext;
 
-    mockPrisma.clubMember.findFirst.mockResolvedValue({ role: 'ADMIN' });
+    mockPrisma.clubMember.findFirst.mockResolvedValue({ role: 'ADMIN', status: 'ACTIVE' });
 
     const result = await guard.canActivate(ctx);
 
     expect(result).toBe(true);
     expect(request.clubId).toBe('club-1');
     expect(request.clubRole).toBe('ADMIN');
+  });
+
+  it('should reject suspended members with ForbiddenException', async () => {
+    const request = {
+      user: {
+        sub: 'user-1',
+        email: 'a@b.com',
+        activeClubId: 'club-1',
+        role: 'MEMBER',
+      },
+    } as any;
+
+    const ctx = {
+      switchToHttp: () => ({
+        getRequest: () => request,
+      }),
+    } as unknown as ExecutionContext;
+
+    mockPrisma.clubMember.findFirst.mockResolvedValue({ role: 'MEMBER', status: 'SUSPENDED' });
+
+    await expect(guard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
   });
 
   it('should query ClubMember with correct userId and clubId', async () => {
@@ -97,13 +118,13 @@ describe('ClubGuard', () => {
       }),
     } as unknown as ExecutionContext;
 
-    mockPrisma.clubMember.findFirst.mockResolvedValue({ role: 'MEMBER' });
+    mockPrisma.clubMember.findFirst.mockResolvedValue({ role: 'MEMBER', status: 'ACTIVE' });
 
     await guard.canActivate(ctx);
 
     expect(mockPrisma.clubMember.findFirst).toHaveBeenCalledWith({
       where: { userId: 'user-123', clubId: 'club-456' },
-      select: { role: true },
+      select: { role: true, status: true },
     });
   });
 });

@@ -2,6 +2,7 @@ import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import { AppModule } from './app/app.module.js';
 import {
   AllExceptionsFilter,
@@ -23,7 +24,11 @@ async function bootstrap() {
     process.exit(1);
   }
 
-  const app = await NestFactory.create(AppModule);
+  // rawBody: true — required for Stripe webhook signature verification (Story 9.2)
+  const app = await NestFactory.create(AppModule, { rawBody: true });
+
+  // WebSocket adapter for Socket.IO
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);

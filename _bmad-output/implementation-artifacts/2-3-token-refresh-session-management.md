@@ -1,6 +1,6 @@
 # Story 2.3: Token Refresh & Session Management
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -25,52 +25,52 @@ So that I don't get unexpectedly kicked out during normal use but can end my ses
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Backend — Refresh token endpoint (AC: #1, #2)
-  - [ ] Add `POST /auth/refresh` to `libs/api/features/src/lib/auth/auth.controller.ts` (no auth guard — public endpoint, reads httpOnly cookie)
-  - [ ] In `auth.service.ts`, add `refreshTokens(refreshToken: string)` method:
+- [x] Task 1: Backend — Refresh token endpoint (AC: #1, #2)
+  - [x] Add `POST /auth/refresh` to `libs/api/features/src/lib/auth/auth.controller.ts` (no auth guard — public endpoint, reads httpOnly cookie)
+  - [x] In `auth.service.ts`, add `refreshTokens(refreshToken: string)` method:
     - Verify refresh token using `JWT_REFRESH_SECRET`
     - Look up user from `sub` claim via PrismaService
     - If user not found or token invalid/expired → throw `UnauthorizedException`
     - Issue new access token (15min) with current `{ sub, email, activeClubId, role }` by reading latest ClubMember
     - Issue new refresh token (7d) — rotation: old token is replaced
     - Return new access token in response body + set new refresh token as httpOnly cookie
-  - [ ] Add `@SkipThrottle()` or appropriate rate limit on refresh endpoint (avoid blocking legitimate refreshes but prevent abuse)
+  - [x] Add `@SkipThrottle()` or appropriate rate limit on refresh endpoint (avoid blocking legitimate refreshes but prevent abuse)
 
-- [ ] Task 2: Backend — Logout endpoint (AC: #3)
-  - [ ] Add `POST /auth/logout` to auth controller (guarded: `@UseGuards(JwtAuthGuard)`)
-  - [ ] In `auth.service.ts`, add `logout(userId: string)` method:
+- [x] Task 2: Backend — Logout endpoint (AC: #3)
+  - [x] Add `POST /auth/logout` to auth controller (guarded: `@UseGuards(JwtAuthGuard)`)
+  - [x] In `auth.service.ts`, add `logout(userId: string)` method:
     - Clear the refresh token cookie by setting it to empty with `maxAge: 0`
     - Return success response
-  - [ ] Response clears the `refresh_token` httpOnly cookie
+  - [x] Response clears the `refresh_token` httpOnly cookie
 
-- [ ] Task 3: Frontend — Axios/fetch interceptor for transparent token refresh (AC: #1, #2)
-  - [ ] In `libs/frontend/data-access/src/lib/api-client.ts`, add response interceptor:
+- [x] Task 3: Frontend — Axios/fetch interceptor for transparent token refresh (AC: #1, #2)
+  - [x] In `libs/frontend/data-access/src/lib/api-client.ts`, add response interceptor:
     - On 401 response: attempt `POST /auth/refresh` (with credentials to send cookie)
     - If refresh succeeds: update in-memory access token, retry original request with new token
     - If refresh fails: clear AuthContext, redirect to `/login`
     - Implement request queue: while refresh is in-flight, queue subsequent requests and retry all after refresh completes (prevent multiple simultaneous refresh calls)
-  - [ ] Ensure `withCredentials: true` (or `credentials: 'include'`) is set on the API client for cookie transport
+  - [x] Ensure `withCredentials: true` (or `credentials: 'include'`) is set on the API client for cookie transport
 
-- [ ] Task 4: Frontend — AuthContext session management (AC: #2, #3, #4)
-  - [ ] In `apps/frontend/src/app/providers/auth-provider.tsx`:
+- [x] Task 4: Frontend — AuthContext session management (AC: #2, #3, #4)
+  - [x] In `libs/frontend/data-access/src/lib/AuthContext.tsx`:
     - Add `logout()` method: calls `POST /auth/logout`, clears access token from memory, resets AuthContext state
     - Add redirect-after-login: store the attempted URL before redirect to `/login`, restore after successful login
     - On refresh token expiry (401 from refresh endpoint): clear AuthContext, redirect to login, show toast "Votre session a expiré, veuillez vous reconnecter"
-  - [ ] Expose `logout` and `isAuthenticated` from AuthContext
+  - [x] Expose `logout` and `isAuthenticated` from AuthContext
 
-- [ ] Task 5: Frontend — Protected route guard (AC: #4)
-  - [ ] Create `libs/frontend/features/src/lib/auth/ProtectedRoute.tsx`:
+- [x] Task 5: Frontend — Protected route guard (AC: #4)
+  - [x] Create `libs/frontend/features/src/lib/auth/ProtectedRoute.tsx`:
     - Wrap routes that require authentication
     - If not authenticated: save current path, redirect to `/login`
     - After login success: redirect to saved path (or default `/`)
-  - [ ] Integrate with React Router in `apps/frontend/src/app/app.tsx`
+  - [x] Integrate with React Router in `apps/frontend/src/app/app.tsx`
 
-- [ ] Task 6: Backend + Frontend — Unit & integration tests
-  - [ ] `auth.service.spec.ts`: test `refreshTokens()` — valid refresh, expired refresh, invalid token, user not found
-  - [ ] `auth.controller.spec.ts`: test `POST /auth/refresh` and `POST /auth/logout` endpoints
-  - [ ] Frontend: test api-client interceptor refresh flow (mock 401 → refresh → retry)
-  - [ ] Frontend: test ProtectedRoute redirect behavior
-  - [ ] Frontend: test AuthContext logout flow
+- [x] Task 6: Backend + Frontend — Unit & integration tests
+  - [x] `auth.service.spec.ts`: test `refreshTokens()` — valid refresh, expired refresh, invalid token, user not found
+  - [x] `auth.controller.spec.ts`: test `POST /auth/refresh` and `POST /auth/logout` endpoints
+  - [x] Frontend: test api-client interceptor refresh flow (mock 401 → refresh → retry)
+  - [x] Frontend: test ProtectedRoute redirect behavior
+  - [x] Frontend: test AuthContext logout flow
 
 ## Dev Notes
 
@@ -214,8 +214,32 @@ When the first 401 triggers a refresh, any subsequent requests that also get 401
 
 ### Agent Model Used
 
+Claude Opus 4.6 (1M context)
+
 ### Debug Log References
+
+None — clean implementation with no blockers.
 
 ### Completion Notes List
 
+- Tasks 1-2 (backend refresh + logout endpoints) were already implemented in prior sessions as part of story 2.1/2.2 groundwork. Verified correct: `POST /auth/refresh` with `@SkipThrottle()`, `POST /auth/logout` with `@UseGuards(JwtAuthGuard)`, token rotation, cookie clearing.
+- Task 3: Rewrote `api-client.ts` to add transparent 401 → refresh → retry interceptor with request queue pattern. Concurrent requests during refresh are queued and resolved with the new token. Auth endpoints (`/auth/login`, `/auth/refresh`) skip the refresh attempt.
+- Task 4: Updated `AuthContext.tsx` — `logout()` now calls `POST /auth/logout` before clearing state. Added `handleSessionExpired()` with toast "Votre session a expiré, veuillez vous reconnecter" (persists until dismissed). Added `setTokenSetter` integration for the interceptor to update access token in React state after refresh.
+- Task 5: `ProtectedRoute` and `AppRoutes` integration were already implemented. `LoginForm` reads `location.state.from` for redirect-after-login.
+- Task 6: Added 6 refreshTokens tests + 1 getClearRefreshTokenCookieOptions test to `auth.service.spec.ts`. Added 3 refresh tests + 1 logout test to `auth.controller.spec.ts`. Added 4 interceptor tests to `api-client.test.ts` (refresh flow, queue, skip for login, onUnauthorized). Added 2 ProtectedRoute tests. Added 3 AuthContext logout tests.
+- All story 2.3 tests pass. Pre-existing failures in `invite.service.spec.ts` and `MemberProfile.test.tsx` are unrelated.
+
+### Change Log
+
+- 2026-03-22: Implemented story 2.3 — token refresh interceptor, AuthContext logout with API call, session expiry toast, comprehensive tests
+
 ### File List
+
+- libs/frontend/data-access/src/lib/api-client.ts (MODIFIED — added refresh interceptor, request queue, setTokenSetter)
+- libs/frontend/data-access/src/lib/AuthContext.tsx (MODIFIED — logout calls API, session expiry toast, setTokenSetter integration)
+- libs/frontend/data-access/src/index.ts (MODIFIED — exported setTokenSetter)
+- libs/frontend/data-access/src/lib/api-client.test.ts (MODIFIED — added 4 interceptor tests)
+- libs/frontend/data-access/src/lib/AuthContext.test.tsx (MODIFIED — rewrote with login/logout tests, mock fetch)
+- libs/frontend/features/src/lib/auth/ProtectedRoute.test.tsx (CREATED — 2 tests for redirect behavior)
+- libs/api/features/src/lib/auth/auth.service.spec.ts (MODIFIED — added 7 refreshTokens + logout tests)
+- libs/api/features/src/lib/auth/auth.controller.spec.ts (MODIFIED — added 4 refresh + logout tests)

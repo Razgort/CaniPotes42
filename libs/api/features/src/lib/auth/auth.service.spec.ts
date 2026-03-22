@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
 import type { RegisterWithConsent } from './dto/register.dto.js';
 import * as bcrypt from 'bcrypt';
@@ -26,6 +26,7 @@ function createMockPrisma() {
     },
     clubMember: {
       findMany: vi.fn(),
+      findFirst: vi.fn(),
     },
     $transaction: vi.fn((fn: (tx: MockTx) => Promise<unknown>) => fn(tx)),
     _tx: tx,
@@ -35,6 +36,7 @@ function createMockPrisma() {
 function createMockJwtService() {
   return {
     sign: vi.fn().mockReturnValue('mock-jwt-token'),
+    verify: vi.fn(),
   };
 }
 
@@ -364,6 +366,210 @@ describe('AuthService', () => {
       const result = await service.login(loginDto);
 
       expect(result.user).not.toHaveProperty('passwordHash');
+    });
+  });
+
+  // --- Token Refresh tests ---
+
+  describe('refreshTokens', () => {
+    const refreshUser = {
+      id: 'uuid-123',
+      email: 'test@example.com',
+      passwordHash: '$2b$10$hashedpassword',
+      firstName: 'Jean',
+      lastName: 'Dupont',
+      avatarUrl: null,
+      createdAt: new Date('2026-03-22T10:00:00Z'),
+      updatedAt: new Date('2026-03-22T10:00:00Z'),
+    };
+
+    it('should return new access and refresh tokens for valid refresh token', async () => {
+      jwtService.verify.mockReturnValue({ sub: 'uuid-123' });
+      jwtService.sign
+        .mockReturnValueOnce('new-access-token')
+        .mockReturnValueOnce('new-refresh-token');
+
+      prisma.user.findUnique.mockResolvedValue(refreshUser);
+      prisma.clubMember.findMany.mockResolvedValue([
+        { clubId: 'club-1', role: 'OWNER', createdAt: new Date() },
+      ]);
+
+      const result = await service.refreshTokens('valid-refresh-token');
+
+      expect(result.accessToken).toBe('new-access-token');
+      expect(result.refreshToken).toBe('new-refresh-token');
+    });
+
+    it('should re-read club membership from DB on refresh', async () => {
+      jwtService.verify.mockReturnValue({ sub: 'uuid-123' });
+      jwtService.sign.mockReturnValue('token');
+
+      prisma.user.findUnique.mockResolvedValue(refreshUser);
+      prisma.clubMember.findMany.mockResolvedValue([
+        { clubId: 'new-club', role: 'ADMIN', createdAt: new Date() },
+      ]);
+
+      await service.refreshTokens('valid-token');
+
+      expect(jwtService.sign).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sub: 'uuid-123',
+          activeClubId: 'new-club',
+          role: 'ADMIN',
+        })
+      );
+    });
+
+    it('should throw UnauthorizedException for expired refresh token', async () => {
+      jwtService.verify.mockImplementation(() => {
+        throw new Error('jwt expired');
+      });
+
+      await expect(service.refreshTokens('expired-token'))
+        .rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw UnauthorizedException for invalid refresh token', async () => {
+      jwtService.verify.mockImplementation(() => {
+        throw new Error('invalid signature');
+      });
+
+      await expect(service.refreshTokens('bad-token'))
+        .rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw UnauthorizedException when user not found', async () => {
+      jwtService.verify.mockReturnValue({ sub: 'nonexistent' });
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      await expect(service.refreshTokens('valid-token'))
+        .rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should handle user with no club memberships', async () => {
+      jwtService.verify.mockReturnValue({ sub: 'uuid-123' });
+      jwtService.sign.mockReturnValue('token');
+
+      prisma.user.findUnique.mockResolvedValue(refreshUser);
+      prisma.clubMember.findMany.mockResolvedValue([]);
+
+      await service.refreshTokens('valid-token');
+
+      expect(jwtService.sign).toHaveBeenCalledWith(
+        expect.objectContaining({
+          activeClubId: null,
+          role: null,
+        })
+      );
+    });
+  });
+
+  // --- Logout helper tests ---
+
+  describe('getClearRefreshTokenCookieOptions', () => {
+    it('should return cookie options with maxAge 0', () => {
+      const options = service.getClearRefreshTokenCookieOptions();
+
+      expect(options.maxAge).toBe(0);
+      expect(options.httpOnly).toBe(true);
+    });
+  });
+
+  // --- switchClub tests ---
+
+  describe('switchClub', () => {
+    const membershipWithClub = {
+      id: 'member-1',
+      userId: 'uuid-123',
+      clubId: 'club-2',
+      role: 'ADMIN',
+      createdAt: new Date(),
+      club: {
+        id: 'club-2',
+        name: 'Club Agility',
+        logo: 'https://example.com/logo.png',
+        federationType: 'FFSLC',
+      },
+    };
+
+    it('should return new accessToken with correct activeClubId and role', async () => {
+      prisma.clubMember.findFirst.mockResolvedValue(membershipWithClub);
+      jwtService.sign.mockReturnValue('new-access-token');
+
+      const result = await service.switchClub('uuid-123', 'test@example.com', 'club-2');
+
+      expect(result.accessToken).toBe('new-access-token');
+      expect(result.role).toBe('ADMIN');
+      expect(result.activeClub).toEqual({
+        id: 'club-2',
+        name: 'Club Agility',
+        logo: 'https://example.com/logo.png',
+        federationType: 'FFSLC',
+      });
+      expect(jwtService.sign).toHaveBeenCalledWith({
+        sub: 'uuid-123',
+        email: 'test@example.com',
+        activeClubId: 'club-2',
+        role: 'ADMIN',
+      });
+    });
+
+    it('should throw ForbiddenException when user is not a member of the club', async () => {
+      prisma.clubMember.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.switchClub('uuid-123', 'test@example.com', 'non-member-club'),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  // --- getUserClubs tests ---
+
+  describe('getUserClubs', () => {
+    it('should return all clubs with role for user, ordered by club name', async () => {
+      const memberships = [
+        {
+          id: 'member-1',
+          userId: 'uuid-123',
+          clubId: 'club-1',
+          role: 'OWNER',
+          createdAt: new Date(),
+          club: { id: 'club-1', name: 'Alpha Club', logo: null, federationType: 'CNEAC' },
+        },
+        {
+          id: 'member-2',
+          userId: 'uuid-123',
+          clubId: 'club-2',
+          role: 'MEMBER',
+          createdAt: new Date(),
+          club: { id: 'club-2', name: 'Beta Club', logo: 'logo.png', federationType: 'FFSLC' },
+        },
+      ];
+
+      prisma.clubMember.findMany.mockResolvedValue(memberships);
+
+      const result = await service.getUserClubs('uuid-123');
+
+      expect(result).toEqual([
+        { clubId: 'club-1', name: 'Alpha Club', logo: null, federationType: 'CNEAC', role: 'OWNER' },
+        { clubId: 'club-2', name: 'Beta Club', logo: 'logo.png', federationType: 'FFSLC', role: 'MEMBER' },
+      ]);
+
+      expect(prisma.clubMember.findMany).toHaveBeenCalledWith({
+        where: { userId: 'uuid-123' },
+        include: {
+          club: { select: { id: true, name: true, logo: true, federationType: true } },
+        },
+        orderBy: { club: { name: 'asc' } },
+      });
+    });
+
+    it('should return empty array when user has no clubs', async () => {
+      prisma.clubMember.findMany.mockResolvedValue([]);
+
+      const result = await service.getUserClubs('uuid-123');
+
+      expect(result).toEqual([]);
     });
   });
 });

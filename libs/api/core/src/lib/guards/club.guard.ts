@@ -28,7 +28,7 @@ export class ClubGuard implements CanActivate {
         userId: user.sub,
         clubId: user.activeClubId,
       },
-      select: { role: true },
+      select: { role: true, status: true },
     });
 
     if (!membership) {
@@ -36,6 +36,13 @@ export class ClubGuard implements CanActivate {
         `User ${user.sub} is not a member of club ${user.activeClubId}`,
       );
       throw new ForbiddenException('Not a member of this club');
+    }
+
+    if (membership.status === 'SUSPENDED') {
+      this.logger.warn(
+        `Suspended user ${user.sub} attempted to access club ${user.activeClubId}`,
+      );
+      throw new ForbiddenException('Membership suspended');
     }
 
     request.clubId = user.activeClubId;

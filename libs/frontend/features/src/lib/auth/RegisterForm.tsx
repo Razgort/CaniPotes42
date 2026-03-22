@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from '@org/ui';
-import { ApiClientError } from '@org/data-access';
+import { ApiClientError, useAuth } from '@org/data-access';
 import { registerWithConsentSchema, type RegisterWithConsent, type RegisterWithConsentInput } from './hooks/types';
 import { useRegister } from './hooks/useRegister';
+import { useInvitationStatus } from '../members/hooks/useInvitations';
 
 const ERROR_CODE_MESSAGES: Record<string, string> = {
   CONFLICT: 'Cette adresse email est deja utilisee.',
@@ -13,7 +14,12 @@ const ERROR_CODE_MESSAGES: Record<string, string> = {
 
 export function RegisterForm() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const inviteToken = searchParams.get('invite') ?? undefined;
   const registerMutation = useRegister();
+  const { login: authLogin } = useAuth();
+  const { data: invitationData } = useInvitationStatus(inviteToken);
+  const clubName = invitationData?.data?.clubName ?? (invitationData as any)?.clubName;
 
   const {
     register,
@@ -37,7 +43,22 @@ export function RegisterForm() {
 
   const onSubmit = async (data: RegisterWithConsent) => {
     try {
-      await registerMutation.mutateAsync(data);
+      const payload = inviteToken ? { ...data, invitationToken: inviteToken } : data;
+      const result = await registerMutation.mutateAsync(payload);
+      const responseData = (result as any).data ?? result;
+
+      // If invitation-based registration returned tokens, auto-login
+      if (responseData.accessToken && responseData.activeClub) {
+        authLogin({
+          accessToken: responseData.accessToken,
+          user: { id: responseData.id, email: responseData.email, firstName: '', lastName: '', avatarUrl: null },
+          activeClub: responseData.activeClub,
+        });
+        toast.success('Bienvenue ! Vous avez rejoint le club.');
+        navigate('/events', { replace: true });
+        return;
+      }
+
       toast.success('Votre compte a ete cree avec succes');
       navigate('/login');
     } catch (error) {
@@ -58,7 +79,13 @@ export function RegisterForm() {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <h1 className="text-h1 text-foreground mb-6">Creer un compte</h1>
+      <h1 className="text-h1 text-foreground mb-2">
+        {clubName ? `Rejoindre ${clubName}` : 'Creer un compte'}
+      </h1>
+      {clubName && (
+        <p className="text-muted mb-6">Créez votre compte pour rejoindre le club</p>
+      )}
+      {!clubName && <div className="mb-6" />}
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
         {/* Email */}

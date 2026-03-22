@@ -23,6 +23,10 @@ export { AllExceptionsFilter } from './lib/filters/all-exceptions.filter.js';
 // Interceptors
 export { ResponseWrapperInterceptor } from './lib/interceptors/response-wrapper.interceptor.js';
 
+// Mail
+export { MailModule } from './lib/mail/mail.module.js';
+export { MailService } from './lib/mail/mail.service.js';
+
 // Config
 export { jwtConfig, jwtConstants } from './lib/config/jwt.config.js';
 export { getCorsConfig } from './lib/config/cors.config.js';

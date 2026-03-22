@@ -1,6 +1,6 @@
 # Story 3.2: Club Settings Management
 
-Status: ready-for-dev
+Status: complete
 
 ## Story
 
@@ -24,76 +24,76 @@ so that I can keep the club information accurate and up to date.
 
 ### Backend
 
-- [ ] Task 1: Create `ClubController` update endpoint (AC: #2, #3, #4)
-  - [ ] 1.1 Create `PATCH /clubs/:clubId` endpoint in `libs/api/features/src/lib/club/club.controller.ts`
-  - [ ] 1.2 Apply guard chain: `@UseGuards(JwtAuthGuard, ClubGuard, RolesGuard)` with `@Roles('OWNER')`
-  - [ ] 1.3 Create `update-club.dto.ts` importing `updateClubSchema` from `@canifed/shared/types`
-  - [ ] 1.4 Use `ZodValidationPipe` for request body validation
+- [x] Task 1: Create `ClubController` update endpoint (AC: #2, #3, #4)
+  - [x] 1.1 Create `PATCH /clubs/:clubId` endpoint in `libs/api/features/src/lib/club/club.controller.ts`
+  - [x] 1.2 Apply guard chain: `@UseGuards(JwtAuthGuard, ClubGuard, RolesGuard)` with `@Roles('OWNER')`
+  - [x] 1.3 Create `update-club.dto.ts` importing `updateClubSchema` from `@canifed/shared/types`
+  - [x] 1.4 Use `ZodValidationPipe` for request body validation
 
-- [ ] Task 2: Create `ClubService.update()` method (AC: #2, #3)
-  - [ ] 2.1 Implement `update(clubId: string, data: UpdateClub)` in `club.service.ts`
-  - [ ] 2.2 Scope query with `WHERE id = clubId` (Club table is the tenant root — no FK to itself)
-  - [ ] 2.3 Wrap response in `{ data: updatedClub }` envelope
-  - [ ] 2.4 Return only public fields (no internal metadata)
+- [x] Task 2: Create `ClubService.update()` method (AC: #2, #3)
+  - [x] 2.1 Implement `update(clubId: string, data: UpdateClub)` in `club.service.ts`
+  - [x] 2.2 Scope query with `WHERE id = clubId` (Club table is the tenant root — no FK to itself)
+  - [x] 2.3 Wrap response in `{ data: updatedClub }` envelope
+  - [x] 2.4 Return only public fields (no internal metadata)
 
-- [ ] Task 3: Create `ClubController` get-settings endpoint (AC: #1)
-  - [ ] 3.1 Create `GET /clubs/:clubId` endpoint returning current club data
-  - [ ] 3.2 Apply guard chain: `@UseGuards(JwtAuthGuard, ClubGuard, RolesGuard)` with `@Roles('OWNER')`
+- [x] Task 3: Create `ClubController` get-settings endpoint (AC: #1)
+  - [x] 3.1 Create `GET /clubs/:clubId` endpoint returning current club data
+  - [x] 3.2 Apply guard chain: `@UseGuards(JwtAuthGuard, ClubGuard, RolesGuard)` with `@Roles('OWNER')`
 
-- [ ] Task 4: Logo upload via R2 (AC: #3)
-  - [ ] 4.1 Create `POST /clubs/:clubId/logo` endpoint accepting multipart file upload
-  - [ ] 4.2 Validate MIME type (image/jpeg, image/png, image/webp) and size (max 2MB)
-  - [ ] 4.3 Use `R2Service` to upload with tenant-scoped key: `clubs/{clubId}/logo/{filename}`
-  - [ ] 4.4 Generate signed URL and update Club.logo field
-  - [ ] 4.5 Delete old logo from R2 if exists (cleanup)
-  - [ ] 4.6 On upload failure, preserve old logo — return error response
+- [x] Task 4: Logo upload via R2 (AC: #3)
+  - [x] 4.1 Create `POST /clubs/:clubId/logo` endpoint accepting multipart file upload
+  - [x] 4.2 Validate MIME type (image/jpeg, image/png, image/webp) and size (max 2MB)
+  - [x] 4.3 Use `R2Service` to upload with tenant-scoped key: `clubs/{clubId}/logo/{filename}`
+  - [x] 4.4 Generate signed URL and update Club.logo field
+  - [x] 4.5 Delete old logo from R2 if exists (cleanup)
+  - [x] 4.6 On upload failure, preserve old logo — return error response
 
-- [ ] Task 5: Write backend tests (AC: all)
-  - [ ] 5.1 `club.controller.spec.ts` — test OWNER-only access, 403 for ADMIN/MEMBER
-  - [ ] 5.2 `club.service.spec.ts` — test update logic, field validation
-  - [ ] 5.3 Test logo upload validation (type, size rejection)
+- [x] Task 5: Write backend tests (AC: all)
+  - [x] 5.1 `club.controller.spec.ts` — test OWNER-only access, 403 for ADMIN/MEMBER
+  - [x] 5.2 `club.service.spec.ts` — test update logic, field validation
+  - [x] 5.3 Test logo upload validation (type, size rejection)
 
 ### Frontend
 
-- [ ] Task 6: Create `ClubSettings` page component (AC: #1, #2, #5)
-  - [ ] 6.1 Create `libs/frontend/features/src/lib/onboarding/ClubSettings.tsx`
-  - [ ] 6.2 Use React Hook Form + `updateClubSchema` from `@canifed/shared/types`
-  - [ ] 6.3 Pre-populate form with current club data fetched via TanStack Query
-  - [ ] 6.4 Validation mode: `onBlur` (per architecture spec)
-  - [ ] 6.5 Error messages in French "we" phrasing below each field
-  - [ ] 6.6 Form preserves input on validation failure (no reset)
+- [x] Task 6: Create `ClubSettings` page component (AC: #1, #2, #5)
+  - [x] 6.1 Create `libs/frontend/features/src/lib/onboarding/ClubSettings.tsx`
+  - [x] 6.2 Use React Hook Form + `updateClubSchema` from `@canifed/shared/types`
+  - [x] 6.3 Pre-populate form with current club data fetched via TanStack Query
+  - [x] 6.4 Validation mode: `onBlur` (per architecture spec)
+  - [x] 6.5 Error messages in French "we" phrasing below each field
+  - [x] 6.6 Form preserves input on validation failure (no reset)
 
-- [ ] Task 7: Club settings form fields (AC: #1, #2)
-  - [ ] 7.1 Club name input (required, min 2 chars)
-  - [ ] 7.2 Federation radio selection (FFSLC, CNEAC, Other, None)
-  - [ ] 7.3 Logo upload with camera-first option + file picker
-  - [ ] 7.4 Contact email input (required, email format)
-  - [ ] 7.5 Description textarea (optional, max 500 chars)
-  - [ ] 7.6 Submit button: full width on mobile, disabled during submission, loading indicator
+- [x] Task 7: Club settings form fields (AC: #1, #2)
+  - [x] 7.1 Club name input (required, min 2 chars)
+  - [x] 7.2 Federation radio selection (FFSLC, CNEAC, Other, None)
+  - [x] 7.3 Logo upload with camera-first option + file picker
+  - [x] 7.4 Contact email input (required, email format)
+  - [x] 7.5 Description textarea (optional, max 500 chars)
+  - [x] 7.6 Submit button: full width on mobile, disabled during submission, loading indicator
 
-- [ ] Task 8: Logo upload UI (AC: #3)
-  - [ ] 8.1 Display current logo preview (or placeholder if none)
-  - [ ] 8.2 Camera-first upload button (prominent) + file picker (secondary)
-  - [ ] 8.3 Client-side validation: type (JPEG, PNG, WebP) and size (max 2MB)
-  - [ ] 8.4 Show upload progress indicator
-  - [ ] 8.5 On success: update preview immediately
-  - [ ] 8.6 On failure: preserve old logo, show error toast (red, persistent until dismissed)
+- [x] Task 8: Logo upload UI (AC: #3)
+  - [x] 8.1 Display current logo preview (or placeholder if none)
+  - [x] 8.2 Camera-first upload button (prominent) + file picker (secondary)
+  - [x] 8.3 Client-side validation: type (JPEG, PNG, WebP) and size (max 2MB)
+  - [x] 8.4 Show upload progress indicator
+  - [x] 8.5 On success: update preview immediately
+  - [x] 8.6 On failure: preserve old logo, show error toast (red, persistent until dismissed)
 
-- [ ] Task 9: Success/error feedback (AC: #2, #5)
-  - [ ] 9.1 On successful update: green toast "Paramètres du club mis à jour" (auto-dismiss 3s)
-  - [ ] 9.2 On error: red toast at top of screen, persistent until dismissed
-  - [ ] 9.3 On validation error: scroll to first error, focus the errored field
-  - [ ] 9.4 Invalidate TanStack Query cache for club data to refresh header/club switcher
+- [x] Task 9: Success/error feedback (AC: #2, #5)
+  - [x] 9.1 On successful update: green toast "Paramètres du club mis à jour" (auto-dismiss 3s)
+  - [x] 9.2 On error: red toast at top of screen, persistent until dismissed
+  - [x] 9.3 On validation error: scroll to first error, focus the errored field
+  - [x] 9.4 Invalidate TanStack Query cache for club data to refresh header/club switcher
 
-- [ ] Task 10: Route and access control (AC: #4)
-  - [ ] 10.1 Add lazy-loaded route for club settings page in `app.tsx`
-  - [ ] 10.2 Hide settings menu item for non-OWNER roles (check `role` from AuthContext)
-  - [ ] 10.3 Protect route: redirect non-OWNER to 403 or club dashboard
-  - [ ] 10.4 TanStack Query key: `['club', clubId, 'settings']`
+- [x] Task 10: Route and access control (AC: #4)
+  - [x] 10.1 Add lazy-loaded route for club settings page in `app.tsx`
+  - [x] 10.2 Hide settings menu item for non-OWNER roles (check `role` from AuthContext)
+  - [x] 10.3 Protect route: redirect non-OWNER to 403 or club dashboard
+  - [x] 10.4 TanStack Query key: `['club', clubId, 'settings']`
 
-- [ ] Task 11: Write frontend tests (AC: all)
-  - [ ] 11.1 `ClubSettings.test.tsx` — form rendering, validation, submit flow
-  - [ ] 11.2 Test OWNER-only visibility of settings menu item
+- [x] Task 11: Write frontend tests (AC: all)
+  - [x] 11.1 `ClubSettings.test.tsx` — form rendering, validation, submit flow
+  - [x] 11.2 Test OWNER-only visibility of settings menu item
 
 ## Dev Notes
 
@@ -211,9 +211,37 @@ Choose option 1 (map in service) to avoid breaking any existing consumers of the
 ## Dev Agent Record
 
 ### Agent Model Used
+Claude Opus 4.6
 
 ### Debug Log References
+- Backend tests: 13 controller + 16 service tests passing
+- Frontend tests: 6 ClubSettings tests passing
+- Pre-existing failures in MemberDirectory/MemberProfile (from other stories, unrelated)
 
 ### Completion Notes List
+- Installed `@aws-sdk/client-s3` and `@aws-sdk/s3-request-presigner` for R2 integration
+- Created R2Service at `libs/api/features/src/lib/document/r2.service.ts` for reuse by future document features
+- Mapped `federation` (Zod schema) ↔ `federationType` (Prisma model) in ClubService per option 1 (service-layer mapping)
+- Existing `createClub` tests fixed (switched from NestJS TestingModule to direct instantiation)
+- AppShell admin nav now filters items by role — "Parametres" visible only to OWNER
+- Logo upload uses raw fetch (not apiClient) since multipart requires no Content-Type header
+- ResponseWrapperInterceptor auto-wraps responses in `{ data: ... }` envelope
 
 ### File List
+**Created:**
+- `libs/api/features/src/lib/document/r2.service.ts`
+- `libs/api/features/src/lib/club/dto/update-club.dto.ts`
+- `libs/frontend/features/src/lib/onboarding/ClubSettings.tsx`
+- `libs/frontend/features/src/lib/onboarding/ClubSettings.test.tsx`
+- `libs/frontend/features/src/lib/onboarding/hooks/useClubSettings.ts`
+
+**Modified:**
+- `libs/api/features/src/lib/club/club.controller.ts` — added GET/:clubId, PATCH/:clubId, POST/:clubId/logo
+- `libs/api/features/src/lib/club/club.service.ts` — added findOne, update, updateLogo, getLogo
+- `libs/api/features/src/lib/club/club.module.ts` — added R2Service provider
+- `libs/api/features/src/lib/club/club.controller.spec.ts` — extended with settings/update/logo tests
+- `libs/api/features/src/lib/club/club.service.spec.ts` — extended with findOne/update/logo tests
+- `libs/frontend/features/src/lib/features.tsx` — added /clubs/settings route
+- `libs/frontend/ui/src/lib/AppShell.tsx` — OWNER-only settings nav, path → /clubs/settings
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` — status → in-progress
+- `package.json` / `package-lock.json` — added @aws-sdk/client-s3, @aws-sdk/s3-request-presigner

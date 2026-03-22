@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2563EB" />
+    <title>CaniFed — Gestion de club canin gratuite</title>
+    <meta
+      name="description"
+      content="Événements, GPS, membres et documents pour clubs FFSLC, CNEAC et indépendants. Gratuit, sans engagement."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #2563eb;
+        --primary-hover: #1d4ed8;
+        --primary-light: #dbeafe;
+        --accent: #f97316;
+        --background: #fafafa;
+        --card: #ffffff;
+        --foreground: #18181b;
+        --muted: #71717a;
+        --border: #e4e4e7;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--foreground);
+        background: var(--background);
+      }
+      a {
+        color: var(--primary);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        background: var(--card);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      .logo {
+        font-weight: 700;
+        font-size: 18px;
+        color: var(--foreground);
+      }
+      .btn-ghost {
+        background: transparent;
+        border: none;
+        color: var(--primary);
+        font-weight: 500;
+        font-size: 14px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        min-height: 44px;
+      }
+      .btn-ghost:hover {
+        background: var(--primary-light);
+      }
+      .wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 24px 16px 120px;
+      }
+      @media (min-width: 640px) {
+        .wrap {
+          padding: 32px 24px 100px;
+        }
+      }
+      .hero h1 {
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 1.2;
+        margin: 0 0 12px;
+      }
+      .hero p.lead {
+        font-size: 16px;
+        color: var(--foreground);
+        margin: 0 0 24px;
+        max-width: 36rem;
+      }
+      .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-width: 320px;
+        min-height: 48px;
+        padding: 12px 20px;
+        background: var(--primary);
+        color: #fff;
+        font-weight: 600;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .btn-primary:hover {
+        background: var(--primary-hover);
+      }
+      .micro {
+        margin-top: 12px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .section {
+        margin-top: 48px;
+      }
+      .section h2 {
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0 0 20px;
+      }
+      .pillars {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      @media (min-width: 1024px) {
+        .pillars {
+          flex-direction: row;
+        }
+        .pillar {
+          flex: 1;
+        }
+      }
+      .pillar {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+      }
+      .pillar h3 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 8px;
+      }
+      .pillar p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .trust {
+        margin-top: 48px;
+        padding: 24px 16px;
+        background: var(--primary-light);
+        border-radius: 12px;
+        text-align: center;
+        font-size: 14px;
+        color: #1e3a5f;
+      }
+      footer {
+        margin-top: 48px;
+        padding-top: 32px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        font-size: 12px;
+      }
+      .sticky-cta {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 12px 16px;
+        background: var(--card);
+        border-top: 1px solid var(--border);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+      }
+      @media (max-width: 639px) {
+        .sticky-cta.show {
+          display: block;
+        }
+      }
+      .sticky-cta .btn-primary {
+        max-width: none;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <span class="logo" aria-label="CaniFed">CaniFed</span>
+      <button type="button" class="btn-ghost">Se connecter</button>
+    </header>
+
+    <main class="wrap">
+      <section class="hero">
+        <h1>Le club canin, enfin au même endroit.</h1>
+        <p class="lead">
+          Événements, GPS fiable, membres, documents et chat — gratuit et sans engagement. Pour les clubs FFSLC, CNEAC et
+          indépendants.
+        </p>
+        <button type="button" class="btn-primary">Créer mon club gratuitement</button>
+        <p class="micro">Gratuit · Sans carte bancaire · Vos données restent les vôtres</p>
+      </section>
+
+      <section class="section" aria-labelledby="piliers">
+        <h2 id="piliers">Pourquoi les clubs nous font confiance</h2>
+        <div class="pillars">
+          <article class="pillar">
+            <h3>Événements et GPS qui tiennent la route</h3>
+            <p>
+              Créez une séance, placez le point de rendez-vous, les membres ouvrent Waze ou Google Maps en un geste.
+            </p>
+          </article>
+          <article class="pillar">
+            <h3>Membres, chiens, documents</h3>
+            <p>
+              Annuaire, carnet de santé, pièces jointes : tout ce qu’il faut pour préparer les sorties sans Excel ni papier.
+            </p>
+          </article>
+          <article class="pillar">
+            <h3>Votre club, votre outil</h3>
+            <p>Fédération-agnostique, zéro lock-in : un espace numérique dont vous restez propriétaires.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="trust">
+        Conçu avec des clubs canins français — pour remplacer les outils cassés et le bricolage Facebook.
+      </section>
+
+      <footer>
+        <a href="#">Confidentialité</a>
+        <a href="#">Mentions légales</a>
+      </footer>
+    </main>
+
+    <div class="sticky-cta" id="stickyCta" hidden>
+      <button type="button" class="btn-primary">Créer mon club gratuitement</button>
+    </div>
+    <script>
+      var sticky = document.getElementById("stickyCta");
+      window.addEventListener(
+        "scroll",
+        function () {
+          if (window.innerWidth >= 640) return;
+          sticky.hidden = false;
+          sticky.classList.toggle("show", window.scrollY > window.innerHeight * 0.35);
+        },
+        { passive: true }
+      );
+    </script>
+  </body>
+</html>

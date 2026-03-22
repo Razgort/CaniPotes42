@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#2563EB" />
+  <title>Suivi vaccinal — CaniFed Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #dbeafe;
+      --background: #fafafa;
+      --card: #ffffff;
+      --foreground: #18181b;
+      --muted: #71717a;
+      --border: #e4e4e7;
+      --ok: #16a34a; --ok-light: #dcfce7; --ok-border: #86efac;
+      --warn: #d97706; --warn-light: #fef3c7; --warn-border: #fcd34d;
+      --crit: #dc2626; --crit-light: #fee2e2; --crit-border: #fca5a5;
+      --info: #6366f1; --info-light: #e0e7ff; --info-border: #a5b4fc;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--foreground);
+      background: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+    .phone {
+      width: 420px;
+      min-height: 100vh;
+      background: var(--background);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 0 1px #cbd5e1, 0 20px 60px rgba(0,0,0,.15);
+      overflow: hidden;
+    }
+    @media (max-width: 440px) { .phone { width: 100%; box-shadow: none; } }
+
+    /* Header */
+    .nav-header {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 10;
+      gap: 8px;
+    }
+    .back-btn {
+      width: 36px; height: 36px;
+      border: none; background: transparent;
+      border-radius: 8px; cursor: pointer;
+      font-size: 20px; color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .back-btn:hover { background: var(--primary-light); }
+    .nav-title { font-weight: 700; font-size: 16px; flex: 1; }
+    .admin-badge {
+      padding: 3px 8px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .scroll-content { flex: 1; overflow-y: auto; }
+
+    /* Club context bar */
+    .club-context {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .club-context strong { color: var(--foreground); font-weight: 600; }
+    .fed-tag {
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .03em;
+    }
+    .fed-ffslc { background: #fef3c7; color: #92400e; }
+    .fed-cneac { background: #e0e7ff; color: #3730a3; }
+
+    /* KPI strip */
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 6px;
+      padding: 12px 16px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+    }
+    .kpi-card {
+      border-radius: 10px;
+      padding: 10px 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform .1s, box-shadow .1s;
+      border: 1.5px solid transparent;
+    }
+    .kpi-card:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .kpi-card.selected { border-color: currentColor; }
+    .kpi-ok   { background: var(--ok-light); color: var(--ok); }
+    .kpi-warn { background: var(--warn-light); color: var(--warn); }
+    .kpi-crit { background: var(--crit-light); color: var(--crit); }
+    .kpi-all  { background: #f4f4f5; color: var(--foreground); }
+    .kpi-num { font-size: 24px; font-weight: 700; line-height: 1; margin-bottom: 3px; }
+    .kpi-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; opacity: .85; }
+
+    /* Filters */
+    .filters {
+      padding: 10px 16px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      position: sticky;
+      top: 53px; z-index: 9;
+    }
+    .search-box { flex: 1; position: relative; }
+    .search-box input {
+      width: 100%;
+      padding: 8px 12px 8px 34px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      background: var(--background);
+      outline: none;
+      transition: border-color .15s;
+    }
+    .search-box input:focus { border-color: var(--primary); }
+    .search-icon {
+      position: absolute;
+      left: 10px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px; color: var(--muted); pointer-events: none;
+    }
+    .filter-pills {
+      display: flex;
+      gap: 4px;
+      flex-wrap: nowrap;
+    }
+    .pill {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      background: transparent;
+      color: var(--muted);
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .pill.active { background: var(--primary); border-color: var(--primary); color: white; }
+    .pill:hover:not(.active) { background: var(--primary-light); color: var(--primary); }
+
+    /* Dog list */
+    .dog-list { padding: 4px 0; }
+    .section-label {
+      padding: 10px 16px 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+    }
+
+    /* Dog card (expanded) */
+    .dog-card {
+      margin: 6px 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: box-shadow .15s;
+    }
+    .dog-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+    .dog-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 14px 10px;
+      cursor: pointer;
+    }
+    .dog-avatar {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+      background: #f4f4f5;
+    }
+    .dog-info { flex: 1; min-width: 0; }
+    .dog-name-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dog-name { font-weight: 700; font-size: 14px; }
+    .dog-breed { font-size: 11px; color: var(--muted); font-weight: 500; }
+    .dog-meta {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2px;
+    }
+    .passport-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+      border: 1px solid transparent;
+    }
+    .passport-complete { background: var(--ok-light); color: var(--ok); border-color: var(--ok-border); }
+    .passport-club-only { background: var(--info-light); color: var(--info); border-color: var(--info-border); }
+    .passport-incomplete { background: var(--crit-light); color: var(--crit); border-color: var(--crit-border); }
+    .passport-warning { background: var(--warn-light); color: var(--warn); border-color: var(--warn-border); }
+
+    /* Vaccine grid inside card */
+    .vax-grid {
+      padding: 0 14px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .vax-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--background);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .vax-icon {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+    .vax-icon-ok   { background: var(--ok-light); color: var(--ok); }
+    .vax-icon-warn { background: var(--warn-light); color: var(--warn); }
+    .vax-icon-crit { background: var(--crit-light); color: var(--crit); }
+    .vax-icon-na   { background: #f4f4f5; color: var(--muted); }
+    .vax-details { flex: 1; min-width: 0; }
+    .vax-name-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .vax-name { font-size: 12px; font-weight: 600; }
+    .req-tag {
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+    }
+    .req-club { background: #dbeafe; color: #1e40af; }
+    .req-compet { background: #fef3c7; color: #92400e; }
+    .req-fed { background: #e0e7ff; color: #3730a3; }
+    .req-opt { background: #f4f4f5; color: var(--muted); }
+    .vax-exp { font-size: 11px; color: var(--muted); }
+    .vax-status-text {
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0;
+      text-align: right;
+    }
+    .vax-status-ok { color: var(--ok); }
+    .vax-status-warn { color: var(--warn); }
+    .vax-status-crit { color: var(--crit); }
+    .vax-status-na { color: var(--muted); }
+
+    /* Action buttons in card */
+    .dog-card-actions {
+      display: flex;
+      border-top: 1px solid var(--border);
+    }
+    .card-action {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--primary);
+      transition: background .1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    .card-action:hover { background: var(--primary-light); }
+    .card-action + .card-action { border-left: 1px solid var(--border); }
+    .card-action-warn { color: var(--warn); }
+    .card-action-warn:hover { background: var(--warn-light); }
+
+    /* Legend */
+    .legend {
+      margin: 12px;
+      padding: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .legend-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 12px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* Empty */
+    .empty-state {
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state .title { font-weight: 600; font-size: 15px; margin-bottom: 6px; color: var(--foreground); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1e293b; color: white;
+      padding: 10px 18px; border-radius: 10px;
+      font-size: 13px; font-weight: 500;
+      opacity: 0; transition: all .25s; z-index: 200;
+      white-space: nowrap;
+      max-width: 380px;
+      text-align: center;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- Nav header -->
+  <div class="nav-header">
+    <button class="back-btn" onclick="showToast('← Retour admin')">←</button>
+    <span class="nav-title">Suivi vaccinal</span>
+    <span class="admin-badge">Admin</span>
+  </div>
+
+  <!-- Club context -->
+  <div class="club-context" id="club-context">
+    <strong>CaniPotes 42</strong>
+    <span class="fed-tag fed-ffslc">FFSLC</span>
+    <span>·</span>
+    <span>53 chiens · 48 membres</span>
+  </div>
+
+  <div class="scroll-content">
+
+    <!-- KPI strip -->
+    <div class="kpi-strip" id="kpi-strip">
+      <div class="kpi-card kpi-all selected" id="kpi-all" onclick="filterStatus('all')">
+        <div class="kpi-num" id="count-all">53</div>
+        <div class="kpi-label">Total</div>
+      </div>
+      <div class="kpi-card kpi-ok" id="kpi-ok" onclick="filterStatus('ok')">
+        <div class="kpi-num" id="count-ok">42</div>
+        <div class="kpi-label">Complet</div>
+      </div>
+      <div class="kpi-card kpi-warn" id="kpi-warn" onclick="filterStatus('warn')">
+        <div class="kpi-num" id="count-warn">8</div>
+        <div class="kpi-label">Bientot</div>
+      </div>
+      <div class="kpi-card kpi-crit" id="kpi-crit" onclick="filterStatus('crit')">
+        <div class="kpi-num" id="count-crit">3</div>
+        <div class="kpi-label">Action</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Chien ou propriétaire…" oninput="applyFilters()" />
+      </div>
+      <div class="filter-pills">
+        <button class="pill active" id="pill-all" onclick="setPill('all')">Tous</button>
+        <button class="pill" id="pill-club" onclick="setPill('club')">Club</button>
+        <button class="pill" id="pill-compet" onclick="setPill('compet')">Compét.</button>
+      </div>
+    </div>
+
+    <!-- Dog list -->
+    <div class="dog-list" id="dog-list"></div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-title">Exigences vaccinales</div>
+      <div class="legend-grid">
+        <div class="legend-item"><span class="req-tag req-club">CLUB</span> Inscription obligatoire</div>
+        <div class="legend-item"><span class="req-tag req-compet">COMPÉT</span> Compétition uniquement</div>
+        <div class="legend-item"><span class="req-tag req-fed">FED</span> Exigence fédération</div>
+        <div class="legend-item"><span class="req-tag req-opt">OPT</span> Optionnel recommandé</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const DOGS = [
+  {
+    name: 'Voodoo', breed: 'Berger Australien', sex: 'F', emoji: '🐕‍🦺',
+    owner: 'Alex M.', club: 'CaniPotes 42', federation: 'FFSLC', discipline: 'Canicross',
+    vaccines: [
+      { name: 'CHPPiL', req: 'club', reqLabel: 'Club', status: 'ok', exp: '15 oct. 2026', days: 207 },
+      { name: 'Toux du chenil', req: 'opt', reqLabel: 'Opt', status: 'ok', exp: '20 nov. 2026', days: 243 },
+      { name: 'Rage', req: 'compet', reqLabel: 'Compét', status: 'ok', exp: '12 jan. 2027', days: 296 },
+    ],
+    passportStatus: 'complete',
+    passportLabel: 'Passport compét. complet',
+  },
+  {
+    name: 'Ari', breed: 'Berger des Shetland', sex: 'M', emoji: '🦊',
+    owner: 'Alex M.', club: 'CEC Velay', federation: 'CNEAC', discipline: 'Agility',
+    vaccines: [
+      { name: 'CHPPiL', req: 'club', reqLabel: 'Club', status: 'ok', exp: '08 sep. 2026', days: 170 },
+      { name: 'Toux du chenil', req: 'fed', reqLabel: 'Fed', status: 'ok', exp: '08 sep. 2026', days: 170 },
+      { name: 'Rage', req: 'opt', reqLabel: 'Opt', status: 'na', exp: null, days: null },
+    ],
+    passportStatus: 'club-only',
+    passportLabel: 'Complet club · Rage optionnelle',
+  },
+  {
+    name: 'Luna', breed: 'Border Collie', sex: 'F', emoji: '🐺',
+    owner: 'Julie C.', club: 'CaniPotes 42', federation: 'FFSLC', discipline: 'Canitrail',
+    vaccines: [
+      { name: 'CHPPiL', req: 'club', reqLabel: 'Club', status: 'warn', exp: '18 avr. 2026', days: 27 },
+      { name: 'Toux du chenil', req: 'opt', reqLabel: 'Opt', status: 'ok', exp: '01 déc. 2026', days: 254 },
+      { name: 'Rage', req: 'compet', reqLabel: 'Compét', status: 'ok', exp: '30 juil. 2026', days: 130 },
+    ],
+    passportStatus: 'warning',
+    passportLabel: 'CHPPiL à renouveler < 30j',
+  },
+  {
+    name: 'Rocky', breed: 'Greyster', sex: 'M', emoji: '🦮',
+    owner: 'Thomas B.', club: 'CaniPotes 42', federation: 'FFSLC', discipline: 'Canicross',
+    vaccines: [
+      { name: 'CHPPiL', req: 'club', reqLabel: 'Club', status: 'crit', exp: '10 mar. 2026', days: -12 },
+      { name: 'Toux du chenil', req: 'opt', reqLabel: 'Opt', status: 'na', exp: null, days: null },
+      { name: 'Rage', req: 'compet', reqLabel: 'Compét', status: 'crit', exp: '01 fév. 2026', days: -49 },
+    ],
+    passportStatus: 'incomplete',
+    passportLabel: 'CHPPiL + Rage expirés',
+  },
+  {
+    name: 'Nala', breed: 'Malinois', sex: 'F', emoji: '🐕',
+    owner: 'Perrine O.', club: 'CaniPotes 42', federation: 'FFSLC', discipline: 'Canicross',
+    vaccines: [
+      { name: 'CHPPiL', req: 'club', reqLabel: 'Club', status: 'ok', exp: '19 oct. 2026', days: 211 },
+      { name: 'Toux du chenil', req: 'opt', reqLabel: 'Opt', status: 'ok', exp: '01 sep. 2026', days: 163 },
+      { name: 'Rage', req: 'compet', reqLabel: 'Compét', status: 'warn', exp: '15 avr. 2026', days: 24 },
+    ],
+    passportStatus: 'warning',
+    passportLabel: 'Rage compét. à renouveler < 30j',
+  },
+  {
+    name: 'Max', breed: 'Braque Allemand', sex: 'M', emoji: '🐕‍🦺',
+    owner: 'Patrick L.', club: 'CaniPotes 42', federation: 'FFSLC', discipline: 'Canirando',
+    vaccines: [
+      { name: 'CHPPiL', req: 'club', reqLabel: 'Club', status: 'ok', exp: '20 juin 2026', days: 90 },
+      { name: 'Toux du chenil', req: 'opt', reqLabel: 'Opt', status: 'na', exp: null, days: null },
+      { name: 'Rage', req: 'compet', reqLabel: 'Compét', status: 'na', exp: null, days: null },
+    ],
+    passportStatus: 'club-only',
+    passportLabel: 'Complet club · Pas en compétition',
+  },
+  {
+    name: 'Bella', breed: 'Dalmatien', sex: 'F', emoji: '🐩',
+    owner: 'Sophie R.', club: 'CaniPotes 42', federation: 'FFSLC', discipline: 'Canicross',
+    vaccines: [
+      { name: 'CHPPiL', req: 'club', reqLabel: 'Club', status: 'ok', exp: '15 déc. 2026', days: 268 },
+      { name: 'Toux du chenil', req: 'opt', reqLabel: 'Opt', status: 'ok', exp: '15 déc. 2026', days: 268 },
+      { name: 'Rage', req: 'compet', reqLabel: 'Compét', status: 'ok', exp: '15 déc. 2026', days: 268 },
+    ],
+    passportStatus: 'complete',
+    passportLabel: 'Passport compét. complet',
+  },
+  {
+    name: 'Pixel', breed: 'Shetland', sex: 'M', emoji: '🦊',
+    owner: 'Camille V.', club: 'CEC Velay', federation: 'CNEAC', discipline: 'Agility',
+    vaccines: [
+      { name: 'CHPPiL', req: 'club', reqLabel: 'Club', status: 'ok', exp: '01 août 2026', days: 132 },
+      { name: 'Toux du chenil', req: 'fed', reqLabel: 'Fed', status: 'crit', exp: '05 mar. 2026', days: -17 },
+      { name: 'Rage', req: 'opt', reqLabel: 'Opt', status: 'na', exp: null, days: null },
+    ],
+    passportStatus: 'incomplete',
+    passportLabel: 'Toux du chenil expiré (exigence CNEAC)',
+  },
+];
+
+let activeStatus = 'all';
+let activeScope = 'all';
+let searchQuery = '';
+
+function statusIcon(s) {
+  if (s === 'ok')   return { icon: '✓', cls: 'vax-icon-ok', textCls: 'vax-status-ok', label: 'À jour' };
+  if (s === 'warn') return { icon: '⚠', cls: 'vax-icon-warn', textCls: 'vax-status-warn', label: '' };
+  if (s === 'crit') return { icon: '✕', cls: 'vax-icon-crit', textCls: 'vax-status-crit', label: 'Expiré' };
+  return                   { icon: '—', cls: 'vax-icon-na', textCls: 'vax-status-na', label: 'Non fait' };
+}
+
+function reqTagCls(r) {
+  if (r === 'club') return 'req-club';
+  if (r === 'compet') return 'req-compet';
+  if (r === 'fed') return 'req-fed';
+  return 'req-opt';
+}
+
+function passportCls(s) {
+  if (s === 'complete') return 'passport-complete';
+  if (s === 'club-only') return 'passport-club-only';
+  if (s === 'warning') return 'passport-warning';
+  return 'passport-incomplete';
+}
+
+function daysLabel(days) {
+  if (days === null) return '';
+  if (days < 0) return `Exp. ${Math.abs(days)}j`;
+  if (days === 0) return "Auj.";
+  return `${days}j`;
+}
+
+function dogPassport(dog) {
+  const hasAnyCrit = dog.vaccines.some(v => v.status === 'crit' && v.req !== 'opt');
+  const hasAnyWarn = dog.vaccines.some(v => v.status === 'warn');
+  if (hasAnyCrit) return 'crit';
+  if (hasAnyWarn) return 'warn';
+  return 'ok';
+}
+
+function filterDogs() {
+  return DOGS.filter(d => {
+    // Status filter
+    if (activeStatus !== 'all') {
+      const ps = dogPassport(d);
+      if (activeStatus !== ps) return false;
+    }
+    // Scope filter
+    if (activeScope === 'club') {
+      // Show only vaccines required for club
+      // Dog passes if it has any club-required vaccine issue
+    }
+    if (activeScope === 'compet') {
+      // Focus on competition vaccines
+    }
+    // Search
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      if (!d.name.toLowerCase().includes(q) && !d.owner.toLowerCase().includes(q) && !d.breed.toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderDogCard(d) {
+  const fedCls = d.federation === 'FFSLC' ? 'fed-ffslc' : 'fed-cneac';
+  const ppCls = passportCls(d.passportStatus);
+
+  let vaxRows = '';
+  d.vaccines.forEach(v => {
+    if (activeScope === 'club' && v.req !== 'club' && v.req !== 'fed') return;
+    if (activeScope === 'compet' && v.req === 'opt') return;
+    const si = statusIcon(v.status);
+    const rc = reqTagCls(v.req);
+    const dl = v.days !== null ? daysLabel(v.days) : '';
+    const expLine = v.exp ? `Exp. ${v.exp}` : 'Non vacciné';
+    vaxRows += `
+      <div class="vax-row">
+        <div class="vax-icon ${si.cls}">${si.icon}</div>
+        <div class="vax-details">
+          <div class="vax-name-row">
+            <span class="vax-name">${v.name}</span>
+            <span class="req-tag ${rc}">${v.reqLabel}</span>
+          </div>
+          <div class="vax-exp">${expLine}</div>
+        </div>
+        <div class="vax-status-text ${si.textCls}">${dl || si.label}</div>
+      </div>`;
+  });
+
+  const hasIssue = d.vaccines.some(v => v.status === 'crit' || v.status === 'warn');
+
+  return `
+    <div class="dog-card">
+      <div class="dog-card-header">
+        <div class="dog-avatar">${d.emoji}</div>
+        <div class="dog-info">
+          <div class="dog-name-row">
+            <span class="dog-name">${d.name}</span>
+            <span class="dog-breed">${d.breed} · ${d.sex}</span>
+          </div>
+          <div class="dog-meta">
+            <span>${d.owner}</span>
+            <span>·</span>
+            <span class="fed-tag ${fedCls}" style="font-size:9px">${d.federation}</span>
+            <span>${d.discipline}</span>
+          </div>
+        </div>
+        <div class="passport-badge ${ppCls}">${d.passportStatus === 'complete' ? '✓ Complet' : d.passportStatus === 'club-only' ? 'Club ✓' : d.passportStatus === 'warning' ? '⚠ Bientôt' : '✕ Action'}</div>
+      </div>
+      <div class="vax-grid">${vaxRows}</div>
+      <div class="dog-card-actions">
+        <button class="card-action" onclick="showToast('→ Dossier vaccinal de ${d.name}')">📋 Dossier</button>
+        ${hasIssue ? `<button class="card-action card-action-warn" onclick="showToast('→ Envoyer rappel à ${d.owner}')">🔔 Rappel</button>` : `<button class="card-action" onclick="showToast('→ Profil de ${d.owner}')">👤 Propriétaire</button>`}
+      </div>
+    </div>`;
+}
+
+function renderList() {
+  const list = document.getElementById('dog-list');
+  const filtered = filterDogs();
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="icon">🔍</div>
+      <div class="title">Aucun résultat</div>
+      <div>Modifiez vos critères de recherche.</div>
+    </div>`;
+    return;
+  }
+
+  // Sort: incomplete first, then warning, then complete
+  const order = { incomplete: 0, warning: 1, 'club-only': 2, complete: 3 };
+  filtered.sort((a,b) => (order[a.passportStatus]||9) - (order[b.passportStatus]||9));
+
+  // Group
+  const groups = [
+    { key: 'incomplete', label: '🔴 Action requise' },
+    { key: 'warning', label: '🟠 À renouveler bientôt' },
+    { key: 'club-only', label: '🔵 Complet club (compétition optionnelle)' },
+    { key: 'complete', label: '🟢 Passport compétition complet' },
+  ];
+
+  let html = '';
+  groups.forEach(g => {
+    const dogs = filtered.filter(d => d.passportStatus === g.key);
+    if (!dogs.length) return;
+    html += `<div class="section-label">${g.label} (${dogs.length})</div>`;
+    dogs.forEach(d => { html += renderDogCard(d); });
+  });
+  list.innerHTML = html;
+
+  // Update KPIs
+  const all = DOGS.length;
+  const okCount = DOGS.filter(d => dogPassport(d) === 'ok').length;
+  const warnCount = DOGS.filter(d => dogPassport(d) === 'warn').length;
+  const critCount = DOGS.filter(d => dogPassport(d) === 'crit').length;
+  document.getElementById('count-all').textContent = all;
+  document.getElementById('count-ok').textContent = okCount;
+  document.getElementById('count-warn').textContent = warnCount;
+  document.getElementById('count-crit').textContent = critCount;
+}
+
+function filterStatus(s) {
+  activeStatus = activeStatus === s ? 'all' : s;
+  ['all','ok','warn','crit'].forEach(k => {
+    document.getElementById('kpi-'+k).classList.toggle('selected', activeStatus === k);
+  });
+  renderList();
+}
+
+function setPill(scope) {
+  activeScope = scope;
+  ['all','club','compet'].forEach(k => {
+    document.getElementById('pill-'+k).classList.toggle('active', scope === k);
+  });
+  renderList();
+}
+
+function applyFilters() {
+  searchQuery = document.getElementById('search-input').value;
+  renderList();
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// Init
+renderList();
+</script>
+</body>
+</html>
