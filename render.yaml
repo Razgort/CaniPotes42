@@ -15,7 +15,7 @@ services:
     name: canifed-api-staging
     env: node
     plan: free
-    buildCommand: npm ci && npx prisma migrate deploy --schema libs/shared/prisma-client/prisma/schema.prisma && npx nx build api --configuration=production
+    buildCommand: npm ci && npx prisma generate --schema libs/shared/prisma-client/prisma/schema.prisma && npx prisma migrate deploy --schema libs/shared/prisma-client/prisma/schema.prisma && npx nx build api --configuration=production
     startCommand: node dist/apps/api/main.js
     healthCheckPath: /api/health
     envVars:
@@ -30,7 +30,7 @@ services:
     name: canifed-api-prod
     env: node
     plan: free
-    buildCommand: npm ci && npx prisma migrate deploy --schema libs/shared/prisma-client/prisma/schema.prisma && npx nx build api --configuration=production
+    buildCommand: npm ci && npx prisma generate --schema libs/shared/prisma-client/prisma/schema.prisma && npx prisma migrate deploy --schema libs/shared/prisma-client/prisma/schema.prisma && npx nx build api --configuration=production
     startCommand: node dist/apps/api/main.js
     healthCheckPath: /api/health
     envVars:

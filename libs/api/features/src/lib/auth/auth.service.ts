@@ -132,7 +132,7 @@ export class AuthService {
       { sub: user.id },
       {
         secret: process.env['JWT_REFRESH_SECRET'],
-        expiresIn: jwtConstants.refreshTokenExpiry,
+        expiresIn: jwtConstants.refreshTokenExpiry as any,
       },
     );
 
