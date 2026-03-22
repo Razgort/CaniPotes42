@@ -16,7 +16,7 @@ services:
     env: node
     plan: free
     buildCommand: npm ci && npx prisma generate --schema libs/shared/prisma-client/prisma/schema.prisma && npx prisma migrate deploy --schema libs/shared/prisma-client/prisma/schema.prisma && npx nx build api --configuration=production
-    startCommand: node dist/apps/api/main.js
+    startCommand: node apps/api/dist/main.js
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
@@ -31,7 +31,7 @@ services:
     env: node
     plan: free
     buildCommand: npm ci && npx prisma generate --schema libs/shared/prisma-client/prisma/schema.prisma && npx prisma migrate deploy --schema libs/shared/prisma-client/prisma/schema.prisma && npx nx build api --configuration=production
-    startCommand: node dist/apps/api/main.js
+    startCommand: node apps/api/dist/main.js
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
