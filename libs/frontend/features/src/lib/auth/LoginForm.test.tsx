@@ -131,7 +131,7 @@ describe('LoginForm', () => {
     });
   });
 
-  it('redirects to /club-setup when user has no clubs', async () => {
+  it('redirects to /clubs/new when user has no clubs', async () => {
     const user = userEvent.setup();
     mockMutateAsync.mockResolvedValue({
       data: {
@@ -148,7 +148,7 @@ describe('LoginForm', () => {
     await user.click(screen.getByRole('button', { name: /se connecter/i }));
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/club-setup', { replace: true });
+      expect(mockNavigate).toHaveBeenCalledWith('/clubs/new', { replace: true });
     });
   });
 

@@ -1,6 +1,6 @@
 # Story 4.2: Member Directory & Profile Management
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -311,9 +311,43 @@ Register `MemberModule` in the features barrel export and import it in `apps/api
 ## Dev Agent Record
 
 ### Agent Model Used
+Claude Opus 4.6 (1M context)
 
 ### Debug Log References
+- Build verified: `npx nx build api-features` — SUCCESS (types, api-core, api-features all pass)
+- Build verified: `npx nx build @org/frontend` — SUCCESS (built in 9.15s)
+- Pre-existing build issue: duplicate `SwitchClub` export in types (auth.schema vs club.schema) — not related to this story
 
 ### Completion Notes List
+- Avatar upload uses placeholder URL pattern (`{clubId}/avatars/{userId}/{timestamp}-{filename}`) since Cloudflare R2 integration is not yet set up. TODO: integrate R2 client when available.
+- `@types/multer` installed as dev dependency for `Express.Multer.File` type support.
+- Linter/co-developer extended member module with Story 4.3 features (updateRole, removeMember, suspendMember, unsuspendMember) during implementation — these are integrated.
+- Response wrapper interceptor already handles `{ data: ... }` wrapping at the framework level; controller methods return raw data.
 
 ### File List
+**Backend (API)**
+- `libs/api/features/src/lib/member/member.module.ts` — NestJS module registration
+- `libs/api/features/src/lib/member/member.controller.ts` — REST endpoints (GET /members, GET /members/:id, PATCH /members/:id, POST /members/:id/avatar)
+- `libs/api/features/src/lib/member/member.service.ts` — Business logic (findAll, findOne, updateProfile, updateAvatar)
+- `libs/api/features/src/lib/member/member.service.spec.ts` — Unit tests for service
+- `libs/api/features/src/lib/member/member.controller.spec.ts` — Unit tests for controller
+- `libs/api/features/src/lib/api-features.ts` — Updated to import MemberModule
+
+**Shared Types**
+- `libs/shared/types/src/lib/schemas/member.schema.ts` — Added updateProfileSchema, findMembersQuerySchema + types
+
+**Frontend (UI Components)**
+- `libs/frontend/ui/src/lib/Avatar.tsx` — Avatar with initials fallback, size variants
+- `libs/frontend/ui/src/lib/RoleBadge.tsx` — Role badge (Owner/Admin/Member) with French labels
+- `libs/frontend/ui/src/lib/MemberCard.tsx` — Member card component
+- `libs/frontend/ui/src/lib/MemberCard.test.tsx` — MemberCard unit tests
+- `libs/frontend/ui/src/index.ts` — Updated to export Avatar, RoleBadge, MemberCard
+
+**Frontend (Features)**
+- `libs/frontend/features/src/lib/members/hooks/useMembers.ts` — TanStack Query hooks (useMembers, useMemberDetail, useUpdateProfile, useUploadAvatar)
+- `libs/frontend/features/src/lib/members/MemberDirectory.tsx` — Member directory page (mobile list + desktop table, search/filter for admin)
+- `libs/frontend/features/src/lib/members/MemberProfile.tsx` — Member profile page (own edit + read-only for others)
+- `libs/frontend/features/src/lib/members/ProfileEditForm.tsx` — Profile edit form (React Hook Form + Zod)
+- `libs/frontend/features/src/lib/members/MemberDirectory.test.tsx` — Directory unit tests
+- `libs/frontend/features/src/lib/members/MemberProfile.test.tsx` — Profile unit tests
+- `libs/frontend/features/src/lib/features.tsx` — Updated with /members and /members/:memberId routes

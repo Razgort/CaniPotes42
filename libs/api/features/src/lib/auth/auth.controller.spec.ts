@@ -15,6 +15,8 @@ describe('AuthController', () => {
   let authService: {
     register: ReturnType<typeof vi.fn>;
     login: ReturnType<typeof vi.fn>;
+    refreshTokens: ReturnType<typeof vi.fn>;
+    getClearRefreshTokenCookieOptions: ReturnType<typeof vi.fn>;
   };
 
   const validDto: RegisterWithConsent = {
@@ -31,7 +33,17 @@ describe('AuthController', () => {
   };
 
   beforeEach(() => {
-    authService = { register: vi.fn(), login: vi.fn() };
+    authService = {
+      register: vi.fn(),
+      login: vi.fn(),
+      refreshTokens: vi.fn(),
+      getClearRefreshTokenCookieOptions: vi.fn().mockReturnValue({
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 0,
+      }),
+    };
     controller = new AuthController(authService as unknown as AuthService);
   });
 
@@ -158,6 +170,75 @@ describe('AuthController', () => {
 
       expect(authService.login).toHaveBeenCalledTimes(1);
       expect(authService.login).toHaveBeenCalledWith(loginDto);
+    });
+  });
+
+  // --- Refresh tests ---
+
+  describe('refresh', () => {
+    it('should return new access token and set refresh cookie on valid refresh', async () => {
+      authService.refreshTokens.mockResolvedValue({
+        accessToken: 'new-access',
+        refreshToken: 'new-refresh',
+      });
+
+      const req = { cookies: { refresh_token: 'old-refresh' } };
+      const res = createMockResponse();
+
+      const result = await controller.refresh(req as never, res as never);
+
+      expect(result).toEqual({ accessToken: 'new-access' });
+      expect(res.cookie).toHaveBeenCalledWith(
+        'refresh_token',
+        'new-refresh',
+        expect.objectContaining({ httpOnly: true }),
+      );
+    });
+
+    it('should return 401 when no refresh token cookie', async () => {
+      const req = { cookies: {} };
+      const res = {
+        ...createMockResponse(),
+        status: vi.fn().mockReturnThis(),
+        json: vi.fn(),
+      };
+
+      await controller.refresh(req as never, res as never);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({ error: 'NO_REFRESH_TOKEN' }),
+      );
+    });
+
+    it('should propagate UnauthorizedException for invalid refresh token', async () => {
+      authService.refreshTokens.mockRejectedValue(
+        new UnauthorizedException({ error: 'INVALID_REFRESH_TOKEN' })
+      );
+
+      const req = { cookies: { refresh_token: 'bad-token' } };
+      const res = createMockResponse();
+
+      await expect(controller.refresh(req as never, res as never))
+        .rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  // --- Logout tests ---
+
+  describe('logout', () => {
+    it('should clear refresh token cookie and return success', async () => {
+      const user = { sub: 'uuid-123', email: 'a@b.com', activeClubId: 'c1', role: 'OWNER' };
+      const res = createMockResponse();
+
+      const result = await controller.logout(user as never, res as never);
+
+      expect(result).toEqual({ message: 'Logged out successfully' });
+      expect(res.cookie).toHaveBeenCalledWith(
+        'refresh_token',
+        '',
+        expect.objectContaining({ maxAge: 0 }),
+      );
     });
   });
 });

@@ -40,7 +40,7 @@ export function LoginForm() {
       const from = (location.state as { from?: string })?.from;
 
       if (!response.data.activeClub) {
-        navigate('/club-setup', { replace: true });
+        navigate('/clubs/new', { replace: true });
       } else if (from) {
         navigate(from, { replace: true });
       } else {

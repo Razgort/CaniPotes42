@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2563EB" />
+    <title>Nouvel événement — CaniFed</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #2563eb;
+        --primary-hover: #1d4ed8;
+        --primary-light: #dbeafe;
+        --background: #fafafa;
+        --card: #ffffff;
+        --foreground: #18181b;
+        --muted: #71717a;
+        --border: #e4e4e7;
+        --danger: #dc2626;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--foreground);
+        background: var(--background);
+        padding-bottom: 100px;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        background: var(--card);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 5;
+      }
+      .back {
+        min-width: 44px;
+        min-height: 44px;
+        border: none;
+        background: transparent;
+        font-size: 20px;
+        cursor: pointer;
+        border-radius: 8px;
+      }
+      .back:hover {
+        background: var(--primary-light);
+      }
+      .header h1 {
+        flex: 1;
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+      }
+      .main {
+        padding: 16px;
+        max-width: 720px;
+        margin: 0 auto;
+      }
+      @media (min-width: 1024px) {
+        .layout-desk {
+          display: grid;
+          grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.15fr);
+          gap: 32px;
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: 24px;
+          align-items: start;
+        }
+        .layout-desk .main {
+          max-width: none;
+          margin: 0;
+          padding: 0;
+        }
+        .map-block {
+          height: min(420px, 70vh);
+          position: sticky;
+          top: 72px;
+        }
+      }
+      .map-block {
+        height: 220px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #c7d2fe 0%, #a5b4fc 40%, #818cf8 100%);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--border);
+      }
+      .map-block::after {
+        content: "";
+        position: absolute;
+        width: 28px;
+        height: 28px;
+        background: var(--primary);
+        border: 3px solid #fff;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        left: 55%;
+        top: 45%;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+      .map-label {
+        position: absolute;
+        bottom: 8px;
+        left: 8px;
+        right: 8px;
+        background: rgba(255, 255, 255, 0.92);
+        padding: 8px 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .field {
+        margin-bottom: 16px;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: var(--foreground);
+      }
+      input,
+      textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font: inherit;
+        background: var(--card);
+      }
+      textarea {
+        min-height: 88px;
+        resize: vertical;
+      }
+      .help {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 6px;
+        line-height: 1.4;
+      }
+      .row-switch {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        margin-bottom: 16px;
+      }
+      .row-switch input[type="checkbox"] {
+        width: 44px;
+        height: 24px;
+        margin-top: 2px;
+        accent-color: var(--primary);
+      }
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        margin-bottom: 16px;
+      }
+      .seg {
+        display: flex;
+        background: var(--background);
+        border-radius: 8px;
+        padding: 2px;
+        border: 1px solid var(--border);
+      }
+      .seg button {
+        border: none;
+        background: transparent;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        border-radius: 6px;
+        font-family: inherit;
+        color: var(--muted);
+      }
+      .seg button.active {
+        background: var(--card);
+        color: var(--foreground);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+      }
+      .bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 12px 16px;
+        background: var(--card);
+        border-top: 1px solid var(--border);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+      }
+      .btn-save {
+        width: 100%;
+        min-height: 48px;
+        background: var(--primary);
+        color: #fff;
+        font-weight: 600;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .btn-save:hover {
+        background: var(--primary-hover);
+      }
+      .hidden {
+        display: none !important;
+      }
+      @media (max-width: 1023px) {
+        .map-aside {
+          display: contents;
+        }
+        .map-aside #mapSection {
+          order: -1;
+        }
+        .layout-desk {
+          display: flex;
+          flex-direction: column;
+        }
+        #formCol {
+          order: 0;
+        }
+      }
+      @media (min-width: 1024px) {
+        .map-aside #mapSection {
+          margin-top: 0;
+        }
+      }
+      /* Modal */
+      dialog {
+        border: none;
+        border-radius: 16px;
+        padding: 0;
+        max-width: calc(100% - 32px);
+        width: 400px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+      }
+      dialog::backdrop {
+        background: rgba(0, 0, 0, 0.45);
+      }
+      .modal-inner {
+        padding: 24px;
+      }
+      .modal-inner h2 {
+        margin: 0 0 12px;
+        font-size: 20px;
+        font-weight: 600;
+      }
+      .modal-inner p {
+        margin: 0 0 20px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .modal-actions {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 8px;
+      }
+      @media (min-width: 480px) {
+        .modal-actions {
+          flex-direction: row;
+          justify-content: flex-end;
+        }
+      }
+      .btn-outline {
+        padding: 10px 18px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--card);
+        font-weight: 500;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .btn-confirm {
+        padding: 10px 18px;
+        border-radius: 8px;
+        border: none;
+        background: var(--primary);
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <button type="button" class="back" aria-label="Retour">←</button>
+      <h1>Nouvel événement</h1>
+    </header>
+
+    <div class="layout-desk">
+      <div class="main" id="formCol">
+        <div class="row-switch">
+          <input type="checkbox" id="showMap" checked aria-describedby="showMapHelp" />
+          <div>
+            <label for="showMap" style="margin: 0; font-size: 14px; font-weight: 600">Afficher la carte GPS pour cet événement</label>
+            <p class="help" id="showMapHelp">
+              Désactivez pour les séances toujours au même endroit (ex. local fixe, CNEAC). Les membres verront uniquement le texte du
+              lieu.
+            </p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="title">Titre</label>
+          <input id="title" type="text" placeholder="Séance canicross du mardi" maxlength="120" />
+        </div>
+        <div class="field">
+          <label for="start">Début</label>
+          <input id="start" type="datetime-local" />
+        </div>
+        <div class="field">
+          <label for="end">Fin (optionnel)</label>
+          <input id="end" type="datetime-local" />
+        </div>
+        <div class="field">
+          <label for="place">Lieu</label>
+          <input id="place" type="text" placeholder="Ex. Parking du stade · Salle des fêtes" required />
+        </div>
+        <div class="field">
+          <label for="desc">Description (optionnel)</label>
+          <textarea id="desc" placeholder="Infos pratiques pour les membres…"></textarea>
+        </div>
+        <div class="field">
+          <label for="cap">Capacité max (optionnel)</label>
+          <input id="cap" type="number" min="1" placeholder="30" />
+        </div>
+
+        <div class="toggle-row">
+          <span style="font-weight: 600">Visibilité</span>
+          <div class="seg" role="group" aria-label="Brouillon ou publié">
+            <button type="button" id="btnDraft" class="active">Brouillon</button>
+            <button type="button" id="btnPub">Publié</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="main map-aside" id="mapAside" style="padding-top: 0">
+        <div id="mapSection">
+          <div class="map-block" aria-hidden="true">
+            <div class="map-label">Prototype — intégration carte (Mapbox / Leaflet / Google) à brancher</div>
+          </div>
+          <div class="field" style="margin-top: 12px">
+            <label for="search">Rechercher une adresse…</label>
+            <input id="search" type="search" placeholder="Ex. Stade municipal, Lyon" autocomplete="off" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bar">
+      <button type="button" class="btn-save" id="btnSave">Enregistrer</button>
+    </div>
+
+    <dialog id="publishModal">
+      <div class="modal-inner">
+        <h2>Publier l’événement ?</h2>
+        <p>Les membres verront cet événement sur le fil du club.</p>
+        <div class="modal-actions">
+          <button type="button" class="btn-outline" id="modalCancel">Annuler</button>
+          <button type="button" class="btn-confirm" id="modalOk">Publier</button>
+        </div>
+      </div>
+    </dialog>
+
+    <script>
+      var showMap = document.getElementById("showMap");
+      var mapSection = document.getElementById("mapSection");
+      var btnDraft = document.getElementById("btnDraft");
+      var btnPub = document.getElementById("btnPub");
+      var btnSave = document.getElementById("btnSave");
+      var modal = document.getElementById("publishModal");
+      var modalOk = document.getElementById("modalOk");
+      var modalCancel = document.getElementById("modalCancel");
+      var wasDraft = true;
+
+      function syncMap() {
+        mapSection.classList.toggle("hidden", !showMap.checked);
+      }
+      showMap.addEventListener("change", syncMap);
+      syncMap();
+
+      btnDraft.addEventListener("click", function () {
+        btnDraft.classList.add("active");
+        btnPub.classList.remove("active");
+      });
+      btnPub.addEventListener("click", function () {
+        btnPub.classList.add("active");
+        btnDraft.classList.remove("active");
+      });
+
+      btnSave.addEventListener("click", function () {
+        var publish = btnPub.classList.contains("active");
+        if (publish && wasDraft) {
+          modal.showModal();
+        } else {
+          alert("Enregistré (prototype).");
+        }
+      });
+
+      modalCancel.addEventListener("click", function () {
+        modal.close();
+        btnDraft.classList.add("active");
+        btnPub.classList.remove("active");
+      });
+
+      modalOk.addEventListener("click", function () {
+        modal.close();
+        wasDraft = false;
+        alert("Publié (prototype).");
+      });
+
+      var mapAside = document.getElementById("mapAside");
+      function syncMapAside() {
+        mapAside.classList.toggle("hidden", !showMap.checked);
+      }
+      showMap.addEventListener("change", syncMapAside);
+      syncMapAside();
+    </script>
+  </body>
+</html>

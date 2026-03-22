@@ -38,6 +38,16 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum PaymentProvider {
+  STRIPE
+  HELLOASSO
+}
+
+enum MemberStatus {
+  ACTIVE
+  SUSPENDED
+}
+
 enum DocumentType {
   VACCINE_CERT
   REGISTRATION_FORM
@@ -78,6 +88,7 @@ model Club {
   updatedAt      DateTime @updatedAt
 
   members        ClubMember[]
+  invitations    Invitation[]
   events         Event[]
   participations EventParticipation[]
   dogs           Dog[]
@@ -87,13 +98,32 @@ model Club {
   payments       Payment[]
 }
 
+model Invitation {
+  id         String    @id @default(uuid())
+  clubId     String
+  email      String
+  token      String    @unique @default(uuid())
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  @@unique([clubId, email])
+  @@index([token])
+  @@index([clubId])
+}
+
 model ClubMember {
-  id        String   @id @default(uuid())
-  userId    String
-  clubId    String
-  role      Role     @default(MEMBER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String       @id @default(uuid())
+  userId      String
+  clubId      String
+  role        Role         @default(MEMBER)
+  status      MemberStatus @default(ACTIVE)
+  suspendedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
@@ -220,13 +250,15 @@ model ChatMessage {
 }
 
 model LicenseType {
-  id        String   @id @default(uuid())
-  clubId    String
-  name      String
-  amount    Decimal
-  season    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String          @id @default(uuid())
+  clubId          String
+  name            String
+  amount          Decimal
+  season          String
+  paymentProvider PaymentProvider
+  deletedAt       DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 
   club     Club      @relation(fields: [clubId], references: [id], onDelete: Cascade)
   payments Payment[]
@@ -235,15 +267,17 @@ model LicenseType {
 }
 
 model Payment {
-  id              String        @id @default(uuid())
-  clubId          String
-  userId          String
-  licenseTypeId   String
-  amount          Decimal
-  status          PaymentStatus @default(PENDING)
-  stripeSessionId String?       @unique
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id                        String        @id @default(uuid())
+  clubId                    String
+  userId                    String
+  licenseTypeId             String
+  amount                    Decimal
+  status                    PaymentStatus @default(PENDING)
+  stripeSessionId           String?       @unique
+  helloAssoCheckoutIntentId String?       @unique
+  paymentDate               DateTime?
+  createdAt                 DateTime      @default(now())
+  updatedAt                 DateTime      @updatedAt
 
   club        Club        @relation(fields: [clubId], references: [id], onDelete: Cascade)
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)

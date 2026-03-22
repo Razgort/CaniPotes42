@@ -4,6 +4,11 @@ export enum Role {
   MEMBER = 'MEMBER',
 }
 
+export enum MemberStatus {
+  ACTIVE = 'ACTIVE',
+  SUSPENDED = 'SUSPENDED',
+}
+
 export enum EventStatus {
   DRAFT = 'DRAFT',
   PUBLISHED = 'PUBLISHED',
@@ -26,6 +31,11 @@ export enum PaymentStatus {
   COMPLETED = 'COMPLETED',
   FAILED = 'FAILED',
   REFUNDED = 'REFUNDED',
+}
+
+export enum PaymentProvider {
+  STRIPE = 'STRIPE',
+  HELLOASSO = 'HELLOASSO',
 }
 
 export enum DocumentType {

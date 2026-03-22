@@ -7,3 +7,4 @@ export * from './vaccine.schema.js';
 export * from './document.schema.js';
 export * from './chat.schema.js';
 export * from './payment.schema.js';
+export * from './invitation.schema.js';

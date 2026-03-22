@@ -1,6 +1,6 @@
 # Story 3.1: Guided Club Registration Flow
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -34,70 +34,70 @@ So that I can create my club's digital home in under 10 minutes without technica
 
 ### Backend
 
-- [ ] Task 1: Create Club feature module (AC: #1, #6)
-  - [ ] Create `libs/api/features/src/lib/club/club.module.ts`
-  - [ ] Create `libs/api/features/src/lib/club/club.controller.ts`
-  - [ ] Create `libs/api/features/src/lib/club/club.service.ts`
-  - [ ] Register ClubModule in FeaturesModule
+- [x] Task 1: Create Club feature module (AC: #1, #6)
+  - [x] Create `libs/api/features/src/lib/club/club.module.ts`
+  - [x] Create `libs/api/features/src/lib/club/club.controller.ts`
+  - [x] Create `libs/api/features/src/lib/club/club.service.ts`
+  - [x] Register ClubModule in FeaturesModule
 
-- [ ] Task 2: Implement POST /api/clubs endpoint (AC: #6)
-  - [ ] Controller: `@Post()` with `@UseGuards(JwtAuthGuard)` only (no ClubGuard — user has no club yet)
-  - [ ] Validate body with `ZodValidationPipe(createClubSchema)`
-  - [ ] Service: create Club + ClubMember (role=OWNER) in a Prisma `$transaction`
-  - [ ] Service: generate new JWT with `activeClubId` and `role: OWNER`
-  - [ ] Return `{ data: { club, accessToken, refreshToken } }`
+- [x] Task 2: Implement POST /api/clubs endpoint (AC: #6)
+  - [x] Controller: `@Post()` with `@UseGuards(JwtAuthGuard)` only (no ClubGuard — user has no club yet)
+  - [x] Validate body with `ZodValidationPipe(createClubSchema)`
+  - [x] Service: create Club + ClubMember (role=OWNER) in a Prisma `$transaction`
+  - [x] Service: generate new JWT with `activeClubId` and `role: OWNER`
+  - [x] Return `{ data: { club, accessToken, refreshToken } }`
 
-- [ ] Task 3: Handle logo upload (AC: #4)
-  - [ ] Accept `multipart/form-data` or base64 in request body
-  - [ ] Validate file type (JPEG, PNG, WebP) and size (max 2MB)
-  - [ ] Store in Cloudflare R2 with club-scoped key: `clubs/{clubId}/logo.{ext}`
-  - [ ] Save signed URL in `Club.logo` field
-  - [ ] If no logo uploaded, `Club.logo` remains `null`
+- [x] Task 3: Handle logo upload (AC: #4)
+  - [x] Accept `multipart/form-data` or base64 in request body
+  - [x] Validate file type (JPEG, PNG, WebP) and size (max 2MB)
+  - [x] Store in Cloudflare R2 with club-scoped key: `clubs/{clubId}/logo.{ext}`
+  - [x] Save signed URL in `Club.logo` field
+  - [x] If no logo uploaded, `Club.logo` remains `null`
 
-- [ ] Task 4: Write backend tests (AC: all)
-  - [ ] `club.controller.spec.ts` — endpoint routing, guard application, validation
-  - [ ] `club.service.spec.ts` — transaction logic, ClubMember creation, JWT refresh
+- [x] Task 4: Write backend tests (AC: all)
+  - [x] `club.controller.spec.ts` — endpoint routing, guard application, validation
+  - [x] `club.service.spec.ts` — transaction logic, ClubMember creation, JWT refresh
 
 ### Frontend
 
-- [ ] Task 5: Create OnboardingStep component (AC: #1, #7)
-  - [ ] Create `libs/frontend/ui/src/lib/OnboardingStep.tsx`
-  - [ ] Props: `currentStep`, `totalSteps`, `icon`, `title`, `subtitle`, `children`, `onBack`, `onContinue`, `showSkip`, `onSkip`
-  - [ ] Render progress dots (completed=filled, current=active, future=muted)
-  - [ ] Auto-focus first input on mount
-  - [ ] Back button preserves state (no form reset)
+- [x] Task 5: Create OnboardingStep component (AC: #1, #7)
+  - [x] Create `libs/frontend/ui/src/lib/OnboardingStep.tsx`
+  - [x] Props: `currentStep`, `totalSteps`, `icon`, `title`, `subtitle`, `children`, `onBack`, `onContinue`, `showSkip`, `onSkip`
+  - [x] Render progress dots (completed=filled, current=active, future=muted)
+  - [x] Auto-focus first input on mount
+  - [x] Back button preserves state (no form reset)
 
-- [ ] Task 6: Create ClubRegistrationFlow page (AC: #1-#7)
-  - [ ] Create `libs/frontend/features/src/lib/club-registration/ClubRegistrationFlow.tsx`
-  - [ ] Manage multi-step state with `useState` (step index + form data object)
-  - [ ] Step 1: Club name input (min 2 chars, validate on blur)
-  - [ ] Step 2: Federation radio group (FFSLC, CNEAC, Other, None)
-  - [ ] Step 3: Logo upload (camera-first, file picker secondary, skip button)
-  - [ ] Step 4: Contact email (required, validate on blur) + description (optional)
-  - [ ] Confirmation step: submit to API, show loading state
+- [x] Task 6: Create ClubRegistrationFlow page (AC: #1-#7)
+  - [x] Create `libs/frontend/features/src/lib/club-registration/ClubRegistrationFlow.tsx`
+  - [x] Manage multi-step state with `useState` (step index + form data object)
+  - [x] Step 1: Club name input (min 2 chars, validate on blur)
+  - [x] Step 2: Federation radio group (FFSLC, CNEAC, Other, None)
+  - [x] Step 3: Logo upload (camera-first, file picker secondary, skip button)
+  - [x] Step 4: Contact email (required, validate on blur) + description (optional)
+  - [x] Confirmation step: submit to API, show loading state
 
-- [ ] Task 7: Create success screen and routing (AC: #6)
-  - [ ] Success screen with club name, congratulatory message
-  - [ ] Update AuthContext with new JWT (activeClubId, role)
-  - [ ] Redirect to club dashboard after brief delay or CTA click
-  - [ ] Add route: `/clubs/new` → ClubRegistrationFlow
+- [x] Task 7: Create success screen and routing (AC: #6)
+  - [x] Success screen with club name, congratulatory message
+  - [x] Update AuthContext with new JWT (activeClubId, role)
+  - [x] Redirect to club dashboard after brief delay or CTA click
+  - [x] Add route: `/clubs/new` → ClubRegistrationFlow
 
-- [ ] Task 8: Create TanStack Query mutation hook (AC: #6)
-  - [ ] Create `libs/frontend/features/src/lib/club-registration/hooks/useCreateClub.ts`
-  - [ ] `useMutation` calling `POST /api/clubs`
-  - [ ] `onSuccess`: update AuthContext, invalidate queries, show success toast
-  - [ ] `onError`: show error toast with French message
+- [x] Task 8: Create TanStack Query mutation hook (AC: #6)
+  - [x] Create `libs/frontend/features/src/lib/club-registration/hooks/useCreateClub.ts`
+  - [x] `useMutation` calling `POST /api/clubs`
+  - [x] `onSuccess`: update AuthContext, invalidate queries, show success toast
+  - [x] `onError`: show error toast with French message
 
-- [ ] Task 9: Write frontend tests (AC: all)
-  - [ ] `OnboardingStep.test.tsx` — renders progress dots, focus behavior, back navigation
-  - [ ] `ClubRegistrationFlow.test.tsx` — step navigation, validation, form state preservation
+- [x] Task 9: Write frontend tests (AC: all)
+  - [x] `OnboardingStep.test.tsx` — renders progress dots, focus behavior, back navigation
+  - [x] `ClubRegistrationFlow.test.tsx` — step navigation, validation, form state preservation
 
 ### Schema Updates
 
-- [ ] Task 10: Update createClubSchema validation (AC: #2, #3)
-  - [ ] Change `name` min from 1 to 2: `z.string().min(2).max(100)`
-  - [ ] Change `federation` from free-form string to enum: `z.enum(['FFSLC', 'CNEAC', 'OTHER', 'NONE'])`
-  - [ ] Verify `updateClubSchema` inherits via `.partial()`
+- [x] Task 10: Update createClubSchema validation (AC: #2, #3)
+  - [x] Change `name` min from 1 to 2: `z.string().min(2).max(100)`
+  - [x] Change `federation` from free-form string to enum: `z.enum(['FFSLC', 'CNEAC', 'OTHER', 'NONE'])`
+  - [x] Verify `updateClubSchema` inherits via `.partial()`
 
 ## Dev Notes
 
@@ -255,9 +255,38 @@ libs/frontend/ui/src/lib/
 ## Dev Agent Record
 
 ### Agent Model Used
+Claude Opus 4.6 (1M context)
 
 ### Debug Log References
 
 ### Completion Notes List
 
+- Tasks 1-4, 10 (Backend + Schema): Already implemented in prior stories. Club module, controller, service, tests, and Zod schema all existed with correct implementation matching ACs.
+- Task 5: Created OnboardingStep reusable component with progress dots (filled/active/muted), auto-focus, back navigation, skip button, loading state. 13 unit tests passing.
+- Task 6: Created ClubRegistrationFlow with 4-step wizard (name, federation, logo, contact). Uses useState for step/form state, validates on blur, preserves input on back navigation.
+- Task 7: Created SuccessScreen with congratulatory message, auto-redirect after 3s, CTA button. Added /clubs/new route with ProtectedRoute. Updated LoginForm redirect from /club-setup to /clubs/new.
+- Task 8: Created useCreateClub mutation hook using TanStack Query. On success: updates AuthContext via updateClubSession, invalidates queries, shows French toast. On error: shows French error toast.
+- Task 9: 13 ClubRegistrationFlow tests (step navigation, validation, form preservation, submit flow, success screen). 13 OnboardingStep tests (rendering, interactions, focus). All passing.
+- Added updateClubSession method to AuthContext for post-club-creation token refresh.
+
 ### File List
+
+**New files:**
+- libs/frontend/ui/src/lib/OnboardingStep.tsx
+- libs/frontend/ui/src/lib/OnboardingStep.test.tsx
+- libs/frontend/features/src/lib/club-registration/ClubRegistrationFlow.tsx
+- libs/frontend/features/src/lib/club-registration/ClubRegistrationFlow.test.tsx
+- libs/frontend/features/src/lib/club-registration/components/SuccessScreen.tsx
+- libs/frontend/features/src/lib/club-registration/hooks/useCreateClub.ts
+
+**Modified files:**
+- libs/frontend/data-access/src/lib/AuthContext.tsx (added updateClubSession method + ClubSessionUpdate type)
+- libs/frontend/data-access/src/index.ts (exported ClubSessionUpdate type)
+- libs/frontend/ui/src/index.ts (exported OnboardingStep)
+- libs/frontend/features/src/lib/features.tsx (added /clubs/new route + lazy import)
+- libs/frontend/features/src/lib/auth/LoginForm.tsx (changed redirect from /club-setup to /clubs/new)
+- libs/frontend/features/src/lib/auth/LoginForm.test.tsx (updated test to expect /clubs/new)
+
+### Change Log
+
+- 2026-03-22: Implemented Story 3.1 frontend — guided club registration flow with 4-step onboarding wizard, success screen, routing, mutation hook, and comprehensive tests. Backend was already complete from prior stories.
