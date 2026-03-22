@@ -1,8 +1,9 @@
 import { useState, useDeferredValue } from 'react';
-import { FileText, FileBadge, FileHeart, Award, File, ExternalLink, Download, Trash2, Search } from 'lucide-react';
+import { FileText, FileBadge, FileHeart, Award, File, Eye, Download, Trash2, Search } from 'lucide-react';
 import { toast, cn } from '@org/ui';
 import { DocumentType } from '@org/types';
 import { useDocuments, useDeleteDocument, type DocumentDto } from './hooks/useDocuments';
+import { DocumentViewer } from './DocumentViewer';
 
 // --- Expiry badge logic ---
 
@@ -83,6 +84,7 @@ interface DocumentRowProps {
 
 function DocumentRow({ document, clubId, canDelete, showMemberName }: DocumentRowProps) {
   const { mutate: deleteDocument, isPending: isDeleting } = useDeleteDocument(clubId);
+  const [viewerOpen, setViewerOpen] = useState(false);
 
   const Icon = TYPE_ICONS[document.type as DocumentType] ?? FileText;
   const typeLabel = TYPE_LABELS[document.type as DocumentType] ?? document.type;
@@ -119,6 +121,7 @@ function DocumentRow({ document, clubId, canDelete, showMemberName }: DocumentRo
     : getExpiryStatus(document.expiryDate);
 
   return (
+    <>
     <div className="flex items-center gap-3 rounded-lg border border-border p-4 hover:bg-muted/40">
       {/* Icon */}
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
@@ -161,15 +164,14 @@ function DocumentRow({ document, clubId, canDelete, showMemberName }: DocumentRo
       {/* Actions */}
       <div className="flex shrink-0 items-center gap-1">
         {/* View inline */}
-        <a
-          href={document.fileUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          type="button"
+          onClick={() => setViewerOpen(true)}
           className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
           aria-label={`Ouvrir ${typeLabel}`}
         >
-          <ExternalLink className="h-4 w-4" />
-        </a>
+          <Eye className="h-4 w-4" />
+        </button>
         {/* Download */}
         <a
           href={document.fileUrl}
@@ -192,6 +194,15 @@ function DocumentRow({ document, clubId, canDelete, showMemberName }: DocumentRo
         )}
       </div>
     </div>
+
+      {viewerOpen && (
+        <DocumentViewer
+          fileName={document.fileName}
+          fileUrl={document.fileUrl}
+          onClose={() => setViewerOpen(false)}
+        />
+      )}
+    </>
   );
 }
 

@@ -176,7 +176,7 @@ describe('DocumentList', () => {
       expect(screen.getByText('Moi')).toBeInTheDocument();
     });
 
-    it('shows external link for viewing document', () => {
+    it('shows view button to open document viewer', () => {
       mockUseDocuments.mockReturnValue({
         data: {
           data: [buildDoc()],
@@ -185,9 +185,7 @@ describe('DocumentList', () => {
         isLoading: false,
       });
       renderDocumentList();
-      const link = screen.getByRole('link', { name: /ouvrir/i });
-      expect(link).toHaveAttribute('href', 'https://signed.url/license.pdf');
-      expect(link).toHaveAttribute('target', '_blank');
+      expect(screen.getByRole('button', { name: /ouvrir/i })).toBeInTheDocument();
     });
 
     it('shows download link for document', () => {

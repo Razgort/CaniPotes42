@@ -63,6 +63,7 @@ describe('ClubService', () => {
         const tx = {
           club: { create: vi.fn().mockResolvedValue(mockClub) },
           clubMember: { create: vi.fn().mockResolvedValue({}) },
+          chatChannel: { create: vi.fn().mockResolvedValue({}) },
         };
         return fn(tx);
       });
@@ -81,6 +82,7 @@ describe('ClubService', () => {
         const tx = {
           club: { create: vi.fn().mockResolvedValue(mockClub) },
           clubMember: { create: vi.fn().mockResolvedValue({}) },
+          chatChannel: { create: vi.fn().mockResolvedValue({}) },
         };
         return fn(tx);
       });
@@ -102,6 +104,7 @@ describe('ClubService', () => {
         const tx = {
           club: { create: vi.fn().mockResolvedValue(mockClub) },
           clubMember: { create: memberCreate },
+          chatChannel: { create: vi.fn().mockResolvedValue({}) },
         };
         return fn(tx);
       });
@@ -124,6 +127,7 @@ describe('ClubService', () => {
         const tx = {
           club: { create: clubCreate },
           clubMember: { create: vi.fn().mockResolvedValue({}) },
+          chatChannel: { create: vi.fn().mockResolvedValue({}) },
         };
         return fn(tx);
       });
@@ -144,6 +148,7 @@ describe('ClubService', () => {
         const tx = {
           club: { create: clubCreate },
           clubMember: { create: vi.fn().mockResolvedValue({}) },
+          chatChannel: { create: vi.fn().mockResolvedValue({}) },
         };
         return fn(tx);
       });
@@ -162,6 +167,7 @@ describe('ClubService', () => {
         const tx = {
           club: { create: vi.fn().mockResolvedValue(mockClub) },
           clubMember: { create: vi.fn().mockResolvedValue({}) },
+          chatChannel: { create: vi.fn().mockResolvedValue({}) },
         };
         return fn(tx);
       });

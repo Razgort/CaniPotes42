@@ -53,6 +53,12 @@ describe('ChatGateway', () => {
 
     gateway = module.get<ChatGateway>(ChatGateway);
 
+    // Direct injection — emitDecoratorMetadata is not enabled in this monorepo,
+    // so NestJS constructor injection is bypassed; inject mocks directly.
+    (gateway as unknown as { jwtService: unknown }).jwtService = mockJwtService;
+    (gateway as unknown as { chatService: unknown }).chatService = mockChatService;
+    (gateway as unknown as { prisma: unknown }).prisma = mockPrismaService;
+
     // Set a default server mock
     (gateway as unknown as { server: unknown }).server = {
       to: vi.fn().mockReturnValue({ emit: vi.fn() }),

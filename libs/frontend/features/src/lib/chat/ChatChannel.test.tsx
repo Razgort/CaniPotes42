@@ -47,6 +47,8 @@ function renderChatChannel(channelId = 'ch-1') {
 describe('ChatChannel', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // JSDOM does not implement scrollIntoView
+    window.HTMLElement.prototype.scrollIntoView = vi.fn();
     mockUseAuth.mockReturnValue({
       user: { id: 'user-1', email: 'a@b.com', firstName: 'Alice', lastName: 'D' },
       activeClub: { id: 'club-1', name: 'Test Club' },

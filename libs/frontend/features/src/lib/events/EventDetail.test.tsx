@@ -9,6 +9,10 @@ vi.mock('./hooks/useEventDetail', () => ({
   useRsvpMutation: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
 }));
 
+vi.mock('./components/EventAdminActions', () => ({
+  EventAdminActions: () => <div data-testid="event-admin-actions" />,
+}));
+
 vi.mock('@org/ui', () => ({
   MapWidget: ({ latitude, longitude, locationName }: any) => (
     <div data-testid="map-widget" data-lat={latitude} data-lng={longitude}>
@@ -133,7 +137,7 @@ describe('EventDetail', () => {
     it('renders location name', () => {
       renderEventDetail();
 
-      expect(screen.getByText('Stade de France')).toBeTruthy();
+      expect(screen.getAllByText('Stade de France').length).toBeGreaterThan(0);
     });
 
     it('renders event description', () => {

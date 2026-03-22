@@ -70,13 +70,13 @@ describe('ChatBubble', () => {
 
   it('applies blue tint for own messages bubble', () => {
     render(<ChatBubble {...baseProps} isOwn={true} />);
-    const bubble = screen.getByText('Bonjour!').parentElement as HTMLElement;
+    const bubble = screen.getByText('Bonjour!') as HTMLElement;
     expect(bubble.className).toContain('bg-blue-100');
   });
 
   it('applies muted styling for other users messages bubble', () => {
     render(<ChatBubble {...baseProps} isOwn={false} />);
-    const bubble = screen.getByText('Bonjour!').parentElement as HTMLElement;
+    const bubble = screen.getByText('Bonjour!') as HTMLElement;
     expect(bubble.className).toContain('bg-muted');
   });
 });
