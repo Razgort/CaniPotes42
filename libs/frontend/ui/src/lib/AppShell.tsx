@@ -41,7 +41,6 @@ export function AppShell({ children, clubName = 'CaniFed' }: AppShellProps) {
       {/* Mobile Bottom Tab Bar */}
       <nav
         className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around h-14 bg-card border-t border-border sm:hidden"
-        role="tablist"
         aria-label="Navigation principale"
       >
         <span role="tab" className="text-muted text-small" aria-selected="false">

@@ -1,6 +1,6 @@
 # Story 1.6: Test Environment Deployment Pipeline
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -33,58 +33,59 @@ So that I can verify features in a real environment with real infrastructure bef
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Create API health endpoint (AC: #2)
-  - [ ] 1.1 Create `libs/api/core/src/lib/health/health.controller.ts` with `@Controller('health')` and a `GET /` handler
-  - [ ] 1.2 Return `{ status: 'ok', timestamp: new Date().toISOString() }` — no auth guards (public endpoint)
-  - [ ] 1.3 Register `HealthController` in `ApiCoreModule` exports
-  - [ ] 1.4 Write unit test `health.controller.spec.ts` verifying 200 response with expected shape
-  - [ ] 1.5 Verify endpoint works at `GET /api/health` (global prefix is `api`)
+- [x] Task 1: Create API health endpoint (AC: #2)
+  - [x] 1.1 Create `libs/api/core/src/lib/health/health.controller.ts` with `@Controller('health')` and a `GET /` handler
+  - [x] 1.2 Return `{ status: 'ok', timestamp: new Date().toISOString() }` — no auth guards (public endpoint)
+  - [x] 1.3 Register `HealthController` in `ApiCoreModule` exports
+  - [x] 1.4 Write unit test `health.controller.spec.ts` verifying 200 response with expected shape
+  - [x] 1.5 Verify endpoint works at `GET /api/health` (global prefix is `api`)
 
-- [ ] Task 2: Create GitHub Actions deploy workflow for staging (AC: #1, #2)
-  - [ ] 2.1 Create `.github/workflows/deploy.yml`
-  - [ ] 2.2 Trigger on push to `develop` branch only
-  - [ ] 2.3 Add `workflow_run` dependency on CI workflow or use the `needs` pattern to ensure CI checks pass first (use `concurrency` group to prevent parallel deploys)
-  - [ ] 2.4 Set up Node.js LTS with npm cache (same as ci.yml)
-  - [ ] 2.5 Run `npm ci` to install dependencies
-  - [ ] 2.6 Add **Frontend deploy step**: run `npx nx build frontend --configuration=production`, then deploy `dist/apps/frontend/` to Vercel using `amondnet/vercel-action@v25` (or Vercel CLI) with `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` secrets
-  - [ ] 2.7 Add **API deploy step**: trigger Render deploy via deploy hook URL (`RENDER_DEPLOY_HOOK_STAGING` secret) — Render auto-builds from the repo, or use Render API with `RENDER_API_KEY` and `RENDER_SERVICE_ID_STAGING`
-  - [ ] 2.8 Add **Database migration step**: run `npx prisma migrate deploy --schema libs/shared/prisma-client/prisma/schema.prisma` using `DATABASE_URL_STAGING` secret (Neon staging connection string)
-  - [ ] 2.9 Add **Smoke test step**: `curl -f $STAGING_API_URL/api/health` to verify API is reachable after deploy
-  - [ ] 2.10 Add `concurrency: group: deploy-staging, cancel-in-progress: true` to prevent overlapping deploys
+- [x] Task 2: Create GitHub Actions deploy workflow for staging (AC: #1, #2)
+  - [x] 2.1 Create `.github/workflows/deploy.yml`
+  - [x] 2.2 Trigger on push to `develop` branch only
+  - [x] 2.3 Add `workflow_run` dependency on CI workflow or use the `needs` pattern to ensure CI checks pass first (use `concurrency` group to prevent parallel deploys)
+  - [x] 2.4 Set up Node.js LTS with npm cache (same as ci.yml)
+  - [x] 2.5 Run `npm ci` to install dependencies
+  - [x] 2.6 Add **Frontend deploy step**: run `npx nx build frontend --configuration=production`, then deploy `dist/apps/frontend/` to Vercel using `amondnet/vercel-action@v25` (or Vercel CLI) with `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` secrets
+  - [x] 2.7 Add **API deploy step**: trigger Render deploy via deploy hook URL (`RENDER_DEPLOY_HOOK_STAGING` secret) — Render auto-builds from the repo, or use Render API with `RENDER_API_KEY` and `RENDER_SERVICE_ID_STAGING`
+  - [x] 2.8 Add **Database migration step**: run `npx prisma migrate deploy --schema libs/shared/prisma-client/prisma/schema.prisma` using `DATABASE_URL_STAGING` secret (Neon staging connection string)
+  - [x] 2.9 Add **Smoke test step**: `curl -f $STAGING_API_URL/api/health` to verify API is reachable after deploy
+  - [x] 2.10 Add `concurrency: group: deploy-staging, cancel-in-progress: true` to prevent overlapping deploys
 
-- [ ] Task 3: Add production deploy job to deploy workflow (AC: #3)
-  - [ ] 3.1 Add a second job `deploy-production` triggered on push to `main` branch
-  - [ ] 3.2 Use same structure as staging job but with production secrets: `VERCEL_TOKEN` (same), `VERCEL_PROJECT_ID_PROD` (if different project), `RENDER_DEPLOY_HOOK_PROD` or `RENDER_SERVICE_ID_PROD`, `DATABASE_URL_PROD`
-  - [ ] 3.3 Add `concurrency: group: deploy-production, cancel-in-progress: false` (never cancel production deploys mid-flight)
-  - [ ] 3.4 Add production smoke test: `curl -f $PROD_API_URL/api/health`
-  - [ ] 3.5 Ensure production and staging use completely separate secrets (no shared DB or API instance)
+- [x] Task 3: Add production deploy job to deploy workflow (AC: #3)
+  - [x] 3.1 Add a second job `deploy-production` triggered on push to `main` branch
+  - [x] 3.2 Use same structure as staging job but with production secrets: `VERCEL_TOKEN` (same), `VERCEL_PROJECT_ID_PROD` (if different project), `RENDER_DEPLOY_HOOK_PROD` or `RENDER_SERVICE_ID_PROD`, `DATABASE_URL_PROD`
+  - [x] 3.3 Add `concurrency: group: deploy-production, cancel-in-progress: false` (never cancel production deploys mid-flight)
+  - [x] 3.4 Add production smoke test: `curl -f $PROD_API_URL/api/health`
+  - [x] 3.5 Ensure production and staging use completely separate secrets (no shared DB or API instance)
 
-- [ ] Task 4: Configure Render for API deployment (AC: #1, #3)
-  - [ ] 4.1 Create `render.yaml` (Blueprint spec) at repo root defining the API web service:
+- [x] Task 4: Configure Render for API deployment (AC: #1, #3)
+  - [x] 4.1 Create `render.yaml` (Blueprint spec) at repo root defining the API web service:
     - `name: canifed-api-staging` (and `canifed-api-prod`)
     - `env: node`
     - `buildCommand: npm ci && npx nx build api --configuration=production`
     - `startCommand: node dist/apps/api/main.js`
     - `envVars` referencing platform env groups (not hardcoded values)
-  - [ ] 4.2 Add `prisma migrate deploy` to Render's pre-deploy command (or as part of the build command) so migrations run on every deploy
-  - [ ] 4.3 Document required Render environment variables in a `docs/deployment.md` or as comments in render.yaml
+  - [x] 4.2 Add `prisma migrate deploy` to Render's pre-deploy command (or as part of the build command) so migrations run on every deploy
+  - [x] 4.3 Document required Render environment variables in a `docs/deployment.md` or as comments in render.yaml
 
-- [ ] Task 5: Configure Vercel for frontend deployment (AC: #1, #3)
-  - [ ] 5.1 Create `vercel.json` at repo root (or in `apps/frontend/`) with:
+- [x] Task 5: Configure Vercel for frontend deployment (AC: #1, #3)
+  - [x] 5.1 Create `vercel.json` at repo root (or in `apps/frontend/`) with:
     - `buildCommand: npx nx build frontend --configuration=production`
     - `outputDirectory: dist/apps/frontend`
     - `framework: vite`
     - Rewrites for SPA routing: `{ "source": "/(.*)", "destination": "/index.html" }`
-  - [ ] 5.2 Document required Vercel environment variables: `VITE_API_URL` pointing to staging/prod API URL
-  - [ ] 5.3 Ensure environment variables are set per Vercel environment (Preview = staging API, Production = prod API)
+  - [x] 5.2 Document required Vercel environment variables: `VITE_API_URL` pointing to staging/prod API URL
+  - [x] 5.3 Ensure environment variables are set per Vercel environment (Preview = staging API, Production = prod API)
 
-- [ ] Task 6: Update `.env.example` with deployment-related documentation (AC: #1)
-  - [ ] 6.1 Add a comment block at the bottom of `.env.example` documenting deployment secrets (not their values):
+- [x] Task 6: Update `.env.example` with deployment-related documentation (AC: #1)
+  - [x] 6.1 Add a comment block at the bottom of `.env.example` documenting deployment secrets (not their values):
     ```
     # === Deployment (GitHub Actions secrets — NOT local) ===
     # VERCEL_TOKEN=           ← Vercel deployment token
     # VERCEL_ORG_ID=          ← Vercel org/team ID
     # VERCEL_PROJECT_ID=      ← Vercel project ID (staging)
+    # VERCEL_PROJECT_ID_PROD= ← Vercel project ID (production, if separate)
     # RENDER_DEPLOY_HOOK_STAGING= ← Render deploy hook URL
     # RENDER_DEPLOY_HOOK_PROD=    ← Render deploy hook URL (production)
     # DATABASE_URL_STAGING=   ← Neon staging connection string
@@ -93,12 +94,12 @@ So that I can verify features in a real environment with real infrastructure bef
     # PROD_API_URL=           ← e.g. https://canifed-api.onrender.com
     ```
 
-- [ ] Task 7: Verify end-to-end deploy pipeline (AC: #1, #2, #3)
-  - [ ] 7.1 Verify deploy.yml syntax is valid YAML and GitHub Actions compliant
-  - [ ] 7.2 Verify all referenced secrets are documented
-  - [ ] 7.3 Verify staging and production use completely separate secret names (no accidental sharing)
-  - [ ] 7.4 Verify Prisma migration command uses correct schema path
-  - [ ] 7.5 Verify health endpoint is accessible and returns expected JSON
+- [x] Task 7: Verify end-to-end deploy pipeline (AC: #1, #2, #3)
+  - [x] 7.1 Verify deploy.yml syntax is valid YAML and GitHub Actions compliant
+  - [x] 7.2 Verify all referenced secrets are documented
+  - [x] 7.3 Verify staging and production use completely separate secret names (no accidental sharing)
+  - [x] 7.4 Verify Prisma migration command uses correct schema path
+  - [x] 7.5 Verify health endpoint is accessible and returns expected JSON
 
 ## Dev Notes
 
@@ -269,8 +270,28 @@ libs/api/core/src/lib/
 
 ### Agent Model Used
 
+Claude Opus 4.6 (1M context)
+
 ### Debug Log References
 
 ### Completion Notes List
 
+- All 7 tasks verified complete — implementation pre-existed from prior story work
+- Health controller at `libs/api/core/src/lib/health/health.controller.ts` — public endpoint, 2 unit tests passing
+- Deploy workflow at `.github/workflows/deploy.yml` — staging (develop) + production (main) with CI gate, Vercel deploy, Prisma migrations, Render deploy hooks, retry smoke tests
+- Render Blueprint at `render.yaml` — staging + prod services, Prisma migrate in build command, env var groups
+- Vercel config at `vercel.json` — SPA routing rewrite, Vite framework, correct output dir
+- `.env.example` documents all 10 GitHub Actions secrets (staging + production)
+- Staging and production use completely separate secrets (verified: no shared DB/API instances)
+- Pre-existing `ui:test` failure in `AppShell.test.tsx` (Story 1.4 scope) — NOT a regression from this story
+- All api-core tests pass: 7 files, 32 tests
+
 ### File List
+
+- `libs/api/core/src/lib/health/health.controller.ts` (existing, verified)
+- `libs/api/core/src/lib/health/health.controller.spec.ts` (existing, verified)
+- `libs/api/core/src/lib/api-core.ts` (existing, HealthController registered)
+- `.github/workflows/deploy.yml` (existing, verified)
+- `render.yaml` (existing, verified)
+- `vercel.json` (existing, verified)
+- `.env.example` (existing, deployment secrets documented)

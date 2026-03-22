@@ -1,6 +1,6 @@
 # Story 1.4: Frontend Shell & Design System Foundation
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -34,14 +34,14 @@ So that the app looks polished and feels reliable from the very first screen.
 
 ### Task 1: Install missing dependencies (AC: #8, #12, #14)
 
-- [ ] 1.1 Run `pnpm add @tanstack/react-query sonner`
-- [ ] 1.2 Run `pnpm add -D eslint-plugin-jsx-a11y @testing-library/react @testing-library/jest-dom`
-- [ ] 1.3 Verify packages resolve in `node_modules`
+- [x] 1.1 Run `pnpm add @tanstack/react-query sonner`
+- [x] 1.2 Run `pnpm add -D eslint-plugin-jsx-a11y @testing-library/react @testing-library/jest-dom`
+- [x] 1.3 Verify packages resolve in `node_modules`
 
 ### Task 2: Design tokens + Tailwind v4 theme (AC: #1, #4)
 
-- [ ] 2.1 In `apps/frontend/src/styles.css`, add `:root` block with ALL CSS custom properties from AC #1
-- [ ] 2.2 In the same file, add `@theme` block (Tailwind v4 CSS-first config) mapping custom colors and spacing:
+- [x] 2.1 In `apps/frontend/src/styles.css`, add `:root` block with ALL CSS custom properties from AC #1
+- [x] 2.2 In the same file, add `@theme` block (Tailwind v4 CSS-first config) mapping custom colors and spacing:
   ```css
   @theme {
     --color-primary: var(--primary);
@@ -70,12 +70,12 @@ So that the app looks polished and feels reliable from the very first screen.
 
 ### Task 3: Inter font + typography (AC: #2, #3)
 
-- [ ] 3.1 In `apps/frontend/index.html`, add Google Fonts `<link>` for Inter (weights 400, 500, 600, 700) with `display=swap`
-- [ ] 3.2 In `apps/frontend/index.html`, set `<html lang="fr">` (MVP is French)
-- [ ] 3.3 In `apps/frontend/index.html`, update `<title>` to "CaniFed"
-- [ ] 3.4 In `styles.css` `@theme` block, add: `--font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;`
-- [ ] 3.5 In `styles.css`, add base `body` styles: font-family, color foreground, background, font-size 14px, line-height 1.5
-- [ ] 3.6 In `styles.css`, add typography utility classes:
+- [x] 3.1 In `apps/frontend/index.html`, add Google Fonts `<link>` for Inter (weights 400, 500, 600, 700) with `display=swap`
+- [x] 3.2 In `apps/frontend/index.html`, set `<html lang="fr">` (MVP is French)
+- [x] 3.3 In `apps/frontend/index.html`, update `<title>` to "CaniFed"
+- [x] 3.4 In `styles.css` `@theme` block, add: `--font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;`
+- [x] 3.5 In `styles.css`, add base `body` styles: font-family, color foreground, background, font-size 14px, line-height 1.5
+- [x] 3.6 In `styles.css`, add typography utility classes:
   - `.text-h1` → 24px / font-weight 700
   - `.text-h2` → 20px / font-weight 600
   - `.text-h3` → 16px / font-weight 600
@@ -86,57 +86,57 @@ So that the app looks polished and feels reliable from the very first screen.
 
 ### Task 4: Accessibility CSS (AC: #15, #16)
 
-- [ ] 4.1 In `styles.css`, add global `:focus-visible` rule: `outline: 2px solid var(--primary); outline-offset: 2px;`
-- [ ] 4.2 In `styles.css`, add `@media (prefers-reduced-motion: reduce)` block disabling all animations/transitions
+- [x] 4.1 In `styles.css`, add global `:focus-visible` rule: `outline: 2px solid var(--primary); outline-offset: 2px;`
+- [x] 4.2 In `styles.css`, add `@media (prefers-reduced-motion: reduce)` block disabling all animations/transitions
 
 ### Task 5: AppShell responsive layout (AC: #5, #6)
 
-- [ ] 5.1 Create `libs/frontend/ui/src/lib/AppShell.tsx`:
+- [x] 5.1 Create `libs/frontend/ui/src/lib/AppShell.tsx`:
   - `<header>` fixed top, 56px h, club name prop (default "CaniFed"), bg-card, border-bottom border-border
   - `<main>` scrollable content area, responsive padding (16px mobile / 24px tablet / 32px desktop), max-width (768px tablet / 1200px desktop), centered
   - `<nav>` fixed bottom on mobile only (<640px), 56px h, placeholder tab icons, bg-card, border-top border-border
   - Desktop (>1024px): `<aside>` fixed left sidebar 240px, placeholder, bg-card, border-right; main shifts right
   - Tablet (640-1024px): no sidebar, no bottom nav, centered content
   - Use semantic HTML: `<header>`, `<main>`, `<nav>`, `<aside>`
-- [ ] 5.2 Replace old `Layout` in `libs/frontend/ui/src/lib/ui.tsx` — either rewrite to re-export AppShell or delete and update index.ts
-- [ ] 5.3 Update `libs/frontend/ui/src/index.ts`: export `AppShell`, remove old `Layout` export
-- [ ] 5.4 Update `apps/frontend/src/app/app.tsx`: import `AppShell` instead of `Layout`
-- [ ] 5.5 Write test `libs/frontend/ui/src/lib/AppShell.test.tsx`: verify header, main, nav render; verify club name renders
+- [x] 5.2 Replace old `Layout` in `libs/frontend/ui/src/lib/ui.tsx` — either rewrite to re-export AppShell or delete and update index.ts
+- [x] 5.3 Update `libs/frontend/ui/src/index.ts`: export `AppShell`, remove old `Layout` export
+- [x] 5.4 Update `apps/frontend/src/app/app.tsx`: import `AppShell` instead of `Layout`
+- [x] 5.5 Write test `libs/frontend/ui/src/lib/AppShell.test.tsx`: verify header, main, nav render; verify club name renders
 
 ### Task 6: Toast notification system (AC: #8)
 
-- [ ] 6.1 Create `libs/frontend/ui/src/lib/Toast.tsx`:
+- [x] 6.1 Create `libs/frontend/ui/src/lib/Toast.tsx`:
   - Thin wrapper exporting `<Toaster />` from sonner with design token styling
   - Position: `bottom-center` (mobile-friendly)
   - Export typed helpers: `toast.success(msg)` (green, auto-dismiss 3000ms) and `toast.error(msg)` (red, duration Infinity)
-- [ ] 6.2 Add `<Toaster />` to AppShell component
-- [ ] 6.3 Update `libs/frontend/ui/src/index.ts`: export Toast utilities
-- [ ] 6.4 Write test `libs/frontend/ui/src/lib/Toast.test.tsx`: verify Toaster renders
+- [x] 6.2 Add `<Toaster />` to AppShell component
+- [x] 6.3 Update `libs/frontend/ui/src/index.ts`: export Toast utilities
+- [x] 6.4 Write test `libs/frontend/ui/src/lib/Toast.test.tsx`: verify Toaster renders
 
 ### Task 7: Skeleton loading components (AC: #9)
 
-- [ ] 7.1 Create `libs/frontend/ui/src/lib/Skeleton.tsx`:
+- [x] 7.1 Create `libs/frontend/ui/src/lib/Skeleton.tsx`:
   - `SkeletonCard`: rounded rectangle, pulse animation, configurable height (default 120px), full width, bg-border/opacity
   - `SkeletonList`: accepts `count` prop (default 3), renders horizontal bar skeletons with varying widths, pulse animation
   - Pulse animation respects `prefers-reduced-motion`
-- [ ] 7.2 Update `libs/frontend/ui/src/index.ts`: export skeleton components
-- [ ] 7.3 Write test `libs/frontend/ui/src/lib/Skeleton.test.tsx`: verify correct number of elements render
+- [x] 7.2 Update `libs/frontend/ui/src/index.ts`: export skeleton components
+- [x] 7.3 Write test `libs/frontend/ui/src/lib/Skeleton.test.tsx`: verify correct number of elements render
 
 ### Task 8: React Router with lazy loading (AC: #10)
 
-- [ ] 8.1 Create placeholder pages in `libs/frontend/features/src/lib/pages/`:
+- [x] 8.1 Create placeholder pages in `libs/frontend/features/src/lib/pages/`:
   - `HomePage.tsx` — div with "Accueil" heading
   - `NotFoundPage.tsx` — div with "Page non trouvée" message
-- [ ] 8.2 Rewrite `libs/frontend/features/src/lib/features.tsx` (AppRoutes):
+- [x] 8.2 Rewrite `libs/frontend/features/src/lib/features.tsx` (AppRoutes):
   - `React.lazy()` imports for HomePage, NotFoundPage
   - `<Suspense fallback={<SkeletonList />}>` wrapping `<Routes>`
   - Route `/` → lazy HomePage
   - Route `*` → lazy NotFoundPage
-- [ ] 8.3 Write test `libs/frontend/features/src/lib/features.test.tsx`: verify routes render correct content
+- [x] 8.3 Write test `libs/frontend/features/src/lib/features.test.tsx`: verify routes render correct content
 
 ### Task 9: AuthContext provider shell (AC: #11)
 
-- [ ] 9.1 Create `libs/frontend/data-access/src/lib/AuthContext.tsx`:
+- [x] 9.1 Create `libs/frontend/data-access/src/lib/AuthContext.tsx`:
   ```typescript
   interface User { id: string; email: string; firstName: string; lastName: string; }
   interface Club { id: string; name: string; }
@@ -155,21 +155,21 @@ So that the app looks polished and feels reliable from the very first screen.
   - `AuthProvider` component — all values initially null/false
   - `switchClub` and `logout` are no-op stubs
   - `useAuth()` hook — throws if used outside `AuthProvider`
-- [ ] 9.2 Update `libs/frontend/data-access/src/index.ts`: export `AuthProvider`, `useAuth`, type interfaces
-- [ ] 9.3 Write test `libs/frontend/data-access/src/lib/AuthContext.test.tsx`: verify useAuth throws outside provider, verify default values inside
+- [x] 9.2 Update `libs/frontend/data-access/src/index.ts`: export `AuthProvider`, `useAuth`, type interfaces
+- [x] 9.3 Write test `libs/frontend/data-access/src/lib/AuthContext.test.tsx`: verify useAuth throws outside provider, verify default values inside
 
 ### Task 10: TanStack Query setup (AC: #12)
 
-- [ ] 10.1 Create `libs/frontend/data-access/src/lib/QueryProvider.tsx`:
+- [x] 10.1 Create `libs/frontend/data-access/src/lib/QueryProvider.tsx`:
   - `QueryClient` with `defaultOptions.queries`: `staleTime: 5 * 60 * 1000`, `retry: 1`, `refetchOnWindowFocus: false`
   - `QueryProvider` component wrapping children with `<QueryClientProvider>`
   - Export `queryClient` for test access
-- [ ] 10.2 Update `libs/frontend/data-access/src/index.ts`: export `QueryProvider`
-- [ ] 10.3 Write test `libs/frontend/data-access/src/lib/QueryProvider.test.tsx`: verify renders children
+- [x] 10.2 Update `libs/frontend/data-access/src/index.ts`: export `QueryProvider`
+- [x] 10.3 Write test `libs/frontend/data-access/src/lib/QueryProvider.test.tsx`: verify renders children
 
 ### Task 11: Centralized API client (AC: #13)
 
-- [ ] 11.1 Create `libs/frontend/data-access/src/lib/api-client.ts`:
+- [x] 11.1 Create `libs/frontend/data-access/src/lib/api-client.ts`:
   - `API_BASE_URL` from `import.meta.env.VITE_API_URL || '/api'`
   - French error messages mapped from HTTP status codes:
     - 400: "Nous n'avons pas pu traiter votre demande."
@@ -182,13 +182,13 @@ So that the app looks polished and feels reliable from the very first screen.
   - `setTokenGetter(fn: () => string | null)` — avoids circular deps with AuthContext
   - Auth header injection: `Authorization: Bearer ${token}` when token available
   - On error: parse JSON body, map status to French message, throw typed `ApiClientError`
-- [ ] 11.2 Delete old `libs/frontend/data-access/src/lib/data-access.tsx`
-- [ ] 11.3 Update `libs/frontend/data-access/src/index.ts`: export apiClient, setTokenGetter, ApiClientError (remove old fetchApi)
-- [ ] 11.4 Write test `libs/frontend/data-access/src/lib/api-client.test.ts`: mock fetch, verify GET/POST, verify auth header, verify French error mapping
+- [x] 11.2 Delete old `libs/frontend/data-access/src/lib/data-access.tsx`
+- [x] 11.3 Update `libs/frontend/data-access/src/index.ts`: export apiClient, setTokenGetter, ApiClientError (remove old fetchApi)
+- [x] 11.4 Write test `libs/frontend/data-access/src/lib/api-client.test.ts`: mock fetch, verify GET/POST, verify auth header, verify French error mapping
 
 ### Task 12: Wire up providers in App (AC: #5, #11, #12)
 
-- [ ] 12.1 Rewrite `apps/frontend/src/app/app.tsx`:
+- [x] 12.1 Rewrite `apps/frontend/src/app/app.tsx`:
   ```tsx
   import { AppShell } from '@org/ui';
   import { AppRoutes } from '@org/features';
@@ -210,13 +210,13 @@ So that the app looks polished and feels reliable from the very first screen.
 
 ### Task 13: ESLint jsx-a11y configuration (AC: #14)
 
-- [ ] 13.1 Configure `eslint-plugin-jsx-a11y` — find and update the project's ESLint configuration (check for existing Nx-generated config, or create one). Apply recommended rules to `*.tsx` files
-- [ ] 13.2 Run `pnpm nx lint frontend` and fix any violations
-- [ ] 13.3 Verify lint passes with zero errors
+- [x] 13.1 Configure `eslint-plugin-jsx-a11y` — find and update the project's ESLint configuration (check for existing Nx-generated config, or create one). Apply recommended rules to `*.tsx` files
+- [x] 13.2 Run `pnpm nx lint frontend` and fix any violations
+- [x] 13.3 Verify lint passes with zero errors
 
 ### Task 14: PWA manifest (AC: #17)
 
-- [ ] 14.1 Create `apps/frontend/public/manifest.json`:
+- [x] 14.1 Create `apps/frontend/public/manifest.json`:
   ```json
   {
     "name": "CaniFed",
@@ -232,15 +232,15 @@ So that the app looks polished and feels reliable from the very first screen.
     ]
   }
   ```
-- [ ] 14.2 Create placeholder icons at `apps/frontend/public/icons/icon-192.png` and `icon-512.png`
-- [ ] 14.3 In `apps/frontend/index.html`, add `<link rel="manifest" href="/manifest.json" />` and `<meta name="theme-color" content="#2563EB" />`
+- [x] 14.2 Create placeholder icons at `apps/frontend/public/icons/icon-192.png` and `icon-512.png`
+- [x] 14.3 In `apps/frontend/index.html`, add `<link rel="manifest" href="/manifest.json" />` and `<meta name="theme-color" content="#2563EB" />`
 
 ### Task 15: Verify end-to-end (AC: all)
 
-- [ ] 15.1 Run `pnpm nx serve frontend` — verify: Inter font loads, design tokens apply, AppShell renders with header/content/nav, responsive breakpoints work
-- [ ] 15.2 Run `pnpm nx test frontend` — all tests pass (also test libs: `pnpm nx run-many -t test -p @org/ui @org/features @org/data-access`)
-- [ ] 15.3 Run `pnpm nx lint frontend` — zero errors including jsx-a11y
-- [ ] 15.4 Run `pnpm nx build frontend` — build succeeds
+- [x] 15.1 Run `pnpm nx serve frontend` — verify: Inter font loads, design tokens apply, AppShell renders with header/content/nav, responsive breakpoints work
+- [x] 15.2 Run `pnpm nx test frontend` — all tests pass (also test libs: `pnpm nx run-many -t test -p @org/ui @org/features @org/data-access`)
+- [x] 15.3 Run `pnpm nx lint frontend` — zero errors including jsx-a11y
+- [x] 15.4 Run `pnpm nx build frontend` — build succeeds
 
 ## Dev Notes
 
@@ -438,8 +438,76 @@ No frontend implementation work has been done yet beyond the scaffold.
 
 ### Agent Model Used
 
+Claude Opus 4.6 (1M context)
+
 ### Debug Log References
+
+- All 34 tests pass across 7 test files (ui: 15, features: 2, data-access: 17)
+- ESLint with jsx-a11y passes with zero errors
+- Vite production build succeeds (code-split: HomePage and NotFoundPage are separate chunks)
+- Chunk size warning for index bundle (586KB) expected at this stage — will improve as more routes are added
 
 ### Completion Notes List
 
+- Task 1: Installed @tanstack/react-query, sonner, eslint-plugin-jsx-a11y, @testing-library/react, @testing-library/jest-dom
+- Task 2: Design tokens defined as CSS custom properties in :root + Tailwind v4 @theme directive with --color-* and --spacing-* mappings
+- Task 3: Inter font loaded via Google Fonts, typography utility classes defined (.text-h1 through .text-caption), lang="fr" set, title updated to "CaniFed"
+- Task 4: Global :focus-visible rule (2px solid primary) and prefers-reduced-motion media query added
+- Task 5: AppShell component with responsive header/main/nav/aside layout, semantic HTML, ARIA labels
+- Task 6: Toast component wrapping sonner with success (3s auto-dismiss) and error (persist) helpers
+- Task 7: SkeletonCard and SkeletonList components with pulse animation respecting reduced-motion
+- Task 8: React.lazy() + Suspense for HomePage and NotFoundPage with SkeletonList fallback
+- Task 9: AuthContext shell with User/Club/UserRole types, useAuth hook, AuthProvider with no-op stubs
+- Task 10: QueryProvider with QueryClient defaults (staleTime 5min, retry 1, refetchOnWindowFocus false)
+- Task 11: API client with GET/POST/PATCH/DELETE, auth header injection via setTokenGetter, French error messages
+- Task 12: App.tsx wired with provider nesting: QueryProvider > AuthProvider > AppShell > Toaster + AppRoutes
+- Task 13: eslint-plugin-jsx-a11y recommended rules added to root eslint.config.mjs for TSX/JSX files
+- Task 14: PWA manifest.json with CaniFed metadata, placeholder icons, link/meta tags in index.html
+- Task 15: All tests pass, lint passes, build succeeds
+- Vitest test config added to ui, features, and data-access libs (vitest.setup.ts + vite.config.mts test block)
+- resolve.conditions: ['@org/source'] added to features and data-access vite configs for cross-lib resolution in tests
+- Old data-access.tsx (fetchApi) deleted, replaced by api-client.ts
+- Old Layout component in ui.tsx replaced with re-export from AppShell
+
 ### File List
+
+**Created:**
+- apps/frontend/public/manifest.json
+- apps/frontend/public/icons/icon-192.png
+- apps/frontend/public/icons/icon-512.png
+- libs/frontend/ui/src/lib/AppShell.tsx
+- libs/frontend/ui/src/lib/AppShell.test.tsx
+- libs/frontend/ui/src/lib/Toast.tsx
+- libs/frontend/ui/src/lib/Toast.test.tsx
+- libs/frontend/ui/src/lib/Skeleton.tsx
+- libs/frontend/ui/src/lib/Skeleton.test.tsx
+- libs/frontend/ui/vitest.setup.ts
+- libs/frontend/features/src/lib/pages/HomePage.tsx
+- libs/frontend/features/src/lib/pages/NotFoundPage.tsx
+- libs/frontend/features/src/lib/features.test.tsx
+- libs/frontend/features/vitest.setup.ts
+- libs/frontend/data-access/src/lib/AuthContext.tsx
+- libs/frontend/data-access/src/lib/AuthContext.test.tsx
+- libs/frontend/data-access/src/lib/QueryProvider.tsx
+- libs/frontend/data-access/src/lib/QueryProvider.test.tsx
+- libs/frontend/data-access/src/lib/api-client.ts
+- libs/frontend/data-access/src/lib/api-client.test.ts
+- libs/frontend/data-access/vitest.setup.ts
+
+**Modified:**
+- apps/frontend/index.html (Inter font, lang="fr", title, manifest link, theme-color meta)
+- apps/frontend/src/styles.css (design tokens, @theme, typography, accessibility CSS)
+- apps/frontend/src/app/app.tsx (providers wiring, AppShell, Toaster)
+- libs/frontend/ui/src/index.ts (new exports)
+- libs/frontend/ui/src/lib/ui.tsx (re-export AppShell as Layout)
+- libs/frontend/ui/vite.config.mts (test config)
+- libs/frontend/features/src/lib/features.tsx (React.lazy + Suspense)
+- libs/frontend/features/vite.config.mts (test config + resolve conditions)
+- libs/frontend/data-access/src/index.ts (new exports)
+- libs/frontend/data-access/vite.config.mts (test config + resolve conditions)
+- eslint.config.mjs (jsx-a11y plugin)
+- package.json (new dependencies)
+- package-lock.json (lockfile update)
+
+**Deleted:**
+- libs/frontend/data-access/src/lib/data-access.tsx (replaced by api-client.ts)

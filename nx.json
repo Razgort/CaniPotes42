@@ -64,6 +64,9 @@
   ],
   "nxCloudId": "69be330590a1f73840033b6d",
   "analytics": false,
+  "sync": {
+    "applyChanges": true
+  },
   "generators": {
     "@nx/react": {
       "application": {

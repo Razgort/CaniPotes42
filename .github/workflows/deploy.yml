@@ -1,0 +1,160 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: ${{ github.ref_name == 'develop' }}
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  ci-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: tree:0
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: 'npm'
+
+      - uses: actions/cache@v4
+        with:
+          path: .nx/cache
+          key: nx-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ github.sha }}
+          restore-keys: |
+            nx-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+            nx-${{ runner.os }}-
+
+      - run: npm ci
+
+      - run: npx nx affected -t lint typecheck test --base=HEAD~1
+
+  deploy-staging:
+    if: github.ref == 'refs/heads/develop'
+    needs: ci-check
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: tree:0
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: 'npm'
+
+      - run: npm ci
+
+      # Build frontend
+      - name: Build frontend
+        run: npx nx build frontend --configuration=production
+
+      # Deploy frontend to Vercel
+      - name: Deploy frontend to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./dist/apps/frontend
+
+      # Run Prisma migrations on staging database
+      - name: Run database migrations
+        run: npx prisma migrate deploy --schema libs/shared/prisma-client/prisma/schema.prisma
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
+
+      # Trigger API deploy on Render
+      - name: Deploy API to Render
+        run: curl -sf -X POST "${{ secrets.RENDER_DEPLOY_HOOK_STAGING }}"
+
+      # Wait for Render deploy to be live
+      - name: Wait for API deployment
+        run: sleep 60
+
+      # Smoke test
+      - name: Smoke test staging API
+        run: |
+          for i in 1 2 3 4 5; do
+            if curl -sf "${{ secrets.STAGING_API_URL }}/api/health"; then
+              echo "Health check passed"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 30s..."
+            sleep 30
+          done
+          echo "Health check failed after 5 attempts"
+          exit 1
+
+  deploy-production:
+    if: github.ref == 'refs/heads/main'
+    needs: ci-check
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: tree:0
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: 'npm'
+
+      - run: npm ci
+
+      # Build frontend
+      - name: Build frontend
+        run: npx nx build frontend --configuration=production
+
+      # Deploy frontend to Vercel (production)
+      - name: Deploy frontend to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_PROD }}
+          vercel-args: '--prod'
+          working-directory: ./dist/apps/frontend
+
+      # Run Prisma migrations on production database
+      - name: Run database migrations
+        run: npx prisma migrate deploy --schema libs/shared/prisma-client/prisma/schema.prisma
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+
+      # Trigger API deploy on Render
+      - name: Deploy API to Render
+        run: curl -sf -X POST "${{ secrets.RENDER_DEPLOY_HOOK_PROD }}"
+
+      # Wait for Render deploy to be live
+      - name: Wait for API deployment
+        run: sleep 60
+
+      # Smoke test
+      - name: Smoke test production API
+        run: |
+          for i in 1 2 3 4 5; do
+            if curl -sf "${{ secrets.PROD_API_URL }}/api/health"; then
+              echo "Health check passed"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 30s..."
+            sleep 30
+          done
+          echo "Health check failed after 5 attempts"
+          exit 1

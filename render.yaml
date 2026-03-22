@@ -1,0 +1,41 @@
+# Render Blueprint — CaniFed API
+# https://docs.render.com/infrastructure-as-code
+#
+# Required environment variables (set in Render dashboard, NOT here):
+#   DATABASE_URL       — Neon PostgreSQL connection string
+#   JWT_SECRET         — JWT signing secret
+#   JWT_REFRESH_SECRET — JWT refresh token secret
+#   CORS_ORIGINS       — Allowed CORS origins (comma-separated)
+#   NODE_ENV           — "production"
+#   PORT               — Render sets this automatically
+
+services:
+  # Staging API
+  - type: web
+    name: canifed-api-staging
+    env: node
+    plan: free
+    buildCommand: npm ci && npx prisma migrate deploy --schema libs/shared/prisma-client/prisma/schema.prisma && npx nx build api --configuration=production
+    startCommand: node dist/apps/api/main.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SWAGGER_ENABLED
+        value: "false"
+      - fromGroup: canifed-staging
+
+  # Production API
+  - type: web
+    name: canifed-api-prod
+    env: node
+    plan: free
+    buildCommand: npm ci && npx prisma migrate deploy --schema libs/shared/prisma-client/prisma/schema.prisma && npx nx build api --configuration=production
+    startCommand: node dist/apps/api/main.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SWAGGER_ENABLED
+        value: "false"
+      - fromGroup: canifed-production

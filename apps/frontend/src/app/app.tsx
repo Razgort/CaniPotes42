@@ -1,11 +1,17 @@
-import { AppShell } from '@org/ui';
+import { AppShell, Toaster } from '@org/ui';
 import { AppRoutes } from '@org/features';
+import { AuthProvider, QueryProvider } from '@org/data-access';
 
 export function App() {
   return (
-    <AppShell>
-      <AppRoutes />
-    </AppShell>
+    <QueryProvider>
+      <AuthProvider>
+        <AppShell>
+          <Toaster />
+          <AppRoutes />
+        </AppShell>
+      </AuthProvider>
+    </QueryProvider>
   );
 }
 

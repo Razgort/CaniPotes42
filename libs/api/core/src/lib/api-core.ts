@@ -8,6 +8,7 @@ import { JwtStrategy } from './strategies/jwt.strategy.js';
 import { ClubGuard } from './guards/club.guard.js';
 import { RolesGuard } from './guards/roles.guard.js';
 import { jwtConfig } from './config/jwt.config.js';
+import { HealthController } from './health/health.controller.js';
 
 @Global()
 @Module({
@@ -18,6 +19,7 @@ import { jwtConfig } from './config/jwt.config.js';
       throttlers: [{ ttl: 60000, limit: 10 }],
     }),
   ],
+  controllers: [HealthController],
   providers: [
     PrismaService,
     JwtStrategy,

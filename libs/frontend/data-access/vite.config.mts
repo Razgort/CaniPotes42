@@ -7,6 +7,9 @@ import * as path from 'path';
 export default defineConfig(() => ({
   root: import.meta.dirname,
   cacheDir: '../../../node_modules/.vite/libs/frontend/data-access',
+  resolve: {
+    conditions: ['@org/source'],
+  },
   plugins: [
     react(),
     dts({
@@ -14,6 +17,12 @@ export default defineConfig(() => ({
       tsconfigPath: path.join(import.meta.dirname, 'tsconfig.lib.json'),
     }),
   ],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./vitest.setup.ts'],
+    include: ['src/**/*.test.{ts,tsx}'],
+  },
   // Uncomment this if you are using workers.
   // worker: {
   //  plugins: [],
