@@ -6,7 +6,6 @@ import {
   Body,
   Query,
   UseGuards,
-  Logger,
 } from '@nestjs/common';
 import {
   JwtAuthGuard,
@@ -23,8 +22,6 @@ import { ChatService } from './chat.service.js';
 @Controller('channels')
 @UseGuards(JwtAuthGuard, ClubGuard)
 export class ChatController {
-  private readonly logger = new Logger(ChatController.name);
-
   constructor(private readonly chatService: ChatService) {}
 
   @Get()

@@ -26,6 +26,8 @@ const LicenseSettingsPage = lazy(() => import('./licenses/LicenseSettingsPage'))
 const LicensesPage = lazy(() => import('./licenses/LicensesPage'));
 const PaymentSuccessPage = lazy(() => import('./licenses/PaymentSuccessPage'));
 const PaymentCancelPage = lazy(() => import('./licenses/PaymentCancelPage'));
+const HelloAssoReturnPage = lazy(() => import('./licenses/HelloAssoReturnPage'));
+const PaymentsPage = lazy(() => import('./pages/PaymentsPage'));
 
 export function AppRoutes() {
   return (
@@ -176,9 +178,20 @@ export function AppRoutes() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/payments"
+          element={
+            <ProtectedRoute>
+              <PaymentsPage />
+            </ProtectedRoute>
+          }
+        />
         {/* Stripe payment redirect pages — no ProtectedRoute needed (JWT may not be available on return) */}
         <Route path="/payment/success" element={<PaymentSuccessPage />} />
         <Route path="/payment/cancelled" element={<PaymentCancelPage />} />
+        {/* HelloAsso payment redirect pages (Story 9.3) */}
+        <Route path="/payments/return" element={<HelloAssoReturnPage />} />
+        <Route path="/payments/cancel" element={<PaymentCancelPage />} />
         <Route path="/invite/:token" element={<InvitePage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />

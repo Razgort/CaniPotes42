@@ -151,8 +151,11 @@ export class ChatGateway
       await this.chatService.verifyChannelBelongsToClub(data.channelId, clubId);
       await client.join(`club:${clubId}:channel:${data.channelId}`);
       client.emit('chat:channel-joined', { channelId: data.channelId });
+      return { channelId: data.channelId };
     } catch (err) {
-      client.emit('chat:error', { message: (err as Error).message });
+      const errMsg = (err as Error).message;
+      client.emit('chat:error', { message: errMsg });
+      return { error: errMsg };
     }
   }
 }

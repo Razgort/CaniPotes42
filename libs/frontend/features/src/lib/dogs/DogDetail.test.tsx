@@ -4,12 +4,15 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const mockUseAuth = vi.fn();
-const mockUseDogDetail = vi.fn();
-const mockUseDeleteDog = vi.fn();
-const mockNavigate = vi.fn();
-const mockToastSuccess = vi.fn();
-const mockToastError = vi.fn();
+const { mockUseAuth, mockUseDogDetail, mockUseDeleteDog, mockUseVaccines, mockNavigate, mockToastSuccess, mockToastError } = vi.hoisted(() => ({
+  mockUseAuth: vi.fn(),
+  mockUseDogDetail: vi.fn(),
+  mockUseDeleteDog: vi.fn(),
+  mockUseVaccines: vi.fn(),
+  mockNavigate: vi.fn(),
+  mockToastSuccess: vi.fn(),
+  mockToastError: vi.fn(),
+}));
 
 vi.mock('@org/data-access', () => ({
   useAuth: () => mockUseAuth(),
@@ -18,6 +21,22 @@ vi.mock('@org/data-access', () => ({
 vi.mock('./hooks/useDogs', () => ({
   useDogDetail: (...args: unknown[]) => mockUseDogDetail(...args),
   useDeleteDog: () => mockUseDeleteDog(),
+}));
+
+vi.mock('./hooks/useVaccines', () => ({
+  useVaccines: (...args: unknown[]) => mockUseVaccines(...args),
+}));
+
+vi.mock('./VaccineList', () => ({
+  VaccineList: () => <div data-testid="vaccine-list" />,
+}));
+
+vi.mock('./VaccineForm', () => ({
+  VaccineForm: () => <div data-testid="vaccine-form" />,
+}));
+
+vi.mock('./CertificateUpload', () => ({
+  CertificateUpload: () => <div data-testid="certificate-upload" />,
 }));
 
 vi.mock('@org/ui', async () => {
@@ -64,6 +83,7 @@ describe('DogDetail', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseDeleteDog.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    mockUseVaccines.mockReturnValue({ data: [] });
   });
 
   it('displays dog name, breed, birthdate, and chip number', () => {

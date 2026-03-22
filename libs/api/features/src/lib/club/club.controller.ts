@@ -13,7 +13,6 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
-  UsePipes,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -47,9 +46,8 @@ export class ClubController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
-  @UsePipes(new ZodValidationPipe(createClubSchema))
   async create(
-    @Body() dto: CreateClub,
+    @Body(new ZodValidationPipe(createClubSchema)) dto: CreateClub,
     @CurrentUser() user: JwtPayload,
     @Res({ passthrough: true }) res: Response,
   ) {
@@ -77,10 +75,9 @@ export class ClubController {
   @Patch(':clubId')
   @UseGuards(JwtAuthGuard, ClubGuard, RolesGuard)
   @Roles('OWNER')
-  @UsePipes(new ZodValidationPipe(updateClubSchema))
   async update(
     @Param('clubId') clubId: string,
-    @Body() dto: UpdateClub,
+    @Body(new ZodValidationPipe(updateClubSchema)) dto: UpdateClub,
   ) {
     return this.clubService.update(clubId, dto);
   }

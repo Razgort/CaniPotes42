@@ -3,6 +3,7 @@ import { ArrowLeft, Calendar, MapPin } from 'lucide-react';
 import { MapWidget, MapWidgetError, MapWidgetSkeleton, NavigateButton, RSVPButton, SkeletonCard, SkeletonList } from '@org/ui';
 import { useEventDetail, useRsvpMutation } from './hooks/useEventDetail';
 import { ParticipantList } from './ParticipantList';
+import { EventAdminActions } from './components/EventAdminActions';
 
 function formatEventDateTime(isoDate: string): string {
   const date = new Date(isoDate);
@@ -87,6 +88,11 @@ export default function EventDetail() {
           </span>
         )}
       </header>
+
+      {/* Admin actions bar */}
+      <div className="px-4 py-3 border-b bg-muted/30">
+        <EventAdminActions eventId={event.id} status={event.status} />
+      </div>
 
       {/* Main content — responsive: stacked on mobile, side-by-side on md+ */}
       <div className="flex flex-col md:flex-row md:gap-6 md:p-6">

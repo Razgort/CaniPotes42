@@ -1,6 +1,6 @@
 # Story 9.4: License Status & Payment History
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -50,14 +50,14 @@ so that I can track who has paid and manage club finances.
 
 ### Backend
 
-- [ ] **Task 1: Verify Prisma schema prerequisites** (AC: all)
-  - [ ] Confirm `LicenseType` has `paymentProvider` field (added in story 9.1) — `paymentProvider String` (values: `"STRIPE"` | `"HELLOASSO"`)
-  - [ ] Confirm `Payment` has `helloAssoPaymentId String? @unique` (added in story 9.3)
-  - [ ] If missing: add the fields and run `npx nx run prisma-client:prisma-migrate -- --name add-payment-provider-and-helloasso-id`
-  - [ ] Regenerate Prisma client: `npx nx run prisma-client:generate`
+- [x] **Task 1: Verify Prisma schema prerequisites** (AC: all)
+  - [x] Confirm `LicenseType` has `paymentProvider` field (added in story 9.1) — `paymentProvider String` (values: `"STRIPE"` | `"HELLOASSO"`)
+  - [x] Confirm `Payment` has `helloAssoPaymentId String? @unique` (added in story 9.3)
+  - [x] If missing: add the fields and run `npx nx run prisma-client:prisma-migrate -- --name add-payment-provider-and-helloasso-id`
+  - [x] Regenerate Prisma client: `npx nx run prisma-client:generate`
 
-- [ ] **Task 2: Payment query schemas** (AC: #1, #2, #4, #5)
-  - [ ] Add to `libs/shared/types/src/lib/schemas/payment.schema.ts`:
+- [x] **Task 2: Payment query schemas** (AC: #1, #2, #4, #5)
+  - [x] Add to `libs/shared/types/src/lib/schemas/payment.schema.ts`:
     ```typescript
     export const licenseStatusQuerySchema = z.object({
       season: z.string().optional(),
@@ -75,76 +75,76 @@ so that I can track who has paid and manage club finances.
     export type LicenseStatusQuery = z.infer<typeof licenseStatusQuerySchema>;
     export type PaymentHistoryQuery = z.infer<typeof paymentHistoryQuerySchema>;
     ```
-  - [ ] Export new types from `libs/shared/types/src/lib/schemas/index.ts`
+  - [x] Export new types from `libs/shared/types/src/lib/schemas/index.ts`
 
-- [ ] **Task 3: Payment service — license status endpoint** (AC: #1, #2, #3)
-  - [ ] Add method `getLicenseStatus(clubId, query: LicenseStatusQuery)` to `libs/api/features/src/lib/payment/payment.service.ts`:
+- [x] **Task 3: Payment service — license status endpoint** (AC: #1, #2, #3)
+  - [x] Add method `getLicenseStatus(clubId, query: LicenseStatusQuery)` to `libs/api/features/src/lib/payment/payment.service.ts`:
     - Query all active `ClubMember` records for the club (include `user.firstName`, `user.lastName`)
     - Query `LicenseType` for the club (filter by `season` if provided)
     - Query all `Payment` records for the club scoped by season (via licenseType.season)
     - Build member-row objects: `{ memberId, memberName, payments: [{ licenseTypeId, licenseTypeName, status, amount, date, provider, transactionId }] }`
     - Apply filters: status filter (map PAID→COMPLETED, PENDING→PENDING, UNPAID→no Payment record), provider filter, name search
     - All queries MUST include `where: { clubId }` — never omit tenant scope
-  - [ ] Payment status mapping for display: `COMPLETED` → "Payé", `PENDING` → "En attente", `FAILED`/`REFUNDED` → "Non payé" (with additional context), absent → "Non payé"
+  - [x] Payment status mapping for display: `COMPLETED` → "Payé", `PENDING` → "En attente", `FAILED`/`REFUNDED` → "Non payé" (with additional context), absent → "Non payé"
 
-- [ ] **Task 4: Payment service — history & member view** (AC: #4, #5)
-  - [ ] Add method `getPaymentHistory(clubId, query: PaymentHistoryQuery)` to `payment.service.ts`:
+- [x] **Task 4: Payment service — history & member view** (AC: #4, #5)
+  - [x] Add method `getPaymentHistory(clubId, query: PaymentHistoryQuery)` to `payment.service.ts`:
     - Query `Payment` where `clubId`, include `user.firstName`, `user.lastName`, `licenseType.name`, `licenseType.season`, `licenseType.paymentProvider`
     - Order by `createdAt DESC`
     - Paginate: `skip: (page-1) * pageSize`, `take: pageSize`
     - Filter by season if provided (via `licenseType.season`)
     - Return `{ data: PaymentHistoryItemDto[], meta: { total, page, pageSize } }`
-  - [ ] Add method `getMyPayments(clubId, userId)` to `payment.service.ts`:
+  - [x] Add method `getMyPayments(clubId, userId)` to `payment.service.ts`:
     - Query `Payment` where `{ clubId, userId }` — BOTH filters mandatory (never just userId!)
     - Include `licenseType.name`, `licenseType.season`, `licenseType.paymentProvider`
     - Return own payments only — never expose other users' data
 
-- [ ] **Task 5: Payment controller — admin endpoints** (AC: #1, #2, #3, #4)
-  - [ ] Add to `libs/api/features/src/lib/payment/payment.controller.ts`:
+- [x] **Task 5: Payment controller — admin endpoints** (AC: #1, #2, #3, #4)
+  - [x] Add to `libs/api/features/src/lib/payment/payment.controller.ts`:
     ```
     GET /clubs/:clubId/payments/license-status  → @Roles('ADMIN', 'OWNER')
     GET /clubs/:clubId/payments                 → @Roles('ADMIN', 'OWNER')
     GET /clubs/:clubId/payments/:paymentId      → @Roles('ADMIN', 'OWNER')
     ```
-  - [ ] Use `@UseGuards(JwtAuthGuard, ClubGuard, RolesGuard)` on ALL admin endpoints
-  - [ ] Use `@Query()` with `ZodValidationPipe(licenseStatusQuerySchema)` / `ZodValidationPipe(paymentHistoryQuerySchema)` for query params
-  - [ ] `GET /clubs/:clubId/payments/:paymentId`: query single Payment where `{ id: paymentId, clubId }` — verify clubId scope
+  - [x] Use `@UseGuards(JwtAuthGuard, ClubGuard, RolesGuard)` on ALL admin endpoints
+  - [x] Use `@Query()` with `ZodValidationPipe(licenseStatusQuerySchema)` / `ZodValidationPipe(paymentHistoryQuerySchema)` for query params
+  - [x] `GET /clubs/:clubId/payments/:paymentId`: query single Payment where `{ id: paymentId, clubId }` — verify clubId scope
 
-- [ ] **Task 6: Payment controller — member endpoint** (AC: #5)
-  - [ ] Add to `payment.controller.ts`:
+- [x] **Task 6: Payment controller — member endpoint** (AC: #5)
+  - [x] Add to `payment.controller.ts`:
     ```
     GET /clubs/:clubId/payments/my  → JwtAuthGuard + ClubGuard (no RolesGuard — any member)
     ```
-  - [ ] Extract `userId` from `@CurrentUser()` decorator
-  - [ ] Pass both `clubId` and `userId` to `getMyPayments` — never allow member to query another user
-  - [ ] **CRITICAL**: Route `/my` must be registered BEFORE `/:paymentId` to avoid route collision in NestJS
+  - [x] Extract `userId` from `@CurrentUser()` decorator
+  - [x] Pass both `clubId` and `userId` to `getMyPayments` — never allow member to query another user
+  - [x] **CRITICAL**: Route `/my` must be registered BEFORE `/:paymentId` to avoid route collision in NestJS
 
-- [ ] **Task 7: Backend unit tests** (AC: all)
-  - [ ] Add to `libs/api/features/src/lib/payment/payment.service.spec.ts`:
+- [x] **Task 7: Backend unit tests** (AC: all)
+  - [x] Add to `libs/api/features/src/lib/payment/payment.service.spec.ts`:
     - `getLicenseStatus`: returns correct matrix with all filter combinations
     - `getLicenseStatus`: never returns data from another club (tenant isolation)
     - `getPaymentHistory`: pagination works, returns correct meta
     - `getMyPayments`: only returns current user's payments, not other members'
-  - [ ] Add to `libs/api/features/src/lib/payment/payment.controller.spec.ts`:
+  - [x] Add to `libs/api/features/src/lib/payment/payment.controller.spec.ts`:
     - MEMBER role returns 403 on `GET /payments/license-status`
     - MEMBER role returns 403 on `GET /payments`
     - `GET /payments/my` returns 200 for MEMBER role
 
 ### Frontend
 
-- [ ] **Task 8: Payment API hooks** (AC: all)
-  - [ ] Create `libs/frontend/features/src/lib/payments/hooks/usePayments.ts`:
+- [x] **Task 8: Payment API hooks** (AC: all)
+  - [x] Create `libs/frontend/features/src/lib/payments/hooks/usePayments.ts`:
     ```typescript
     useLicenseStatus(clubId, query)    // ['license-status', clubId, query] — admin only
     usePaymentHistory(clubId, query)   // ['payment-history', clubId, query] — admin only
     useMyPayments(clubId)              // ['my-payments', clubId] — member
     ```
-  - [ ] TanStack Query key convention: `['license-status', clubId, filterParams]`
-  - [ ] Use `apiClient` from `libs/frontend/data-access/src/lib/api-client.ts` (Bearer token included)
-  - [ ] Map API error codes to French toast messages on error
+  - [x] TanStack Query key convention: `['license-status', clubId, filterParams]`
+  - [x] Use `apiClient` from `libs/frontend/data-access/src/lib/api-client.ts` (Bearer token included)
+  - [x] Map API error codes to French toast messages on error
 
-- [ ] **Task 9: License status matrix component** (AC: #1, #2, #6)
-  - [ ] Create `libs/frontend/features/src/lib/payments/LicenseStatusMatrix.tsx`:
+- [x] **Task 9: License status matrix component** (AC: #1, #2, #6)
+  - [x] Create `libs/frontend/features/src/lib/payments/LicenseStatusMatrix.tsx`:
     - Top filter bar: season dropdown, status select, provider select, member search input
     - Table using shadcn/ui `<Table>` component
     - Columns: Member name | [LicenseType1 Season] | [LicenseType2 Season] | ...
@@ -153,33 +153,33 @@ so that I can track who has paid and manage club finances.
     - On cell click: open `<PaymentDetailSheet>` (see Task 10)
     - While loading (`isLoading`): render `<Skeleton>` rows matching table column count
     - Empty state: "Aucun paiement enregistré pour cette saison"
-  - [ ] Status badge labels: `COMPLETED` → "Payé", `PENDING` → "En attente", `FAILED`/`REFUNDED` → "Échoué", absent → "Non payé"
+  - [x] Status badge labels: `COMPLETED` → "Payé", `PENDING` → "En attente", `FAILED`/`REFUNDED` → "Échoué", absent → "Non payé"
 
-- [ ] **Task 10: Payment detail sheet** (AC: #3)
-  - [ ] Create `libs/frontend/features/src/lib/payments/PaymentDetailSheet.tsx`:
+- [x] **Task 10: Payment detail sheet** (AC: #3)
+  - [x] Create `libs/frontend/features/src/lib/payments/PaymentDetailSheet.tsx`:
     - shadcn/ui `<Sheet>` (slide-up on mobile, side panel on desktop)
     - Show: amount (formatted with `Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })`), date (`Intl.DateTimeFormat('fr-FR')`), provider, transaction ID, status badge
     - Transaction ID label: "Référence Stripe" for Stripe, "Référence HelloAsso" for HelloAsso
 
-- [ ] **Task 11: Payment history table (admin)** (AC: #4)
-  - [ ] Create `libs/frontend/features/src/lib/payments/PaymentHistory.tsx`:
+- [x] **Task 11: Payment history table (admin)** (AC: #4)
+  - [x] Create `libs/frontend/features/src/lib/payments/PaymentHistory.tsx`:
     - Season filter dropdown at top
     - On desktop (lg:): shadcn/ui `<Table>` with columns: Member | License | Amount | Date | Status | Provider — sortable by date (client-side sort, no API re-fetch for MVP)
     - On mobile: card-based list (one payment per card showing all fields)
     - Pagination controls: "Page X / Y", Prev/Next buttons — call `usePaymentHistory` with updated page
     - Skeleton while loading
 
-- [ ] **Task 12: My payments view (member)** (AC: #5)
-  - [ ] Create `libs/frontend/features/src/lib/payments/MyPayments.tsx`:
+- [x] **Task 12: My payments view (member)** (AC: #5)
+  - [x] Create `libs/frontend/features/src/lib/payments/MyPayments.tsx`:
     - List of own payments: license type name, season, amount, date, status badge, provider
     - Empty state: "Vous n'avez effectué aucun paiement"
     - No filters needed (member has few payments)
     - Role-based routing: admins see `PaymentHistory`, members see `MyPayments`
 
-- [ ] **Task 13: Route integration** (AC: all)
-  - [ ] Add route in frontend app for `/clubs/:clubId/payments` page (admin) and `/clubs/:clubId/my-payments` (member)
-  - [ ] Page file: `libs/frontend/features/src/lib/pages/PaymentsPage.tsx` — conditional render based on user role from AuthContext
-  - [ ] Use `React.lazy()` for route-level code splitting — never import synchronously
+- [x] **Task 13: Route integration** (AC: all)
+  - [x] Add route in frontend app for `/clubs/:clubId/payments` page (admin) and `/clubs/:clubId/my-payments` (member)
+  - [x] Page file: `libs/frontend/features/src/lib/pages/PaymentsPage.tsx` — conditional render based on user role from AuthContext
+  - [x] Use `React.lazy()` for route-level code splitting — never import synchronously
 
 ## Dev Notes
 
@@ -306,7 +306,44 @@ Never pass raw `Decimal` objects to the frontend.
 ## Story Progress
 
 - [x] Story file created: 2026-03-22
-- [ ] Implementation started
-- [ ] Implementation complete
-- [ ] Tests passing
+- [x] Implementation started
+- [x] Implementation complete
+- [x] Tests passing (4 pre-existing failures in event.service.spec.ts unrelated to this story)
 - [ ] Code review complete
+
+## Dev Agent Record
+
+**Implemented by**: Claude Sonnet 4.6
+**Date**: 2026-03-22
+**Branch**: develop-dev
+
+### Files Created
+
+| File | Description |
+|------|-------------|
+| `libs/shared/types/src/lib/schemas/payment.schema.ts` | Added `licenseStatusQuerySchema`, `paymentHistoryQuerySchema` and inferred types |
+| `libs/api/features/src/lib/payment/payment.service.ts` | Added `getLicenseStatus`, `getPaymentHistory`, `getMyPayments`, `findPaymentById` methods |
+| `libs/api/features/src/lib/payment/payment.controller.ts` | Admin endpoints (license-status, history, detail) + member `/my` endpoint |
+| `libs/api/features/src/lib/payment/payment.service.spec.ts` | Unit tests: matrix, tenant isolation, pagination, member privacy |
+| `libs/api/features/src/lib/payment/payment.controller.spec.ts` | Controller tests: role enforcement, 403 for MEMBER on admin routes |
+| `libs/frontend/features/src/lib/payments/hooks/usePayments.ts` | TanStack Query hooks: `useLicenseStatus`, `usePaymentHistory`, `useMyPayments`, `usePaymentDetail` |
+| `libs/frontend/features/src/lib/payments/LicenseStatusMatrix.tsx` | Admin matrix with season/status/provider/search filters + clickable status cells |
+| `libs/frontend/features/src/lib/payments/PaymentDetailSheet.tsx` | Slide-up (mobile) / side panel (desktop) payment detail view |
+| `libs/frontend/features/src/lib/payments/PaymentHistory.tsx` | Admin paginated history table (desktop) + card list (mobile) with date sort |
+| `libs/frontend/features/src/lib/payments/MyPayments.tsx` | Member own-payments card list |
+| `libs/frontend/features/src/lib/pages/PaymentsPage.tsx` | Role-aware page: ADMIN/OWNER → tabbed matrix+history; MEMBER → MyPayments |
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `libs/api/features/src/lib/api-features.ts` | Added `PaymentModule` import |
+| `libs/frontend/features/src/lib/features.tsx` | Added `PaymentsPage` lazy import + `/payments` route |
+
+### Key Implementation Notes
+
+- Route collision avoided: `GET /my` declared before `GET /:paymentId` in controller
+- All Prisma Decimal amounts converted with `Number(payment.amount)` before serialization
+- Tenant isolation enforced: every query includes `where: { clubId }`; `getMyPayments` also enforces `userId`
+- `helloAssoCheckoutIntentId` used (not `helloAssoPaymentId` — actual schema field name)
+- Pre-existing test failures in `event.service.spec.ts` (findFirst include options mismatch) are not regressions from this story

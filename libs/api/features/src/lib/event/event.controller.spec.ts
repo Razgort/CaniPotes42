@@ -1,7 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
 import { EventController } from './event.controller.js';
-import { EventService } from './event.service.js';
 import { EventStatus } from '@org/types';
 
 describe('EventController', () => {
@@ -21,14 +19,9 @@ describe('EventController', () => {
   const mockUser = { sub: 'user-1', email: 'test@test.com', activeClubId: 'club-1', role: 'MEMBER' as const };
   const mockAdmin = { sub: 'admin-1', email: 'admin@test.com', activeClubId: 'club-1', role: 'ADMIN' as const };
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [EventController],
-      providers: [{ provide: EventService, useValue: mockEventService }],
-    }).compile();
-
-    controller = module.get<EventController>(EventController);
+    controller = new EventController(mockEventService as any);
   });
 
   // ────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 # Story 5.4: RSVP & Participation Tracking
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -53,15 +53,15 @@ so that the group can coordinate attendance.
 
 ### Backend
 
-- [ ] **Task 1: Add Zod schemas for participation** (AC: #2)
-  - [ ] 1.1 Add `rsvpSchema` to `libs/shared/types/src/lib/schemas/event.schema.ts`:
+- [x] **Task 1: Add Zod schemas for participation** (AC: #2)
+  - [x] 1.1 Add `rsvpSchema` to `libs/shared/types/src/lib/schemas/event.schema.ts`:
     ```typescript
     export const rsvpSchema = z.object({
       status: z.nativeEnum(ParticipationStatus),
     });
     export type Rsvp = z.infer<typeof rsvpSchema>;
     ```
-  - [ ] 1.2 Add `eventParticipantSchema` for response shape:
+  - [x] 1.2 Add `eventParticipantSchema` for response shape:
     ```typescript
     export const eventParticipantSchema = z.object({
       userId: z.string().uuid(),
@@ -72,7 +72,7 @@ so that the group can coordinate attendance.
     });
     export type EventParticipant = z.infer<typeof eventParticipantSchema>;
     ```
-  - [ ] 1.3 Add `eventWithParticipationSchema` extending event response with counts + user RSVP:
+  - [x] 1.3 Add `eventWithParticipationSchema` extending event response with counts + user RSVP:
     ```typescript
     export const participationCountsSchema = z.object({
       going: z.number(),
@@ -81,82 +81,82 @@ so that the group can coordinate attendance.
     });
     export type ParticipationCounts = z.infer<typeof participationCountsSchema>;
     ```
-  - [ ] 1.4 Re-export new types from `libs/shared/types/src/lib/schemas/index.ts`
+  - [x] 1.4 Re-export new types from `libs/shared/types/src/lib/schemas/index.ts`
 
-- [ ] **Task 2: Create Event NestJS module** (AC: #1, #2, #3, #4, #5, #6)
-  - [ ] 2.1 Create `libs/api/features/src/lib/event/event.module.ts`
-  - [ ] 2.2 Create `libs/api/features/src/lib/event/event.controller.ts` with endpoints:
+- [x] **Task 2: Create Event NestJS module** (AC: #1, #2, #3, #4, #5, #6)
+  - [x] 2.1 Create `libs/api/features/src/lib/event/event.module.ts`
+  - [x] 2.2 Create `libs/api/features/src/lib/event/event.controller.ts` with endpoints:
     - `PUT /clubs/:clubId/events/:eventId/rsvp` — upsert RSVP (idempotent)
     - `GET /clubs/:clubId/events/:eventId/participants` — list participants with counts
     - `GET /clubs/:clubId/events` — list events (with my RSVP status + going count per event)
     - `GET /clubs/:clubId/events/:eventId` — single event detail (with participants + counts)
-  - [ ] 2.3 Create `libs/api/features/src/lib/event/event.service.ts` with methods:
+  - [x] 2.3 Create `libs/api/features/src/lib/event/event.service.ts` with methods:
     - `upsertRsvp(clubId, eventId, userId, status)` — upsert EventParticipation
     - `getParticipants(clubId, eventId)` — return participant list with user info + counts
     - `findAllEvents(clubId, userId)` — return events with goingCount + myRsvpStatus
     - `findOneEvent(clubId, eventId, userId)` — return event detail with full participation data
-  - [ ] 2.4 Create `libs/api/features/src/lib/event/dto/rsvp.dto.ts` importing `rsvpSchema`
-  - [ ] 2.5 Guard chain: `@UseGuards(JwtAuthGuard, ClubGuard)` on all endpoints
-  - [ ] 2.6 RSVP endpoint must verify event belongs to club AND event is PUBLISHED and not in the past
-  - [ ] 2.7 Register `EventModule` in `libs/api/features/src/lib/api-features.ts` (add to `FeaturesModule` imports)
+  - [x] 2.4 Create `libs/api/features/src/lib/event/dto/rsvp.dto.ts` importing `rsvpSchema`
+  - [x] 2.5 Guard chain: `@UseGuards(JwtAuthGuard, ClubGuard)` on all endpoints
+  - [x] 2.6 RSVP endpoint must verify event belongs to club AND event is PUBLISHED and not in the past
+  - [x] 2.7 Register `EventModule` in `libs/api/features/src/lib/api-features.ts` (add to `FeaturesModule` imports)
 
-- [ ] **Task 3: Backend tests** (AC: #2, #6)
-  - [ ] 3.1 Create `event.controller.spec.ts` — test RSVP upsert, participants list, guard enforcement
-  - [ ] 3.2 Create `event.service.spec.ts` — test upsert logic, past event rejection, participant aggregation
-  - [ ] 3.3 Test 403 for non-club-members, 400 for past events, 404 for non-existent events
+- [x] **Task 3: Backend tests** (AC: #2, #6)
+  - [x] 3.1 Create `event.controller.spec.ts` — test RSVP upsert, participants list, guard enforcement
+  - [x] 3.2 Create `event.service.spec.ts` — test upsert logic, past event rejection, participant aggregation
+  - [x] 3.3 Test 403 for non-club-members, 400 for past events, 404 for non-existent events
 
 ### Frontend
 
-- [ ] **Task 4: RSVPButton UI component** (AC: #1, #3, #6)
-  - [ ] 4.1 Create `libs/frontend/ui/src/lib/RSVPButton.tsx`
+- [x] **Task 4: RSVPButton UI component** (AC: #1, #3, #6)
+  - [x] 4.1 Create `libs/frontend/ui/src/lib/RSVPButton.tsx`
     - Props: `currentStatus`, `onSelect`, `disabled`, `compact` (for inline card variant)
     - Full variant: 3 labeled buttons in a `role="radiogroup"`
     - Compact variant: icon-only for EventCard inline display
     - Disabled state: muted colors, no interaction (past events)
     - Active Going: `bg-blue-600 text-white`; Maybe/Not Going: muted variants
-  - [ ] 4.2 Create `libs/frontend/ui/src/lib/RSVPButton.test.tsx` — test selection, disabled, a11y roles
-  - [ ] 4.3 Export from `libs/frontend/ui/src/index.ts`
+  - [x] 4.2 Create `libs/frontend/ui/src/lib/RSVPButton.test.tsx` — test selection, disabled, a11y roles
+  - [x] 4.3 Export from `libs/frontend/ui/src/index.ts`
 
-- [ ] **Task 5: Participation hooks (data-access)** (AC: #2, #4, #5)
-  - [ ] 5.1 Create `libs/frontend/data-access/src/lib/useEventParticipation.ts`:
+- [x] **Task 5: Participation hooks (data-access)** (AC: #2, #4, #5)
+  - [x] 5.1 Create `libs/frontend/data-access/src/lib/useEventParticipation.ts`:
     - `useRsvpMutation(clubId, eventId)` — `PUT /clubs/:clubId/events/:eventId/rsvp`
       - Optimistic update: update query cache for `['events', clubId, eventId]` and `['events', clubId]`
       - On error: revert cache, show error toast
     - `useEventParticipants(clubId, eventId)` — `GET .../participants`
     - Query keys: `['events', clubId, eventId, 'participants']`
-  - [ ] 5.2 Create `libs/frontend/data-access/src/lib/useEvents.ts`:
+  - [x] 5.2 Create `libs/frontend/data-access/src/lib/useEvents.ts`:
     - `useEvents(clubId)` — `GET /clubs/:clubId/events` (includes goingCount + myRsvpStatus per event)
     - `useEvent(clubId, eventId)` — `GET /clubs/:clubId/events/:eventId`
     - Query keys: `['events', clubId]`, `['events', clubId, eventId]`
-  - [ ] 5.3 Export hooks from `libs/frontend/data-access/src/index.ts`
+  - [x] 5.3 Export hooks from `libs/frontend/data-access/src/index.ts`
 
-- [ ] **Task 6: ParticipantList component** (AC: #4)
-  - [ ] 6.1 Create `libs/frontend/features/src/lib/events/ParticipantList.tsx`
+- [x] **Task 6: ParticipantList component** (AC: #4)
+  - [x] 6.1 Create `libs/frontend/features/src/lib/events/ParticipantList.tsx`
     - Show avatars + names for Going members
     - Display counts: Going / Maybe / Can't go
     - Expandable list (show first 5, "Voir tous" button for rest)
-  - [ ] 6.2 Test file: `ParticipantList.test.tsx`
+  - [x] 6.2 Test file: `ParticipantList.test.tsx`
 
-- [ ] **Task 7: Integrate RSVP into EventDetail page** (AC: #1, #2, #3, #4, #6)
-  - [ ] 7.1 Create `libs/frontend/features/src/lib/events/EventDetail.tsx` (or update if exists from story 5.3)
+- [x] **Task 7: Integrate RSVP into EventDetail page** (AC: #1, #2, #3, #4, #6)
+  - [x] 7.1 Create `libs/frontend/features/src/lib/events/EventDetail.tsx` (or update if exists from story 5.3)
     - Below event info and map: RSVPButton (full variant)
     - Below RSVPButton: ParticipantList
     - Check if event date is past → pass `disabled` to RSVPButton
-  - [ ] 7.2 Wire `useRsvpMutation` to RSVPButton `onSelect`
-  - [ ] 7.3 Wire `useEventParticipants` to ParticipantList
+  - [x] 7.2 Wire `useRsvpMutation` to RSVPButton `onSelect`
+  - [x] 7.3 Wire `useEventParticipants` to ParticipantList
 
-- [ ] **Task 8: Integrate inline RSVP into EventCard** (AC: #5)
-  - [ ] 8.1 Update EventCard component (from story 5.2) to include:
+- [x] **Task 8: Integrate inline RSVP into EventCard** (AC: #5)
+  - [x] 8.1 Update EventCard component (from story 5.2) to include:
     - RSVPButton compact variant showing my status icon
     - Going count display
-  - [ ] 8.2 EventCard receives `myRsvpStatus` and `goingCount` from event list query
+  - [x] 8.2 EventCard receives `myRsvpStatus` and `goingCount` from event list query
 
 ### Tests & Polish
 
-- [ ] **Task 9: Error handling & edge cases**
-  - [ ] 9.1 Error toast on RSVP failure with cache revert (French message: "Impossible de mettre a jour votre participation")
-  - [ ] 9.2 Skeleton loading for participant list
-  - [ ] 9.3 Empty state when no one has RSVP'd yet: "Soyez le premier a confirmer votre presence !"
+- [x] **Task 9: Error handling & edge cases**
+  - [x] 9.1 Error toast on RSVP failure with cache revert (French message: "Impossible de mettre a jour votre participation")
+  - [x] 9.2 Skeleton loading for participant list
+  - [x] 9.3 Empty state when no one has RSVP'd yet: "Soyez le premier a confirmer votre presence !"
 
 ## Dev Notes
 

@@ -213,7 +213,7 @@ export function DogForm({ existingDog }: DogFormProps) {
         <input
           id="dog-birthdate"
           type="date"
-          {...register('birthdate')}
+          {...register('birthdate', { setValueAs: (v) => v === '' ? undefined : v })}
           className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
         />
       </div>

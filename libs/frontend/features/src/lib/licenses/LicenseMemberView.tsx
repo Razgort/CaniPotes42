@@ -1,4 +1,4 @@
-import { useLicenseTypes, useInitiateStripePayment } from './hooks/useLicenseTypes';
+import { useLicenseTypes, useInitiateStripePayment, useInitiateHelloAssoPayment } from './hooks/useLicenseTypes';
 
 interface LicenseMemberViewProps {
   clubId: string;
@@ -16,6 +16,7 @@ function ProviderBadge({ provider }: { provider: 'STRIPE' | 'HELLOASSO' }) {
 export function LicenseMemberView({ clubId }: LicenseMemberViewProps) {
   const { data, isLoading } = useLicenseTypes(clubId);
   const initiateStripe = useInitiateStripePayment();
+  const initiateHelloAsso = useInitiateHelloAssoPayment();
   const licenseTypes = data?.data ?? [];
 
   if (isLoading) {
@@ -63,16 +64,16 @@ export function LicenseMemberView({ clubId }: LicenseMemberViewProps) {
                 disabled={initiateStripe.isPending}
                 className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {initiateStripe.isPending ? '...' : 'Payer'}
+                {initiateStripe.isPending ? '...' : 'Payer par carte'}
               </button>
             ) : (
               <button
                 type="button"
-                disabled
-                title="Paiement HelloAsso disponible prochainement"
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground opacity-50 cursor-not-allowed"
+                onClick={() => initiateHelloAsso.mutate({ licenseTypeId: lt.id })}
+                disabled={initiateHelloAsso.isPending}
+                className="rounded-lg border border-primary px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Payer
+                {initiateHelloAsso.isPending ? '...' : 'Payer via HelloAsso'}
               </button>
             )}
           </div>

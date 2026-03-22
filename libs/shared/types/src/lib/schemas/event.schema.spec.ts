@@ -63,9 +63,9 @@ describe('createEventSchema', () => {
 });
 
 describe('updateEventSchema', () => {
-  it('should accept empty object (status defaults to DRAFT)', () => {
+  it('should accept empty object (status excluded — use PATCH for status)', () => {
     const result = updateEventSchema.parse({});
-    expect(result.status).toBe(EventStatus.DRAFT);
+    expect(result).toEqual({});
   });
 
   it('should accept partial fields', () => {

@@ -6,6 +6,7 @@ import EventDetail from './EventDetail';
 // Mock hooks and UI deps
 vi.mock('./hooks/useEventDetail', () => ({
   useEventDetail: vi.fn(),
+  useRsvpMutation: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
 }));
 
 vi.mock('@org/ui', () => ({
@@ -21,6 +22,11 @@ vi.mock('@org/ui', () => ({
   NavigateButton: ({ latitude, longitude }: any) => (
     <div data-testid="navigate-button" data-disabled={latitude === null}>
       {latitude !== null ? 'Navigate' : 'Disabled'}
+    </div>
+  ),
+  RSVPButton: ({ currentStatus, onSelect, disabled }: any) => (
+    <div data-testid="rsvp-button" data-status={currentStatus} data-disabled={disabled}>
+      RSVP
     </div>
   ),
   SkeletonCard: () => <div data-testid="skeleton-card" />,

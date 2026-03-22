@@ -1,6 +1,6 @@
 # Story 7.1: Document Upload & Association
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -28,89 +28,89 @@ So that my registration forms, certificates, and health records are stored digit
 
 ### Backend Tasks
 
-- [ ] **Task 1: Add R2 env vars to configuration** (AC: #3)
-  - [ ] Add `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME` to `.env.example`
-  - [ ] Add R2 env vars to `libs/shared/utils/src/lib/env.schema.ts` (optional in dev, required in prod)
-  - [ ] Verify `R2Service` in `libs/api/features/src/lib/document/r2.service.ts` reads from these env vars (it already does)
+- [x] **Task 1: Add R2 env vars to configuration** (AC: #3)
+  - [x] Add `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME` to `.env.example`
+  - [x] Add R2 env vars to `libs/shared/utils/src/lib/env.schema.ts` (optional in dev, required in prod)
+  - [x] Verify `R2Service` in `libs/api/features/src/lib/document/r2.service.ts` reads from these env vars (it already does)
 
-- [ ] **Task 2: Create Document feature module** (AC: #1-6)
-  - [ ] Create `libs/api/features/src/lib/document/document.module.ts` — imports `CoreModule`, provides `DocumentService`, `R2Service`
-  - [ ] Create `libs/api/features/src/lib/document/document.controller.ts`
-  - [ ] Create `libs/api/features/src/lib/document/document.service.ts`
-  - [ ] Create `libs/api/features/src/lib/document/dto/upload-document.dto.ts` — imports from shared `uploadDocumentSchema`
-  - [ ] Register `DocumentModule` in `FeaturesModule` (`libs/api/features/src/lib/api-features.ts`)
+- [x] **Task 2: Create Document feature module** (AC: #1-6)
+  - [x] Create `libs/api/features/src/lib/document/document.module.ts` — imports `CoreModule`, provides `DocumentService`, `R2Service`
+  - [x] Create `libs/api/features/src/lib/document/document.controller.ts`
+  - [x] Create `libs/api/features/src/lib/document/document.service.ts`
+  - [x] Create `libs/api/features/src/lib/document/dto/upload-document.dto.ts` — imports from shared `uploadDocumentSchema`
+  - [x] Register `DocumentModule` in `FeaturesModule` (`libs/api/features/src/lib/api-features.ts`)
 
-- [ ] **Task 3: Implement document upload endpoint** (AC: #1, #2, #3, #4, #5)
-  - [ ] `POST /documents` — guarded by `JwtAuthGuard`, `ClubGuard`
-  - [ ] Use `FileInterceptor('file')` from `@nestjs/platform-express` for multipart upload
-  - [ ] Validate file MIME type (jpeg, png, webp, pdf) and size (max 5MB) — reject with 400 and French error message
-  - [ ] Generate tenant-scoped R2 key: `${clubId}/documents/${userId}/${timestamp}-${originalFilename}`
-  - [ ] Upload to R2 via `R2Service.upload(key, buffer, contentType)`
-  - [ ] Generate signed URL via `R2Service.getSignedUrl(key)`
-  - [ ] Create `Document` record via Prisma with: `clubId`, `userId`, `dogId` (optional from body), `type`, `fileName`, `fileUrl` (R2 key — NOT signed URL), `expiryDate` (optional)
-  - [ ] Return `{ data: { id, type, fileName, fileUrl (signed URL), expiryDate, dogId, createdAt } }`
+- [x] **Task 3: Implement document upload endpoint** (AC: #1, #2, #3, #4, #5)
+  - [x] `POST /documents` — guarded by `JwtAuthGuard`, `ClubGuard`
+  - [x] Use `FileInterceptor('file')` from `@nestjs/platform-express` for multipart upload
+  - [x] Validate file MIME type (jpeg, png, webp, pdf) and size (max 5MB) — reject with 400 and French error message
+  - [x] Generate tenant-scoped R2 key: `${clubId}/documents/${userId}/${timestamp}-${originalFilename}`
+  - [x] Upload to R2 via `R2Service.upload(key, buffer, contentType)`
+  - [x] Generate signed URL via `R2Service.getSignedUrl(key)`
+  - [x] Create `Document` record via Prisma with: `clubId`, `userId`, `dogId` (optional from body), `type`, `fileName`, `fileUrl` (R2 key — NOT signed URL), `expiryDate` (optional)
+  - [x] Return `{ data: { id, type, fileName, fileUrl (signed URL), expiryDate, dogId, createdAt } }`
 
-- [ ] **Task 4: Implement document list endpoint** (AC: #1)
-  - [ ] `GET /documents` — guarded by `JwtAuthGuard`, `ClubGuard`
-  - [ ] For regular members: return only own documents (`WHERE userId = currentUser AND clubId = activeClub`)
-  - [ ] For admins/owners: return all club documents (`WHERE clubId = activeClub`)
-  - [ ] Support optional query params: `dogId` (filter by dog), `type` (filter by DocumentType)
-  - [ ] Return with signed URLs generated on-the-fly for each document
-  - [ ] Return `{ data: [...documents], meta: { total, page, pageSize } }`
+- [x] **Task 4: Implement document list endpoint** (AC: #1)
+  - [x] `GET /documents` — guarded by `JwtAuthGuard`, `ClubGuard`
+  - [x] For regular members: return only own documents (`WHERE userId = currentUser AND clubId = activeClub`)
+  - [x] For admins/owners: return all club documents (`WHERE clubId = activeClub`)
+  - [x] Support optional query params: `dogId` (filter by dog), `type` (filter by DocumentType)
+  - [x] Return with signed URLs generated on-the-fly for each document
+  - [x] Return `{ data: [...documents], meta: { total, page, pageSize } }`
 
-- [ ] **Task 5: Implement document delete endpoint** (AC: related to document management)
-  - [ ] `DELETE /documents/:id` — guarded by `JwtAuthGuard`, `ClubGuard`
-  - [ ] Members can only delete their own documents
-  - [ ] Admins/owners can delete any club document
-  - [ ] Delete R2 object via `R2Service.delete(key)`, then delete Prisma record
-  - [ ] Return 204 No Content
+- [x] **Task 5: Implement document delete endpoint** (AC: related to document management)
+  - [x] `DELETE /documents/:id` — guarded by `JwtAuthGuard`, `ClubGuard`
+  - [x] Members can only delete their own documents
+  - [x] Admins/owners can delete any club document
+  - [x] Delete R2 object via `R2Service.delete(key)`, then delete Prisma record
+  - [x] Return 204 No Content
 
-- [ ] **Task 6: Write backend tests** (AC: all)
-  - [ ] Create `document.controller.spec.ts` — test guard stacking, MIME validation, size rejection, successful upload flow
-  - [ ] Create `document.service.spec.ts` — test tenant scoping, file association logic, signed URL generation
-  - [ ] Test tenant isolation: member A cannot see member B's documents
-  - [ ] Test admin can see all club documents
+- [x] **Task 6: Write backend tests** (AC: all)
+  - [x] Create `document.controller.spec.ts` — test guard stacking, MIME validation, size rejection, successful upload flow
+  - [x] Create `document.service.spec.ts` — test tenant scoping, file association logic, signed URL generation
+  - [x] Test tenant isolation: member A cannot see member B's documents
+  - [x] Test admin can see all club documents
 
 ### Frontend Tasks
 
-- [ ] **Task 7: Create document Zod schemas and API hooks** (AC: #1)
-  - [ ] Verify `libs/shared/types/src/lib/schemas/document.schema.ts` has `uploadDocumentSchema` (it exists — has type + expiryDate + associatedDogId)
-  - [ ] Export from `libs/shared/types/src/lib/schemas/index.ts` if not already
-  - [ ] Create `libs/frontend/features/src/lib/documents/hooks/useDocuments.ts` — TanStack Query hooks:
+- [x] **Task 7: Create document Zod schemas and API hooks** (AC: #1)
+  - [x] Verify `libs/shared/types/src/lib/schemas/document.schema.ts` has `uploadDocumentSchema` (it exists — has type + expiryDate + associatedDogId)
+  - [x] Export from `libs/shared/types/src/lib/schemas/index.ts` if not already
+  - [x] Create `libs/frontend/features/src/lib/documents/hooks/useDocuments.ts` — TanStack Query hooks:
     - `useDocuments(filters?)` — GET /documents with optional dogId/type filters
     - `useUploadDocument()` — POST /documents with FormData (mutation)
     - `useDeleteDocument()` — DELETE /documents/:id (mutation)
 
-- [ ] **Task 8: Create UploadForm component** (AC: #1, #2, #5, #6)
-  - [ ] Create `libs/frontend/features/src/lib/documents/UploadForm.tsx`
-  - [ ] Camera-first UI: prominent "Prendre en photo" button (uses `capture="environment"` on file input), secondary "Choisir un fichier" button
-  - [ ] Form fields: document type (select dropdown with DocumentType options in French), expiry date (optional date input), association (select: "Moi" or dog names from user's dogs)
-  - [ ] If `preselectedDogId` prop provided (coming from dog profile), pre-select that dog
-  - [ ] Client-side validation: file type (accept="image/jpeg,image/png,image/webp,application/pdf"), file size (5MB check before upload)
-  - [ ] Upload as `FormData` with file + metadata fields
-  - [ ] Show progress bar during upload (use XMLHttpRequest or fetch with ReadableStream for progress tracking)
-  - [ ] On success: toast "Document ajouté", invalidate documents query cache
-  - [ ] On error: toast "Nous n'avons pas pu télécharger ce fichier — réessayez", preserve form state
+- [x] **Task 8: Create UploadForm component** (AC: #1, #2, #5, #6)
+  - [x] Create `libs/frontend/features/src/lib/documents/UploadForm.tsx`
+  - [x] Camera-first UI: prominent "Prendre en photo" button (uses `capture="environment"` on file input), secondary "Choisir un fichier" button
+  - [x] Form fields: document type (select dropdown with DocumentType options in French), expiry date (optional date input), association (select: "Moi" or dog names from user's dogs)
+  - [x] If `preselectedDogId` prop provided (coming from dog profile), pre-select that dog
+  - [x] Client-side validation: file type (accept="image/jpeg,image/png,image/webp,application/pdf"), file size (5MB check before upload)
+  - [x] Upload as `FormData` with file + metadata fields
+  - [x] Show progress bar during upload (use XMLHttpRequest or fetch with ReadableStream for progress tracking)
+  - [x] On success: toast "Document ajouté", invalidate documents query cache
+  - [x] On error: toast "Nous n'avons pas pu télécharger ce fichier — réessayez", preserve form state
 
-- [ ] **Task 9: Create DocumentList component** (AC: #1, #4)
-  - [ ] Create `libs/frontend/features/src/lib/documents/DocumentList.tsx`
-  - [ ] Display documents as card list: document type icon, file name, upload date, expiry date (if set), association (member name or dog name)
-  - [ ] Expiry badge logic:
+- [x] **Task 9: Create DocumentList component** (AC: #1, #4)
+  - [x] Create `libs/frontend/features/src/lib/documents/DocumentList.tsx`
+  - [x] Display documents as card list: document type icon, file name, upload date, expiry date (if set), association (member name or dog name)
+  - [x] Expiry badge logic:
     - No badge if expiry > 30 days or no expiry
     - Orange "Expire bientôt" badge if expiry <= 30 days and >= today
     - Red "Expiré" badge if expiry < today
-  - [ ] Tap document → open in new tab (images inline, PDFs in browser viewer)
-  - [ ] Skeleton loading state matching list row shape
-  - [ ] Empty state: "Aucun document. Ajoutez votre premier document." with upload CTA button
+  - [x] Tap document → open in new tab (images inline, PDFs in browser viewer)
+  - [x] Skeleton loading state matching list row shape
+  - [x] Empty state: "Aucun document. Ajoutez votre premier document." with upload CTA button
 
-- [ ] **Task 10: Create documents route page** (AC: #1)
-  - [ ] Create or update `apps/frontend/src/app/routes/documents.tsx` — lazy-loaded route
-  - [ ] Page layout: header "Documents", upload button (FAB or header action), DocumentList below
-  - [ ] Add route to `app.tsx` router: `/documents` (protected route)
+- [x] **Task 10: Create documents route page** (AC: #1)
+  - [x] Create or update `apps/frontend/src/app/routes/documents.tsx` — lazy-loaded route
+  - [x] Page layout: header "Documents", upload button (FAB or header action), DocumentList below
+  - [x] Add route to `app.tsx` router: `/documents` (protected route)
 
 - [ ] **Task 11: Write frontend tests** (AC: all)
-  - [ ] Create `UploadForm.test.tsx` — test camera-first UI, file validation, form state preservation on error
-  - [ ] Create `DocumentList.test.tsx` — test expiry badge logic, empty state, loading skeleton
+  - [x] Create `UploadForm.test.tsx` — test camera-first UI, file validation, form state preservation on error
+  - [x] Create `DocumentList.test.tsx` — test expiry badge logic, empty state, loading skeleton
 
 ## Dev Notes
 

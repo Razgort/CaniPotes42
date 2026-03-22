@@ -72,6 +72,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       lastName: data.user.lastName,
     });
     setAccessToken(data.accessToken);
+    // Même tick que setAuth — avant les useEffect enfants (ex. refreshClubs dans App).
+    // Sans ça, tokenGetter peut encore renvoyer null → 401 sur /auth/my-clubs.
+    setTokenGetter(() => data.accessToken);
     if (data.activeClub) {
       setActiveClub({ id: data.activeClub.id, name: data.activeClub.name });
       setRole(data.activeClub.role);
@@ -83,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateClubSession = useCallback((data: ClubSessionUpdate) => {
     setAccessToken(data.accessToken);
+    setTokenGetter(() => data.accessToken);
     setActiveClub({ id: data.club.id, name: data.club.name });
     setRole(data.role);
   }, []);
@@ -93,6 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setActiveClub(null);
     setRole(null);
     setClubs([]);
+    setTokenGetter(() => null);
   }, []);
 
   const logout = useCallback(async () => {
@@ -150,6 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setTokenSetter((newToken: string) => {
       setAccessToken(newToken);
+      setTokenGetter(() => newToken);
     });
   }, []);
 

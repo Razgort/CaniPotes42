@@ -31,7 +31,9 @@ function buildDoc(overrides: Partial<DocumentDto> = {}): DocumentDto {
     fileName: 'license.pdf',
     fileUrl: 'https://signed.url/license.pdf',
     expiryDate: null,
+    expiryStatus: null,
     dogId: null,
+    dogName: null,
     dog: null,
     user: { id: USER_ID, firstName: 'Jean', lastName: 'Dupont' },
     createdAt: new Date('2026-03-22T10:00:00Z').toISOString(),
@@ -55,8 +57,8 @@ function renderDocumentList(props: Partial<React.ComponentProps<typeof DocumentL
 
 describe('DocumentList', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseDeleteDocument.mockReturnValue({ mutate: jest.fn(), isPending: false });
+    vi.clearAllMocks();
+    mockUseDeleteDocument.mockReturnValue({ mutate: vi.fn(), isPending: false });
   });
 
   describe('loading state', () => {
@@ -85,7 +87,7 @@ describe('DocumentList', () => {
         data: { data: [], meta: { total: 0, page: 1, pageSize: 20 } },
         isLoading: false,
       });
-      const onUploadClick = jest.fn();
+      const onUploadClick = vi.fn();
       renderDocumentList({ onUploadClick });
       expect(screen.getByRole('button', { name: /ajouter un document/i })).toBeInTheDocument();
     });
@@ -186,6 +188,61 @@ describe('DocumentList', () => {
       const link = screen.getByRole('link', { name: /ouvrir/i });
       expect(link).toHaveAttribute('href', 'https://signed.url/license.pdf');
       expect(link).toHaveAttribute('target', '_blank');
+    });
+
+    it('shows download link for document', () => {
+      mockUseDocuments.mockReturnValue({
+        data: { data: [buildDoc()], meta: { total: 1, page: 1, pageSize: 20 } },
+        isLoading: false,
+      });
+      renderDocumentList();
+      const link = screen.getByRole('link', { name: /télécharger/i });
+      expect(link).toHaveAttribute('href', 'https://signed.url/license.pdf');
+    });
+  });
+
+  describe('admin features', () => {
+    it('shows search bar for ADMIN role', () => {
+      mockUseDocuments.mockReturnValue({
+        data: { data: [], meta: { total: 0, page: 1, pageSize: 20 } },
+        isLoading: false,
+      });
+      renderDocumentList({ role: 'ADMIN' });
+      expect(screen.getByRole('textbox', { name: /rechercher des documents/i })).toBeInTheDocument();
+    });
+
+    it('does not show search bar for MEMBER role', () => {
+      mockUseDocuments.mockReturnValue({
+        data: { data: [], meta: { total: 0, page: 1, pageSize: 20 } },
+        isLoading: false,
+      });
+      renderDocumentList({ role: 'MEMBER' });
+      expect(screen.queryByRole('textbox', { name: /rechercher des documents/i })).not.toBeInTheDocument();
+    });
+
+    it('shows member name when role is ADMIN and memberName is set', () => {
+      mockUseDocuments.mockReturnValue({
+        data: {
+          data: [buildDoc({ memberName: 'Jean Dupont' })],
+          meta: { total: 1, page: 1, pageSize: 20 },
+        },
+        isLoading: false,
+      });
+      renderDocumentList({ role: 'ADMIN' });
+      expect(screen.getByText('Jean Dupont')).toBeInTheDocument();
+    });
+
+    it('prefers server expiryStatus over local computation', () => {
+      mockUseDocuments.mockReturnValue({
+        data: {
+          // expiryDate is null but server says expired
+          data: [buildDoc({ expiryDate: null, expiryStatus: 'expired' })],
+          meta: { total: 1, page: 1, pageSize: 20 },
+        },
+        isLoading: false,
+      });
+      renderDocumentList();
+      expect(screen.getByText('Expiré')).toBeInTheDocument();
     });
   });
 });

@@ -221,6 +221,8 @@ export const apiClient = {
   get: <T>(endpoint: string) => request<T>('GET', endpoint),
   post: <T>(endpoint: string, body?: unknown) =>
     request<T>('POST', endpoint, body),
+  put: <T>(endpoint: string, body?: unknown) =>
+    request<T>('PUT', endpoint, body),
   patch: <T>(endpoint: string, body?: unknown) =>
     request<T>('PATCH', endpoint, body),
   delete: <T>(endpoint: string) => request<T>('DELETE', endpoint),

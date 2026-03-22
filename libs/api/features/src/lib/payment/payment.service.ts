@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@org/api-core';
 import type { LicenseStatusQuery, PaymentHistoryQuery, HelloAssoWebhook } from '@org/types';
 import { StripeService } from './stripe.service.js';

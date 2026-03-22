@@ -489,4 +489,163 @@ describe('PaymentService', () => {
       ).resolves.not.toThrow();
     });
   });
+
+  describe('initiateStripeCheckout', () => {
+    const mockStripeLicenseType = {
+      id: licenseTypeId,
+      clubId,
+      name: 'Licence annuelle',
+      season: '2025-2026',
+      paymentProvider: 'STRIPE',
+      amount: 50,
+      deletedAt: null,
+    };
+
+    it('creates a checkout session and a PENDING Payment record', async () => {
+      mockPrisma.licenseType.findFirst.mockResolvedValue(mockStripeLicenseType);
+      mockStripeService.createCheckoutSession = vi.fn().mockResolvedValue({
+        id: 'cs_test_stripe123',
+        url: 'https://checkout.stripe.com/pay/cs_test_stripe123',
+      });
+      mockPrisma.payment.create.mockResolvedValue({ id: 'pay-stripe-1' });
+
+      const result = await service.initiateStripeCheckout(clubId, userId, licenseTypeId);
+
+      expect(result.sessionUrl).toBe('https://checkout.stripe.com/pay/cs_test_stripe123');
+      expect(result.paymentId).toBe('pay-stripe-1');
+      expect(mockPrisma.payment.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            clubId,
+            userId,
+            licenseTypeId,
+            status: 'PENDING',
+            stripeSessionId: 'cs_test_stripe123',
+          }),
+        }),
+      );
+    });
+
+    it('converts amount from euros to cents when calling Stripe', async () => {
+      mockPrisma.licenseType.findFirst.mockResolvedValue(mockStripeLicenseType);
+      mockStripeService.createCheckoutSession = vi.fn().mockResolvedValue({
+        id: 'cs_test_stripe123',
+        url: 'https://checkout.stripe.com/pay/cs_test_stripe123',
+      });
+      mockPrisma.payment.create.mockResolvedValue({ id: 'pay-stripe-1' });
+
+      await service.initiateStripeCheckout(clubId, userId, licenseTypeId);
+
+      expect(mockStripeService.createCheckoutSession).toHaveBeenCalledWith(
+        expect.objectContaining({
+          line_items: expect.arrayContaining([
+            expect.objectContaining({
+              price_data: expect.objectContaining({ unit_amount: 5000 }), // €50 → 5000 cents
+            }),
+          ]),
+        }),
+      );
+    });
+
+    it('throws NotFoundException if license type not found or not STRIPE', async () => {
+      mockPrisma.licenseType.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.initiateStripeCheckout(clubId, userId, 'bad-id'),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('scopes license type lookup to clubId (tenant isolation)', async () => {
+      mockPrisma.licenseType.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.initiateStripeCheckout(otherClubId, userId, licenseTypeId),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(mockPrisma.licenseType.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ clubId: otherClubId }),
+        }),
+      );
+    });
+  });
+
+  describe('handleStripeWebhook', () => {
+    function makeEvent(type: string, object: Record<string, unknown>) {
+      return { type, data: { object } } as any;
+    }
+
+    it('updates Payment to COMPLETED on checkout.session.completed', async () => {
+      mockPrisma.payment.updateMany.mockResolvedValue({ count: 1 });
+
+      await service.handleStripeWebhook(
+        makeEvent('checkout.session.completed', { id: 'cs_test_123' }),
+      );
+
+      expect(mockPrisma.payment.updateMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { stripeSessionId: 'cs_test_123', status: 'PENDING' },
+          data: expect.objectContaining({ status: 'COMPLETED' }),
+        }),
+      );
+    });
+
+    it('is idempotent — second call finds no PENDING rows (count=0)', async () => {
+      // First call marks PENDING → COMPLETED
+      mockPrisma.payment.updateMany.mockResolvedValueOnce({ count: 1 });
+      await service.handleStripeWebhook(
+        makeEvent('checkout.session.completed', { id: 'cs_dup' }),
+      );
+
+      // Second call: no PENDING row left, count=0, no error
+      mockPrisma.payment.updateMany.mockResolvedValueOnce({ count: 0 });
+      await expect(
+        service.handleStripeWebhook(makeEvent('checkout.session.completed', { id: 'cs_dup' })),
+      ).resolves.not.toThrow();
+    });
+
+    it('updates Payment to FAILED on checkout.session.expired', async () => {
+      mockPrisma.payment.updateMany.mockResolvedValue({ count: 1 });
+
+      await service.handleStripeWebhook(
+        makeEvent('checkout.session.expired', { id: 'cs_expired' }),
+      );
+
+      expect(mockPrisma.payment.updateMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { stripeSessionId: 'cs_expired', status: 'PENDING' },
+          data: { status: 'FAILED' },
+        }),
+      );
+    });
+
+    it('does not throw on unknown event types', async () => {
+      await expect(
+        service.handleStripeWebhook(makeEvent('payment_intent.created', { id: 'pi_123' })),
+      ).resolves.not.toThrow();
+    });
+  });
+
+  describe('getPaymentStatusBySession', () => {
+    it('returns the payment status for a given session', async () => {
+      mockPrisma.payment.findFirst.mockResolvedValue({ status: 'COMPLETED' });
+
+      const status = await service.getPaymentStatusBySession(clubId, 'cs_test_123');
+
+      expect(status).toBe('COMPLETED');
+      expect(mockPrisma.payment.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { clubId, stripeSessionId: 'cs_test_123' },
+        }),
+      );
+    });
+
+    it('returns "PENDING" when no payment found', async () => {
+      mockPrisma.payment.findFirst.mockResolvedValue(null);
+
+      const status = await service.getPaymentStatusBySession(clubId, 'cs_unknown');
+
+      expect(status).toBe('PENDING');
+    });
+  });
 });

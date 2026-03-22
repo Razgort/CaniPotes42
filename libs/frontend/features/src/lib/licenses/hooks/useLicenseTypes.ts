@@ -82,6 +82,7 @@ export function useDeleteLicenseType(clubId: string | null) {
 
 // ─── Stripe Payment Hooks (Story 9.2) ────────────────────────────────────────
 
+
 interface StripeStatusResponse {
   data: { status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED' };
 }
@@ -96,6 +97,25 @@ export function useInitiateStripePayment() {
     },
     onError: () => {
       toast.error("Impossible d'initier le paiement. Réessayez.");
+    },
+  });
+}
+
+// ─── HelloAsso Payment Hooks (Story 9.3) ─────────────────────────────────────
+
+interface HelloAssoInitiateResponse {
+  redirectUrl: string;
+}
+
+export function useInitiateHelloAssoPayment() {
+  return useMutation<HelloAssoInitiateResponse, ApiClientError, { licenseTypeId: string }>({
+    mutationFn: ({ licenseTypeId }) =>
+      apiClient.post<HelloAssoInitiateResponse>('/payments/helloasso/initiate', { licenseTypeId }),
+    onSuccess: ({ redirectUrl }) => {
+      window.location.href = redirectUrl;
+    },
+    onError: () => {
+      toast.error("Impossible d'initier le paiement HelloAsso. Réessayez.");
     },
   });
 }

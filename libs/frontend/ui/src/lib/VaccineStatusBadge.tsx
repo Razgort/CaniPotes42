@@ -1,87 +1,68 @@
 import { cn } from './cn';
-import type { VaccineStatusValue } from '@org/types';
 
-export type { VaccineStatusValue };
+export type VaccineStatusValue = 'UP_TO_DATE' | 'EXPIRING_SOON' | 'EXPIRED';
 
-const STATUS_CONFIG: Record<
+const statusConfig: Record<
   VaccineStatusValue,
-  { label: string; icon: string; textClass: string; bgClass: string; borderClass: string }
+  { label: string; className: string; ariaLabel: string }
 > = {
   UP_TO_DATE: {
     label: 'À jour',
-    icon: '✓',
-    textClass: 'text-green-700',
-    bgClass: 'bg-green-50',
-    borderClass: 'border-green-200',
+    className: 'bg-green-100 text-green-800',
+    ariaLabel: 'Statut vaccin : À jour',
   },
   EXPIRING_SOON: {
     label: 'À renouveler',
-    icon: '⚠',
-    textClass: 'text-amber-700',
-    bgClass: 'bg-amber-50',
-    borderClass: 'border-amber-200',
+    className: 'bg-orange-100 text-orange-800',
+    ariaLabel: 'Statut vaccin : À renouveler',
   },
   EXPIRED: {
     label: 'Manquant / expiré',
-    icon: '✕',
-    textClass: 'text-red-700',
-    bgClass: 'bg-red-50',
-    borderClass: 'border-red-200',
+    className: 'bg-red-100 text-red-800',
+    ariaLabel: 'Statut vaccin : Manquant / expiré',
   },
 };
 
 interface VaccineStatusBadgeProps {
   status: VaccineStatusValue;
-  /** 'badge' = compact inline, 'card' = summary card with count */
+  className?: string;
   variant?: 'badge' | 'card';
   count?: number;
-  className?: string;
 }
 
 export function VaccineStatusBadge({
   status,
-  variant = 'badge',
-  count,
   className,
+  variant = 'badge',
+  count = 0,
 }: VaccineStatusBadgeProps) {
-  const config = STATUS_CONFIG[status];
+  const config = statusConfig[status];
 
   if (variant === 'card') {
     return (
       <div
-        data-testid={`vax-dash-status-icon-${status.toLowerCase()}`}
         className={cn(
-          'flex flex-col items-center gap-1 rounded-lg border p-3',
-          config.bgClass,
-          config.borderClass,
+          'flex flex-col items-center rounded-lg p-3 text-center',
+          config.className,
           className,
         )}
-        aria-label={`Statut vaccin : ${config.label}`}
+        aria-label={config.ariaLabel}
       >
-        <span className={cn('text-2xl font-bold', config.textClass)}>{count ?? 0}</span>
-        <span className={cn('text-xs font-medium text-center leading-tight', config.textClass)}>
-          <span className="mr-1" aria-hidden="true">
-            {config.icon}
-          </span>
-          {config.label}
-        </span>
+        <span className="text-2xl font-bold">{count}</span>
+        <span className="text-xs font-medium">{config.label}</span>
       </div>
     );
   }
 
   return (
     <span
-      data-testid="vax-dash-status-icon"
       className={cn(
-        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium',
-        config.bgClass,
-        config.borderClass,
-        config.textClass,
+        'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
+        config.className,
         className,
       )}
-      aria-label={`Statut vaccin : ${config.label}`}
+      aria-label={config.ariaLabel}
     >
-      <span aria-hidden="true">{config.icon}</span>
       {config.label}
     </span>
   );

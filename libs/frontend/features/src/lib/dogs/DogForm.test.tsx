@@ -4,13 +4,15 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const mockUseAuth = vi.fn();
-const mockUseCreateDog = vi.fn();
-const mockUseUpdateDog = vi.fn();
-const mockUseUploadDogPhoto = vi.fn();
-const mockNavigate = vi.fn();
-const mockToastSuccess = vi.fn();
-const mockToastError = vi.fn();
+const { mockUseAuth, mockUseCreateDog, mockUseUpdateDog, mockUseUploadDogPhoto, mockNavigate, mockToastSuccess, mockToastError } = vi.hoisted(() => ({
+  mockUseAuth: vi.fn(),
+  mockUseCreateDog: vi.fn(),
+  mockUseUpdateDog: vi.fn(),
+  mockUseUploadDogPhoto: vi.fn(),
+  mockNavigate: vi.fn(),
+  mockToastSuccess: vi.fn(),
+  mockToastError: vi.fn(),
+}));
 
 vi.mock('@org/data-access', () => ({
   useAuth: () => mockUseAuth(),

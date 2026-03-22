@@ -17,6 +17,7 @@ export type Channel = z.infer<typeof channelSchema>;
 export const sendMessageSchema = z.object({
   content: z.string().min(1).max(4000),
   channelId: z.string().uuid(),
+  imageUrl: z.string().url().nullable().optional(),
 });
 
 export type SendMessage = z.infer<typeof sendMessageSchema>;

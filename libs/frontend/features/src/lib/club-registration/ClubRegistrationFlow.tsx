@@ -52,24 +52,6 @@ export function ClubRegistrationFlow() {
     setStep(prev => Math.max(0, prev - 1));
   }, []);
 
-  const handleSubmit = useCallback(async () => {
-    if (!formData.federation) return;
-
-    const dto: CreateClub = {
-      name: formData.name,
-      federation: formData.federation,
-      contactEmail: formData.contactEmail,
-      description: formData.description || undefined,
-    };
-
-    try {
-      await createClubMutation.mutateAsync(dto);
-      setShowSuccess(true);
-    } catch {
-      // Error handled by mutation's onError
-    }
-  }, [formData, createClubMutation]);
-
   // Step 1: Club Name
   const validateAndGoToStep2 = useCallback(() => {
     if (formData.name.trim().length < 2) {
@@ -92,15 +74,6 @@ export function ClubRegistrationFlow() {
   const goToStep4 = useCallback(() => {
     setStep(3);
   }, []);
-
-  // Step 4: Contact & Description
-  const validateAndSubmit = useCallback(() => {
-    if (!validateEmail(formData.contactEmail)) {
-      setErrors({ contactEmail: "L'adresse email n'est pas valide" });
-      return;
-    }
-    handleSubmit();
-  }, [formData.contactEmail, handleSubmit]);
 
   if (showSuccess) {
     return <SuccessScreen clubName={formData.name} />;
@@ -290,7 +263,30 @@ export function ClubRegistrationFlow() {
           title="Contact et description"
           subtitle="Comment peut-on joindre votre club ?"
           onBack={goBack}
-          onContinue={validateAndSubmit}
+          onContinue={() => {
+            // Handler inline = `formData` du rendu courant (plus de ref / useCallback stale).
+            const email = formData.contactEmail.trim();
+            if (!validateEmail(email)) {
+              setErrors({ contactEmail: "L'adresse email n'est pas valide" });
+              return;
+            }
+            const name = formData.name.trim();
+            if (name.length < 2 || !formData.federation) {
+              return;
+            }
+            const dto: CreateClub = {
+              name,
+              federation: formData.federation,
+              contactEmail: email,
+              description: formData.description.trim() || undefined,
+            };
+            void createClubMutation.mutateAsync(dto).then(
+              () => setShowSuccess(true),
+              () => {
+                /* toast dans useCreateClub */
+              },
+            );
+          }}
           continueDisabled={!formData.contactEmail || createClubMutation.isPending}
           continueLabel="Creer le club"
           isLoading={createClubMutation.isPending}

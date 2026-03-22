@@ -1,5 +1,5 @@
 # generated: 2026-03-22
-# last_updated: 2026-03-22  # Story 6.3 ready-for-dev
+# last_updated: 2026-03-22  # Story 5.4 review
 # project: CaniFed
 # project_key: NOKEY
 # tracking_system: file-system
@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-03-22
-last_updated: 2026-03-22  # Story 9.2 in-progress
+last_updated: 2026-03-22  # Story 6.1 review
 project: CaniFed
 project_key: NOKEY
 tracking_system: file-system
@@ -77,22 +77,22 @@ development_status:
   # Epic 5: Event Management & GPS Navigation
   epic-5: in-progress
   5-1-event-creation-with-gps-pin-placement: in-progress
-  5-2-event-feed-date-grouped-list: in-progress
+  5-2-event-feed-date-grouped-list: review
   5-3-event-detail-map-one-tap-navigation: in-progress
-  5-4-rsvp-participation-tracking: in-progress
+  5-4-rsvp-participation-tracking: review
   5-5-draft-publish-workflow-event-management: in-progress
   epic-5-retrospective: optional
 
   # Epic 6: Dog Profiles & Vaccine Tracking
   epic-6: in-progress
-  6-1-dog-registration-profile-management: in-progress
+  6-1-dog-registration-profile-management: review
   6-2-vaccine-records-certificate-upload: in-progress
   6-3-admin-vaccine-dashboard: in-progress
   epic-6-retrospective: optional
 
   # Epic 7: Document Management
   epic-7: in-progress
-  7-1-document-upload-association: in-progress
+  7-1-document-upload-association: review
   7-2-document-viewing-download-expiry-tracking: in-progress
   7-3-admin-document-expiry-dashboard: ready-for-dev
   epic-7-retrospective: optional
@@ -109,7 +109,7 @@ development_status:
   9-1-license-type-configuration: in-progress
   9-2-stripe-checkout-payment-flow: in-progress
   9-3-helloasso-payment-integration: in-progress
-  9-4-license-status-payment-history: in-progress
+  9-4-license-status-payment-history: review
   epic-9-retrospective: optional
 
   # Epic 10: Data Privacy & Account Management

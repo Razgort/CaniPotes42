@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Logger,
   Param,
   Patch,
   Post,
@@ -28,8 +27,6 @@ import { LicenseService } from './license.service.js';
 
 @Controller('clubs/:clubId/license-types')
 export class LicenseController {
-  private readonly logger = new Logger(LicenseController.name);
-
   constructor(private readonly licenseService: LicenseService) {}
 
   @Get()

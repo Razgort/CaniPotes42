@@ -12,7 +12,6 @@ import {
   Body,
   UseGuards,
   UsePipes,
-  Logger,
 } from '@nestjs/common';
 import {
   JwtAuthGuard,
@@ -37,8 +36,6 @@ import { EventService } from './event.service.js';
 @Controller('events')
 @UseGuards(JwtAuthGuard, ClubGuard)
 export class EventController {
-  private readonly logger = new Logger(EventController.name);
-
   constructor(private readonly eventService: EventService) {}
 
   @Post()

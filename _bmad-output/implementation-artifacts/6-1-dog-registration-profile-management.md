@@ -1,6 +1,6 @@
 # Story 6.1: Dog Registration & Profile Management
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -28,71 +28,71 @@ so that my dogs are part of my club profile and ready for vaccine tracking.
 
 ### Backend (API)
 
-- [ ] Task 1: Create Dog module structure (AC: 1-7)
-  - [ ] 1.1 Create `libs/api/features/src/lib/dog/dog.module.ts`
-  - [ ] 1.2 Create `libs/api/features/src/lib/dog/dog.service.ts`
-  - [ ] 1.3 Create `libs/api/features/src/lib/dog/dog.controller.ts`
-  - [ ] 1.4 Create `libs/api/features/src/lib/dog/dto/create-dog.dto.ts` (imports from `@org/types`)
-  - [ ] 1.5 Register `DogModule` in `libs/api/features/src/lib/api-features.ts` imports
+- [x] Task 1: Create Dog module structure (AC: 1-7)
+  - [x] 1.1 Create `libs/api/features/src/lib/dog/dog.module.ts`
+  - [x] 1.2 Create `libs/api/features/src/lib/dog/dog.service.ts`
+  - [x] 1.3 Create `libs/api/features/src/lib/dog/dog.controller.ts`
+  - [x] 1.4 Create `libs/api/features/src/lib/dog/dto/create-dog.dto.ts` (imports from `@org/types`)
+  - [x] 1.5 Register `DogModule` in `libs/api/features/src/lib/api-features.ts` imports
 
-- [ ] Task 2: Implement DogService CRUD (AC: 1-7)
-  - [ ] 2.1 `create(dto, user)` — creates Dog with `userId: user.sub`, `clubId: user.activeClubId`
-  - [ ] 2.2 `findAllForUser(userId, clubId)` — member's own dogs with vaccine status
-  - [ ] 2.3 `findAllForClub(clubId)` — all dogs in club (for admin/read-only views)
-  - [ ] 2.4 `findOne(dogId, clubId)` — single dog detail with owner info
-  - [ ] 2.5 `update(dogId, userId, clubId, dto)` — verifies ownership before update
-  - [ ] 2.6 `remove(dogId, userId, clubId)` — verifies ownership, Prisma cascade handles related records
+- [x] Task 2: Implement DogService CRUD (AC: 1-7)
+  - [x] 2.1 `create(dto, user)` — creates Dog with `userId: user.sub`, `clubId: user.activeClubId`
+  - [x] 2.2 `findAllForUser(userId, clubId)` — member's own dogs with vaccine status
+  - [x] 2.3 `findAllForClub(clubId)` — all dogs in club (for admin/read-only views)
+  - [x] 2.4 `findOne(dogId, clubId)` — single dog detail with owner info
+  - [x] 2.5 `update(dogId, userId, clubId, dto)` — verifies ownership before update
+  - [x] 2.6 `remove(dogId, userId, clubId)` — verifies ownership, Prisma cascade handles related records
 
-- [ ] Task 3: Implement DogController endpoints (AC: 1-7)
-  - [ ] 3.1 `POST /dogs` — `@UseGuards(JwtAuthGuard, ClubGuard)` + `ZodValidationPipe(createDogSchema)`
-  - [ ] 3.2 `GET /dogs` — list own dogs (member) or all dogs (admin query param)
-  - [ ] 3.3 `GET /dogs/:dogId` — single dog detail
-  - [ ] 3.4 `PATCH /dogs/:dogId` — update own dog, `ZodValidationPipe(updateDogSchema)`
-  - [ ] 3.5 `DELETE /dogs/:dogId` — delete own dog
-  - [ ] 3.6 `POST /dogs/:dogId/photo` — file upload with `FileInterceptor('file')`, validate MIME + size (5MB max)
+- [x] Task 3: Implement DogController endpoints (AC: 1-7)
+  - [x] 3.1 `POST /dogs` — `@UseGuards(JwtAuthGuard, ClubGuard)` + `ZodValidationPipe(createDogSchema)`
+  - [x] 3.2 `GET /dogs` — list own dogs (member) or all dogs (admin query param)
+  - [x] 3.3 `GET /dogs/:dogId` — single dog detail
+  - [x] 3.4 `PATCH /dogs/:dogId` — update own dog, `ZodValidationPipe(updateDogSchema)`
+  - [x] 3.5 `DELETE /dogs/:dogId` — delete own dog
+  - [x] 3.6 `POST /dogs/:dogId/photo` — file upload with `FileInterceptor('file')`, validate MIME + size (5MB max)
 
-- [ ] Task 4: Write backend unit tests (AC: 1-7)
-  - [ ] 4.1 `dog.service.spec.ts` — CRUD operations, ownership verification, club scoping
-  - [ ] 4.2 `dog.controller.spec.ts` — endpoint routing, guard chain, validation
+- [x] Task 4: Write backend unit tests (AC: 1-7)
+  - [x] 4.1 `dog.service.spec.ts` — CRUD operations, ownership verification, club scoping
+  - [x] 4.2 `dog.controller.spec.ts` — endpoint routing, guard chain, validation
 
 ### Frontend
 
-- [ ] Task 5: Create dog data-access hooks (AC: 1-6)
-  - [ ] 5.1 Create `libs/frontend/features/src/lib/dogs/hooks/useDogs.ts`
-  - [ ] 5.2 Implement `useDogs(clubId)` — query key `['dogs', clubId]`
-  - [ ] 5.3 Implement `useDogDetail(clubId, dogId)` — query key `['dogs', clubId, dogId]`
-  - [ ] 5.4 Implement `useCreateDog(clubId)`, `useUpdateDog(clubId)`, `useDeleteDog(clubId)` mutations
-  - [ ] 5.5 Implement `useUploadDogPhoto(clubId)` — FormData upload via raw `fetch` (not apiClient, which sets `Content-Type: application/json`)
+- [x] Task 5: Create dog data-access hooks (AC: 1-6)
+  - [x] 5.1 Create `libs/frontend/features/src/lib/dogs/hooks/useDogs.ts`
+  - [x] 5.2 Implement `useDogs(clubId)` — query key `['dogs', clubId]`
+  - [x] 5.3 Implement `useDogDetail(clubId, dogId)` — query key `['dogs', clubId, dogId]`
+  - [x] 5.4 Implement `useCreateDog(clubId)`, `useUpdateDog(clubId)`, `useDeleteDog(clubId)` mutations
+  - [x] 5.5 Implement `useUploadDogPhoto(clubId)` — FormData upload via raw `fetch` (not apiClient, which sets `Content-Type: application/json`)
 
-- [ ] Task 6: Create DogList component (AC: 5, 6)
-  - [ ] 6.1 Create `libs/frontend/features/src/lib/dogs/DogList.tsx`
-  - [ ] 6.2 Dog cards: avatar (photoUrl or paw icon fallback), name, breed
-  - [ ] 6.3 Empty state with CTA button
-  - [ ] 6.4 Loading skeleton state
+- [x] Task 6: Create DogList component (AC: 5, 6)
+  - [x] 6.1 Create `libs/frontend/features/src/lib/dogs/DogList.tsx`
+  - [x] 6.2 Dog cards: avatar (photoUrl or paw icon fallback), name, breed
+  - [x] 6.3 Empty state with CTA button
+  - [x] 6.4 Loading skeleton state
 
-- [ ] Task 7: Create DogForm component (AC: 1, 2, 3)
-  - [ ] 7.1 Create `libs/frontend/features/src/lib/dogs/DogForm.tsx`
-  - [ ] 7.2 React Hook Form + zodResolver(createDogSchema/updateDogSchema)
-  - [ ] 7.3 Camera-first photo upload: camera button prominent, file picker secondary
-  - [ ] 7.4 Photo preview with "Retake" option
-  - [ ] 7.5 Pre-populated mode for editing (pass existing dog data as defaultValues)
+- [x] Task 7: Create DogForm component (AC: 1, 2, 3)
+  - [x] 7.1 Create `libs/frontend/features/src/lib/dogs/DogForm.tsx`
+  - [x] 7.2 React Hook Form + zodResolver(createDogSchema/updateDogSchema)
+  - [x] 7.3 Camera-first photo upload: camera button prominent, file picker secondary
+  - [x] 7.4 Photo preview with "Retake" option
+  - [x] 7.5 Pre-populated mode for editing (pass existing dog data as defaultValues)
 
-- [ ] Task 8: Create DogDetail component (AC: 3, 4, 7)
-  - [ ] 8.1 Create `libs/frontend/features/src/lib/dogs/DogDetail.tsx`
-  - [ ] 8.2 Display dog info: photo, name, breed, birthdate, chip number
-  - [ ] 8.3 Edit button (only for own dogs)
-  - [ ] 8.4 Delete button with confirmation dialog (only for own dogs)
-  - [ ] 8.5 Placeholder section for vaccine records (story 6.2)
+- [x] Task 8: Create DogDetail component (AC: 3, 4, 7)
+  - [x] 8.1 Create `libs/frontend/features/src/lib/dogs/DogDetail.tsx`
+  - [x] 8.2 Display dog info: photo, name, breed, birthdate, chip number
+  - [x] 8.3 Edit button (only for own dogs)
+  - [x] 8.4 Delete button with confirmation dialog (only for own dogs)
+  - [x] 8.5 Placeholder section for vaccine records (story 6.2)
 
-- [ ] Task 9: Wire up routing and DogsPage (AC: 1-6)
-  - [ ] 9.1 Replace `DogsPage.tsx` placeholder with real DogList + DogForm integration
-  - [ ] 9.2 Add nested routes: `/dogs` (list), `/dogs/new` (create), `/dogs/:dogId` (detail), `/dogs/:dogId/edit` (edit)
-  - [ ] 9.3 Wire navigation: list → detail, form submit → detail
+- [x] Task 9: Wire up routing and DogsPage (AC: 1-6)
+  - [x] 9.1 Replace `DogsPage.tsx` placeholder with real DogList + DogForm integration
+  - [x] 9.2 Add nested routes: `/dogs` (list), `/dogs/new` (create), `/dogs/:dogId` (detail), `/dogs/:dogId/edit` (edit)
+  - [x] 9.3 Wire navigation: list → detail, form submit → detail
 
-- [ ] Task 10: Write frontend tests (AC: 1-6)
-  - [ ] 10.1 `DogList.test.tsx` — renders dog cards, empty state, loading state
-  - [ ] 10.2 `DogForm.test.tsx` — validation, submission, pre-populated edit mode
-  - [ ] 10.3 `DogDetail.test.tsx` — displays dog info, edit/delete buttons for owner only
+- [x] Task 10: Write frontend tests (AC: 1-6)
+  - [x] 10.1 `DogList.test.tsx` — renders dog cards, empty state, loading state
+  - [x] 10.2 `DogForm.test.tsx` — validation, submission, pre-populated edit mode
+  - [x] 10.3 `DogDetail.test.tsx` — displays dog info, edit/delete buttons for owner only
 
 ## Dev Notes
 
@@ -213,9 +213,37 @@ The photo upload must follow the WhatsApp-inspired camera-first pattern:
 ## Dev Agent Record
 
 ### Agent Model Used
+claude-sonnet-4-6
 
 ### Debug Log References
+- Fixed vitest hoisting issue in DogDetail.test.tsx and DogForm.test.tsx: replaced bare `vi.fn()` variables with `vi.hoisted()` to prevent "Cannot access before initialization" errors in `vi.mock` factories
+- Fixed `birthdate` field empty-string validation: added `setValueAs: (v) => v === '' ? undefined : v` to `register('birthdate')` so empty date inputs pass Zod's `.date().optional()` validation
 
 ### Completion Notes List
+- DogModule includes VaccineController/VaccineService (pre-created for story 6.2) — both work in the same module
+- `api-features.ts` already had DogModule registered from a prior session
+- Photo upload uses raw `fetch` with FormData (not apiClient) to avoid Content-Type: application/json override
 
 ### File List
+**Backend:**
+- libs/api/features/src/lib/dog/dog.module.ts
+- libs/api/features/src/lib/dog/dog.service.ts
+- libs/api/features/src/lib/dog/dog.controller.ts
+- libs/api/features/src/lib/dog/dto/create-dog.dto.ts
+- libs/api/features/src/lib/dog/dog.service.spec.ts
+- libs/api/features/src/lib/dog/dog.controller.spec.ts
+
+**Frontend:**
+- libs/frontend/features/src/lib/dogs/hooks/useDogs.ts
+- libs/frontend/features/src/lib/dogs/DogList.tsx
+- libs/frontend/features/src/lib/dogs/DogList.test.tsx
+- libs/frontend/features/src/lib/dogs/DogForm.tsx
+- libs/frontend/features/src/lib/dogs/DogForm.test.tsx
+- libs/frontend/features/src/lib/dogs/DogDetail.tsx
+- libs/frontend/features/src/lib/dogs/DogDetail.test.tsx
+- libs/frontend/features/src/lib/dogs/DogNewPage.tsx
+- libs/frontend/features/src/lib/dogs/DogEditPage.tsx
+
+**Modified:**
+- libs/frontend/features/src/lib/pages/DogsPage.tsx (replaced placeholder with DogList)
+- libs/frontend/features/src/lib/features.tsx (added dog routes)

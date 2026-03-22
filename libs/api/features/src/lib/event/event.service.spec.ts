@@ -6,6 +6,7 @@ import { EventStatus } from '@org/types';
 function createMockPrisma() {
   return {
     event: {
+      create: vi.fn(),
       findMany: vi.fn(),
       findFirst: vi.fn(),
       update: vi.fn(),
@@ -33,6 +34,7 @@ describe('EventService', () => {
     status: EventStatus.DRAFT,
     createdAt: new Date('2026-03-22T00:00:00Z'),
     updatedAt: new Date('2026-03-22T00:00:00Z'),
+    participants: [],
   };
   const mockPublishedEvent = { ...mockDraftEvent, status: EventStatus.PUBLISHED };
 
@@ -45,7 +47,44 @@ describe('EventService', () => {
   // ────────────────────────────────────────────────────
   // findAll — role-based visibility
   // ────────────────────────────────────────────────────
-  describe('findAll', () => {
+  
+  // --------
+  // createEvent
+  // --------
+  describe('createEvent', () => {
+    const dto = {
+      title: 'Canitrail training',
+      description: 'Morning session',
+      dateTime: '2026-04-15T09:00:00.000Z',
+      latitude: 45.4397,
+      longitude: 4.3872,
+      locationName: 'Parc de Montaud',
+    };
+
+    it('creates an event with DRAFT status scoped to clubId', async () => {
+      prisma.event.create.mockResolvedValue(mockDraftEvent);
+      const result = await service.createEvent('user-uuid-1', mockClubId, dto as any);
+      expect(prisma.event.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ clubId: mockClubId, createdById: 'user-uuid-1', status: 'DRAFT' }),
+      });
+      expect(result.data.status).toBe('DRAFT');
+    });
+
+    it('sets description/locationName to null when not provided', async () => {
+      const minDto = { title: 'Quick', dateTime: '2026-04-15T09:00:00.000Z', latitude: 45.4, longitude: 4.3 };
+      prisma.event.create.mockResolvedValue({ ...mockDraftEvent, description: null, locationName: null });
+      await service.createEvent('user-uuid-1', mockClubId, minDto as any);
+      expect(prisma.event.create).toHaveBeenCalledWith({ data: expect.objectContaining({ description: null, locationName: null }) });
+    });
+
+    it('converts dateTime string to Date object', async () => {
+      prisma.event.create.mockResolvedValue(mockDraftEvent);
+      await service.createEvent('user-uuid-1', mockClubId, dto as any);
+      expect(prisma.event.create).toHaveBeenCalledWith({ data: expect.objectContaining({ date: new Date('2026-04-15T09:00:00.000Z') }) });
+    });
+  });
+
+describe('findAll', () => {
     it('MEMBER: only returns PUBLISHED events', async () => {
       prisma.event.findMany.mockResolvedValue([mockPublishedEvent]);
       prisma.event.count.mockResolvedValue(1);
@@ -113,7 +152,61 @@ describe('EventService', () => {
     it('tenant isolation: wrong clubId raises NotFoundException', async () => {
       prisma.event.findFirst.mockResolvedValue(null);
       await expect(service.findOne('other-club', mockEventId, 'ADMIN')).rejects.toThrow(NotFoundException);
-      expect(prisma.event.findFirst).toHaveBeenCalledWith({ where: { id: mockEventId, clubId: 'other-club' } });
+      expect(prisma.event.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({ where: expect.objectContaining({ id: mockEventId, clubId: 'other-club' }) }),
+      );
+    });
+  });
+
+  // ────────────────────────────────────────────────────
+  // findAll — participant count & RSVP (Story 5.2)
+  // ────────────────────────────────────────────────────
+  describe('findAll — participant count & RSVP', () => {
+    const eventWithParticipants = {
+      ...mockPublishedEvent,
+      _count: { participants: 5 },
+      participants: [{ status: 'GOING' }],
+    };
+
+    it('includes participant count in mapped DTO', async () => {
+      prisma.event.findMany.mockResolvedValue([eventWithParticipants]);
+      prisma.event.count.mockResolvedValue(1);
+      const result = await service.findAll(mockClubId, 'MEMBER', {}, 'user-1');
+      expect(result.data[0].participantCount).toBe(5);
+    });
+
+    it('includes current user RSVP status', async () => {
+      prisma.event.findMany.mockResolvedValue([eventWithParticipants]);
+      prisma.event.count.mockResolvedValue(1);
+      const result = await service.findAll(mockClubId, 'MEMBER', {}, 'user-1');
+      expect(result.data[0].myRsvpStatus).toBe('GOING');
+    });
+
+    it('returns null RSVP when user has no participation', async () => {
+      prisma.event.findMany.mockResolvedValue([{ ...mockPublishedEvent, _count: { participants: 0 }, participants: [] }]);
+      prisma.event.count.mockResolvedValue(1);
+      const result = await service.findAll(mockClubId, 'MEMBER', {}, 'user-1');
+      expect(result.data[0].myRsvpStatus).toBeNull();
+    });
+
+    it('includes _count and participants in Prisma query when userId provided', async () => {
+      prisma.event.findMany.mockResolvedValue([]);
+      prisma.event.count.mockResolvedValue(0);
+      await service.findAll(mockClubId, 'MEMBER', {}, 'user-1');
+      expect(prisma.event.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          include: expect.objectContaining({
+            _count: { select: { participants: true } },
+          }),
+        }),
+      );
+    });
+
+    it('defaults participantCount to 0 when _count is missing', async () => {
+      prisma.event.findMany.mockResolvedValue([{ ...mockPublishedEvent }]);
+      prisma.event.count.mockResolvedValue(1);
+      const result = await service.findAll(mockClubId, 'MEMBER', {});
+      expect(result.data[0].participantCount).toBe(0);
     });
   });
 
@@ -215,7 +308,7 @@ describe('EventService', () => {
     it('tenant isolation: scopes findFirst by clubId', async () => {
       prisma.event.findFirst.mockResolvedValue(null);
       await expect(service.remove('other-club', mockEventId)).rejects.toThrow(NotFoundException);
-      expect(prisma.event.findFirst).toHaveBeenCalledWith({ where: { id: mockEventId, clubId: 'other-club' } });
+      expect(prisma.event.findFirst).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ id: mockEventId, clubId: 'other-club' }) }));
     });
   });
 });

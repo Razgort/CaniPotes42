@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Logger,
   Param,
   Post,
   Query,
@@ -39,8 +38,6 @@ const listDocumentsQuerySchema = z.object({
 @Controller('documents')
 @UseGuards(JwtAuthGuard, ClubGuard)
 export class DocumentController {
-  private readonly logger = new Logger(DocumentController.name);
-
   constructor(
     private readonly documentService: DocumentService,
     private readonly r2Service: R2Service,

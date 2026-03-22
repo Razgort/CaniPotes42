@@ -1,9 +1,10 @@
 import { io, Socket } from 'socket.io-client';
 import type { ChatMessage } from '@org/types';
 
-const SOCKET_URL =
+/** Origine du serveur Socket.IO (sans `/api`). Vide en dev → même origine que la page (Vite proxy `/socket.io`). */
+const SOCKET_ORIGIN =
   typeof import.meta !== 'undefined' && (import.meta as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL
-    ? (import.meta as { env?: { VITE_API_URL?: string } }).env!.VITE_API_URL!.replace('/api', '')
+    ? (import.meta as { env?: { VITE_API_URL?: string } }).env!.VITE_API_URL!.replace(/\/api\/?$/, '')
     : '';
 
 type MessageListener = (message: ChatMessage) => void;
@@ -25,11 +26,12 @@ class ChatSocketClient {
 
     this.connectedClubId = clubId;
 
-    this.socket = io(SOCKET_URL, {
+    const opts = {
       auth: { token },
-      transports: ['websocket', 'polling'],
+      transports: ['websocket', 'polling'] as const,
       autoConnect: true,
-    });
+    };
+    this.socket = SOCKET_ORIGIN ? io(SOCKET_ORIGIN, opts) : io(opts);
 
     this.socket.on('connect', () => {
       // Connected — rooms are joined automatically in gateway handleConnection

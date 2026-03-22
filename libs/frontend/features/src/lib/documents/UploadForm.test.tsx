@@ -1,16 +1,17 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DocumentType } from '@org/types';
 
 // Mocks
-const mockUseUploadDocument = jest.fn();
-const mockToast = { success: jest.fn(), error: jest.fn() };
+const mockUseUploadDocument = vi.fn();
+const mockToast = { success: vi.fn(), error: vi.fn() };
 
-jest.mock('./hooks/useDocuments', () => ({
+vi.mock('./hooks/useDocuments', () => ({
   useUploadDocument: (...args: unknown[]) => mockUseUploadDocument(...args),
 }));
 
-jest.mock('@org/ui', () => ({
+vi.mock('@org/ui', () => ({
   toast: { success: (...args: unknown[]) => mockToast.success(...args), error: (...args: unknown[]) => mockToast.error(...args) },
   cn: (...classes: unknown[]) => classes.filter(Boolean).join(' '),
 }));
@@ -28,8 +29,8 @@ function renderUploadForm(props: Partial<React.ComponentProps<typeof UploadForm>
 
 describe('UploadForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseUploadDocument.mockReturnValue({ mutate: jest.fn(), isPending: false });
+    vi.clearAllMocks();
+    mockUseUploadDocument.mockReturnValue({ mutate: vi.fn(), isPending: false });
   });
 
   it('renders camera-first upload button prominently', () => {
@@ -90,7 +91,7 @@ describe('UploadForm', () => {
   });
 
   it('preserves form state on error (form remains visible)', async () => {
-    const mutateMock = jest.fn((_args: unknown, { onError }: { onError: () => void }) => {
+    const mutateMock = vi.fn((_args: unknown, { onError }: { onError: () => void }) => {
       onError();
     });
     mockUseUploadDocument.mockReturnValue({ mutate: mutateMock, isPending: false });
