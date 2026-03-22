@@ -1,6 +1,6 @@
 # Story 2.1: User Registration with Privacy Notice
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -37,26 +37,26 @@ So that I have a secure identity on the platform and understand how my data is h
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Create auth feature module backend (AC: #1, #2, #3, #4)
-  - [ ] 1.1 Create `libs/api/features/src/lib/auth/auth.module.ts` — NestJS module importing JwtModule, PassportModule, PrismaService
-  - [ ] 1.2 Create `libs/api/features/src/lib/auth/auth.service.ts` — registration logic: validate uniqueness, bcrypt hash, create User + Consent records in transaction
-  - [ ] 1.3 Create `libs/api/features/src/lib/auth/auth.controller.ts` — `POST /auth/register` endpoint (public, no guards)
-  - [ ] 1.4 Create `libs/api/features/src/lib/auth/dto/register.dto.ts` — imports `registerSchema` from `@canifed/types`
-  - [ ] 1.5 Register AuthModule in FeaturesModule (`libs/api/features/src/lib/features.module.ts`)
-  - [ ] 1.6 Write co-located tests: `auth.service.spec.ts`, `auth.controller.spec.ts`
+- [x] Task 1: Create auth feature module backend (AC: #1, #2, #3, #4)
+  - [x] 1.1 Create `libs/api/features/src/lib/auth/auth.module.ts` — NestJS module importing JwtModule, PassportModule, PrismaService
+  - [x] 1.2 Create `libs/api/features/src/lib/auth/auth.service.ts` — registration logic: validate uniqueness, bcrypt hash, create User + Consent records in transaction
+  - [x] 1.3 Create `libs/api/features/src/lib/auth/auth.controller.ts` — `POST /auth/register` endpoint (public, no guards)
+  - [x] 1.4 Create `libs/api/features/src/lib/auth/dto/register.dto.ts` — imports `registerSchema` from `@canifed/types`
+  - [x] 1.5 Register AuthModule in FeaturesModule (`libs/api/features/src/lib/api-features.ts`)
+  - [x] 1.6 Write co-located tests: `auth.service.spec.ts`, `auth.controller.spec.ts`
 
-- [ ] Task 2: Create registration page frontend (AC: #1, #2, #3, #4)
-  - [ ] 2.1 Create `libs/frontend/features/src/lib/auth/RegisterForm.tsx` — React Hook Form + Zod resolver + `registerSchema`
-  - [ ] 2.2 Include privacy notice section with consent checkbox (consentType: "privacy_notice" + "optional_data")
-  - [ ] 2.3 Add `/register` route in `apps/frontend/src/app/app.tsx` (lazy-loaded)
-  - [ ] 2.4 Create `libs/frontend/features/src/lib/auth/hooks/useAuth.ts` — TanStack Query mutation for registration
-  - [ ] 2.5 Create API client function in `libs/frontend/data-access/` for auth endpoints
+- [x] Task 2: Create registration page frontend (AC: #1, #2, #3, #4)
+  - [x] 2.1 Create `libs/frontend/features/src/lib/auth/RegisterForm.tsx` — React Hook Form + Zod resolver + `registerSchema`
+  - [x] 2.2 Include privacy notice section with consent checkbox (consentType: "privacy_notice" + "optional_data")
+  - [x] 2.3 Add `/register` route in `libs/frontend/features/src/lib/features.tsx` (lazy-loaded)
+  - [x] 2.4 Create `libs/frontend/features/src/lib/auth/hooks/useRegister.ts` — TanStack Query mutation for registration
+  - [x] 2.5 API client already exists in `libs/frontend/data-access/` — used directly via `apiClient.post()`
 
-- [ ] Task 3: Error handling & UX polish (AC: #3, #4)
-  - [ ] 3.1 Map backend error codes to French user messages in frontend
-  - [ ] 3.2 Implement toast notifications (green success, red error) using existing UI library patterns
-  - [ ] 3.3 Preserve form input on error (never clear fields)
-  - [ ] 3.4 Auto-focus first field on form load
+- [x] Task 3: Error handling & UX polish (AC: #3, #4)
+  - [x] 3.1 Map backend error codes to French user messages in frontend (ERROR_CODE_MESSAGES map)
+  - [x] 3.2 Implement toast notifications (green success, red error) using existing sonner-based toast system
+  - [x] 3.3 Preserve form input on error (never clear fields)
+  - [x] 3.4 Auto-focus first field on form load
 
 ## Dev Notes
 
@@ -279,8 +279,44 @@ libs/api/core/                                     ← core infrastructure alrea
 
 ### Agent Model Used
 
+Claude Opus 4.6 (1M context)
+
 ### Debug Log References
 
 ### Completion Notes List
 
+- Backend auth module created with POST /auth/register endpoint (public, no guards)
+- AuthService handles: email uniqueness check, bcrypt password hashing (10 rounds), User + Consent records creation in Prisma transaction
+- Error code for duplicate email uses CONFLICT (from global AllExceptionsFilter mapping 409 status) — frontend maps this to French message
+- Frontend RegisterForm uses react-hook-form with Zod resolver, validates on blur
+- Privacy notice section with mandatory and optional consent checkboxes
+- registerWithConsentSchema extends shared registerSchema with consent fields (defined in DTO, not modifying shared schema)
+- Toast system uses existing sonner-based setup from @org/ui
+- All 19 tests pass across relevant projects (10 backend + 9 frontend)
+- Lint clean on both api-features and features
+- Pre-existing ui:test failure (AppShell tablist role) unrelated to this story
+
+### Change Log
+
+- 2026-03-22: Story 2.1 implementation complete — auth backend module, registration frontend, error handling
+
 ### File List
+
+**Created:**
+- libs/api/features/src/lib/auth/auth.module.ts
+- libs/api/features/src/lib/auth/auth.controller.ts
+- libs/api/features/src/lib/auth/auth.service.ts
+- libs/api/features/src/lib/auth/dto/register.dto.ts
+- libs/api/features/src/lib/auth/auth.service.spec.ts
+- libs/api/features/src/lib/auth/auth.controller.spec.ts
+- libs/api/features/vitest.config.mts
+- libs/frontend/features/src/lib/auth/RegisterForm.tsx
+- libs/frontend/features/src/lib/auth/RegisterForm.test.tsx
+- libs/frontend/features/src/lib/auth/hooks/useRegister.ts
+- libs/frontend/features/src/lib/auth/hooks/types.ts
+- libs/frontend/features/src/lib/pages/RegisterPage.tsx
+
+**Modified:**
+- libs/api/features/src/lib/api-features.ts (added AuthModule import)
+- libs/frontend/features/src/lib/features.tsx (added /register route)
+- package.json (added react-hook-form, @hookform/resolvers, @testing-library/user-event)

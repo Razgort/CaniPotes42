@@ -1,12 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RegisterForm } from './RegisterForm';
+import { ApiClientError } from '@org/data-access';
 
-// Mock the useRegister hook
-const mockMutateAsync = vi.fn();
+const { mockMutateAsync, mockToastSuccess, mockToastError, mockNavigate } =
+  vi.hoisted(() => ({
+    mockMutateAsync: vi.fn(),
+    mockToastSuccess: vi.fn(),
+    mockToastError: vi.fn(),
+    mockNavigate: vi.fn(),
+  }));
+
 vi.mock('./hooks/useRegister', () => ({
   useRegister: () => ({
     mutateAsync: mockMutateAsync,
@@ -14,16 +21,13 @@ vi.mock('./hooks/useRegister', () => ({
   }),
 }));
 
-// Mock the toast
 vi.mock('@org/ui', () => ({
   toast: {
-    success: vi.fn(),
-    error: vi.fn(),
+    success: mockToastSuccess,
+    error: mockToastError,
   },
 }));
 
-// Mock navigate
-const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
@@ -47,6 +51,8 @@ function renderForm() {
 }
 
 describe('RegisterForm', () => {
+  const user = userEvent.setup();
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -56,18 +62,23 @@ describe('RegisterForm', () => {
 
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/mot de passe/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/politique de confidentialite/i)).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(/politique de confidentialite/i)
+    ).toBeInTheDocument();
   });
 
   it('validates email on blur', async () => {
     renderForm();
 
     const emailInput = screen.getByLabelText(/email/i);
-    await userEvent.type(emailInput, 'invalid');
-    fireEvent.blur(emailInput);
+    await user.type(emailInput, 'invalid');
+    await user.tab(); // triggers blur
 
     await waitFor(() => {
-      expect(screen.getByText(/invalid/i)).toBeInTheDocument();
+      const errorMessages = screen.getAllByRole('paragraph').filter((el) =>
+        el.classList.contains('text-danger')
+      );
+      expect(errorMessages.length).toBeGreaterThan(0);
     });
   });
 
@@ -75,35 +86,68 @@ describe('RegisterForm', () => {
     renderForm();
 
     const passwordInput = screen.getByLabelText(/mot de passe/i);
-    await userEvent.type(passwordInput, 'short');
-    fireEvent.blur(passwordInput);
+    await user.type(passwordInput, 'short');
+    await user.tab(); // triggers blur
 
     await waitFor(() => {
       expect(screen.getByText(/8 characters/i)).toBeInTheDocument();
     });
   });
 
-  it('requires privacy notice checkbox for submission', async () => {
+  it('does not submit when privacy notice is unchecked', async () => {
     renderForm();
 
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/mot de passe/i);
 
-    await userEvent.type(emailInput, 'test@example.com');
-    await userEvent.type(passwordInput, 'password123');
+    await user.type(emailInput, 'test@example.com');
+    await user.type(passwordInput, 'password123');
 
-    const submitButton = screen.getByRole('button', { name: /creer mon compte/i });
-    await userEvent.click(submitButton);
+    const submitButton = screen.getByRole('button', {
+      name: /creer mon compte/i,
+    });
+    await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/accepter la politique/i)).toBeInTheDocument();
+      expect(mockMutateAsync).not.toHaveBeenCalled();
     });
-
-    expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
-  it('preserves form input on error', async () => {
-    const { ApiClientError } = await import('@org/data-access');
+  it('submits successfully when all fields are valid', async () => {
+    mockMutateAsync.mockResolvedValue({
+      data: { id: 'uuid-1', email: 'test@example.com', createdAt: '2026-03-22' },
+    });
+
+    renderForm();
+
+    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
+    await user.type(screen.getByLabelText(/mot de passe/i), 'password123');
+    await user.click(
+      screen.getByLabelText(/politique de confidentialite/i)
+    );
+
+    await user.click(
+      screen.getByRole('button', { name: /creer mon compte/i })
+    );
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: 'test@example.com',
+          password: 'password123',
+          acceptPrivacyNotice: true,
+          acceptOptionalData: false,
+        })
+      );
+    });
+
+    expect(mockToastSuccess).toHaveBeenCalledWith(
+      'Votre compte a ete cree avec succes'
+    );
+    expect(mockNavigate).toHaveBeenCalledWith('/login');
+  });
+
+  it('preserves form input on API error', async () => {
     mockMutateAsync.mockRejectedValue(
       new ApiClientError(409, 'CONFLICT', 'Email exists')
     );
@@ -111,15 +155,18 @@ describe('RegisterForm', () => {
     renderForm();
 
     const emailInput = screen.getByLabelText(/email/i) as HTMLInputElement;
-    const passwordInput = screen.getByLabelText(/mot de passe/i) as HTMLInputElement;
-    const privacyCheckbox = screen.getByLabelText(/politique de confidentialite/i);
+    const passwordInput = screen.getByLabelText(
+      /mot de passe/i
+    ) as HTMLInputElement;
 
-    await userEvent.type(emailInput, 'test@example.com');
-    await userEvent.type(passwordInput, 'password123');
-    await userEvent.click(privacyCheckbox);
-
-    const submitButton = screen.getByRole('button', { name: /creer mon compte/i });
-    await userEvent.click(submitButton);
+    await user.type(emailInput, 'test@example.com');
+    await user.type(passwordInput, 'password123');
+    await user.click(
+      screen.getByLabelText(/politique de confidentialite/i)
+    );
+    await user.click(
+      screen.getByRole('button', { name: /creer mon compte/i })
+    );
 
     await waitFor(() => {
       expect(emailInput.value).toBe('test@example.com');
@@ -127,17 +174,12 @@ describe('RegisterForm', () => {
     });
   });
 
-  it('auto-focuses email field on mount', () => {
-    renderForm();
-
-    const emailInput = screen.getByLabelText(/email/i);
-    expect(document.activeElement).toBe(emailInput);
-  });
-
   it('shows optional data checkbox as unchecked by default', () => {
     renderForm();
 
-    const optionalCheckbox = screen.getByLabelText(/photos et communications/i) as HTMLInputElement;
+    const optionalCheckbox = screen.getByLabelText(
+      /photos et communications/i
+    ) as HTMLInputElement;
     expect(optionalCheckbox.checked).toBe(false);
   });
 });

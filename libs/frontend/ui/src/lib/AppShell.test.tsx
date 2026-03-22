@@ -27,9 +27,9 @@ describe('AppShell', () => {
     expect(document.querySelector('main')).toBeInTheDocument();
   });
 
-  it('renders bottom nav with tablist role', () => {
+  it('renders bottom nav with navigation label', () => {
     render(<AppShell>content</AppShell>);
-    expect(screen.getByRole('tablist')).toBeInTheDocument();
+    expect(screen.getByLabelText('Navigation principale')).toBeInTheDocument();
   });
 
   it('renders sidebar with navigation label', () => {

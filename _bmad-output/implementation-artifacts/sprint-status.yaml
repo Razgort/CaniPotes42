@@ -54,8 +54,8 @@ development_status:
 
   # Epic 2: Authentication & User Accounts
   epic-2: in-progress
-  2-1-user-registration-with-privacy-notice: ready-for-dev
-  2-2-user-login-jwt-session: ready-for-dev
+  2-1-user-registration-with-privacy-notice: review
+  2-2-user-login-jwt-session: in-progress
   2-3-token-refresh-session-management: ready-for-dev
   epic-2-retrospective: optional
 

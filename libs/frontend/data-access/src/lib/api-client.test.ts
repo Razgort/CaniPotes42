@@ -19,6 +19,7 @@ describe('apiClient', () => {
     expect(mockFetch).toHaveBeenCalledWith('/api/clubs', {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: undefined,
     });
     expect(result).toEqual({ data: 'test' });
@@ -34,6 +35,7 @@ describe('apiClient', () => {
     expect(mockFetch).toHaveBeenCalledWith('/api/clubs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ name: 'Test Club' }),
     });
   });
@@ -52,6 +54,7 @@ describe('apiClient', () => {
         'Content-Type': 'application/json',
         Authorization: 'Bearer my-token',
       },
+      credentials: 'include',
       body: undefined,
     });
   });
@@ -151,6 +154,7 @@ describe('apiClient', () => {
     expect(mockFetch).toHaveBeenCalledWith('/api/clubs/1', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ name: 'Updated' }),
     });
   });
@@ -165,6 +169,7 @@ describe('apiClient', () => {
     expect(mockFetch).toHaveBeenCalledWith('/api/clubs/1', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: undefined,
     });
   });

@@ -228,20 +228,48 @@ Claude Opus 4.6 (1M context)
 - Task 7: Added Swagger/OpenAPI setup gated on `env.SWAGGER_ENABLED` with DocumentBuilder, BearerAuth, and title/description/version
 - Task 8: Verified full local dev flow — Docker Compose PostgreSQL running, API starts with env validation, Swagger at /api/docs returns HTTP 200
 - Installed missing dependencies from Story 1.2: `helmet`, `@nestjs/passport`, `@nestjs/jwt`, `passport`, `passport-jwt`, `@types/passport-jwt`
-- All 41+ tests pass across workspace (some flaky tests in frontend detected by Nx)
-- Lint passes for all 10 projects
-- Typecheck passes for API
+- All 167 tests pass across 10 projects (73 types, 32 api-core, 10 api-features, 11 utils, 17 data-access, 15 ui, 9 features)
+- Lint passes for all 10 projects (0 errors, only warnings in api-core for pre-existing `any` usage)
+- Typecheck passes for all 10 projects
+- Fixed multiple pre-existing issues surfaced by the new ESLint/typecheck setup (Zod 4 API compat, missing vitest imports, TS strict mode errors, jsx-a11y violations, module boundary issues)
 
 ### Change Log
 
-- 2026-03-22: Story 1.5 implemented — env validation + Swagger in main.ts, missing deps installed, full local dev flow verified
+- 2026-03-22: Story 1.5 implemented — ESLint workspace setup, CI workflow updated (affected + develop branch), env validation schema, Swagger in main.ts, missing deps installed, pre-existing code quality issues fixed
 
 ### File List
 
-- apps/api/src/main.ts (MODIFIED — added validateEnv(), Swagger setup, NestJS Logger)
-- libs/shared/utils/src/lib/env.schema.ts (MODIFIED — aligned with Story 1.5 spec: added CORS_ORIGINS, SWAGGER_ENABLED; made R2/Stripe optional)
-- libs/shared/utils/src/lib/env.schema.spec.ts (MODIFIED — updated tests for new schema)
-- .env.example (MODIFIED — expanded with all env vars)
-- .github/workflows/ci.yml (MODIFIED — develop branch, affected command, Nx cache)
-- nx.json (MODIFIED — removed "linter": "none" from generator defaults)
-- package.json (MODIFIED — added helmet, @nestjs/passport, @nestjs/jwt, passport, passport-jwt, @types/passport-jwt)
+- .github/workflows/ci.yml (MODIFIED — develop branch trigger, PR targets, nx affected, Nx cache)
+- .env.example (MODIFIED — expanded with all env vars: PORT, NODE_ENV, JWT_SECRET, JWT_REFRESH_SECRET, CORS_ORIGINS, SWAGGER_ENABLED)
+- .env (MODIFIED — synced with .env.example)
+- eslint.config.mjs (CREATED — root ESLint flat config with Nx rules + jsx-a11y)
+- apps/api/eslint.config.mjs (CREATED)
+- apps/frontend/eslint.config.mjs (CREATED)
+- libs/api/core/eslint.config.mjs (CREATED)
+- libs/api/features/eslint.config.mjs (CREATED)
+- libs/frontend/data-access/eslint.config.mjs (CREATED)
+- libs/frontend/features/eslint.config.mjs (CREATED)
+- libs/frontend/ui/eslint.config.mjs (CREATED)
+- libs/shared/prisma-client/eslint.config.mjs (CREATED)
+- libs/shared/types/eslint.config.mjs (CREATED)
+- libs/shared/utils/eslint.config.mjs (CREATED)
+- libs/shared/utils/src/lib/env.schema.ts (MODIFIED — Phase A vars only: DATABASE_URL, PORT, NODE_ENV, JWT_SECRET, JWT_REFRESH_SECRET, CORS_ORIGINS, SWAGGER_ENABLED)
+- libs/shared/utils/src/lib/env.schema.spec.ts (MODIFIED — 11 tests for updated schema)
+- nx.json (MODIFIED — added @nx/eslint/plugin, removed linter: none, added sync.applyChanges)
+- package.json (MODIFIED — added @nestjs/swagger, zod, helmet, @nestjs/passport, @nestjs/jwt, @nestjs/throttler, passport-jwt, bcrypt, @nx/eslint, @nx/eslint-plugin, typescript-eslint, eslint, eslint-plugin-jsx-a11y)
+- libs/api/core/tsconfig.lib.json (MODIFIED — added experimentalDecorators, emitDecoratorMetadata)
+- libs/api/features/tsconfig.lib.json (MODIFIED — added experimentalDecorators, emitDecoratorMetadata)
+- libs/frontend/features/tsconfig.lib.json (MODIFIED — added lib: dom)
+- libs/frontend/data-access/src/lib/data-access.tsx (MODIFIED — fixed TS strict mode error)
+- libs/frontend/data-access/src/lib/api-client.ts (MODIFIED — fixed TS strict mode error)
+- libs/frontend/data-access/src/lib/api-client.test.ts (MODIFIED — fixed unused var lint error)
+- libs/frontend/data-access/src/lib/AuthContext.tsx (MODIFIED — fixed empty function lint error)
+- libs/frontend/ui/src/lib/AppShell.tsx (MODIFIED — removed role=tablist for jsx-a11y compliance)
+- libs/frontend/ui/src/lib/AppShell.test.tsx (MODIFIED — updated test for removed tablist role)
+- libs/api/core/src/lib/health/health.controller.spec.ts (MODIFIED — added vitest imports)
+- libs/api/features/src/lib/auth/dto/register.dto.ts (MODIFIED — fixed Zod 4 z.literal error API)
+- libs/api/features/src/lib/auth/auth.controller.spec.ts (MODIFIED — removed unused import)
+- libs/api/features/src/lib/auth/auth.service.spec.ts (MODIFIED — fixed circular type annotation)
+- libs/frontend/features/src/lib/auth/hooks/types.ts (MODIFIED — added RegisterWithConsentInput type)
+- libs/frontend/features/src/lib/auth/RegisterForm.tsx (MODIFIED — fixed useForm generic types)
+- libs/frontend/features/src/lib/auth/RegisterForm.test.tsx (MODIFIED — static import for ApiClientError)

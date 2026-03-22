@@ -276,8 +276,10 @@ Claude Opus 4.6 (1M context)
 
 ### Completion Notes List
 
-- All 7 tasks verified complete — implementation pre-existed from prior story work
-- Health controller at `libs/api/core/src/lib/health/health.controller.ts` — public endpoint, 2 unit tests passing
+- All 7 tasks verified complete
+- Health controller created at `libs/api/core/src/lib/health/health.controller.ts` — public endpoint, 2 unit tests passing
+- HealthController registered in ApiCoreModule controllers array
+- Added Nx cache step to deploy.yml ci-check job for build performance
 - Deploy workflow at `.github/workflows/deploy.yml` — staging (develop) + production (main) with CI gate, Vercel deploy, Prisma migrations, Render deploy hooks, retry smoke tests
 - Render Blueprint at `render.yaml` — staging + prod services, Prisma migrate in build command, env var groups
 - Vercel config at `vercel.json` — SPA routing rewrite, Vite framework, correct output dir
@@ -288,10 +290,13 @@ Claude Opus 4.6 (1M context)
 
 ### File List
 
-- `libs/api/core/src/lib/health/health.controller.ts` (existing, verified)
-- `libs/api/core/src/lib/health/health.controller.spec.ts` (existing, verified)
-- `libs/api/core/src/lib/api-core.ts` (existing, HealthController registered)
-- `.github/workflows/deploy.yml` (existing, verified)
+- `libs/api/core/src/lib/health/health.controller.ts` (new)
+- `libs/api/core/src/lib/health/health.controller.spec.ts` (new)
+- `libs/api/core/src/lib/api-core.ts` (modified — added HealthController import + controllers array)
+- `.github/workflows/deploy.yml` (modified — added Nx cache step)
+- `.env.example` (verified — deployment secrets documented)
+- `render.yaml` (verified)
+- `vercel.json` (verified)
 - `render.yaml` (existing, verified)
 - `vercel.json` (existing, verified)
 - `.env.example` (existing, deployment secrets documented)

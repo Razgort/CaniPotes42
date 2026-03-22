@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@org/ui';
 import { ApiClientError } from '@org/data-access';
-import { registerWithConsentSchema, type RegisterWithConsent } from './hooks/types';
+import { registerWithConsentSchema, type RegisterWithConsent, type RegisterWithConsentInput } from './hooks/types';
 import { useRegister } from './hooks/useRegister';
 
 const ERROR_CODE_MESSAGES: Record<string, string> = {
@@ -20,13 +20,12 @@ export function RegisterForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
     setError,
-  } = useForm<RegisterWithConsent>({
+  } = useForm<RegisterWithConsentInput, unknown, RegisterWithConsent>({
     resolver: zodResolver(registerWithConsentSchema),
     mode: 'onBlur',
     defaultValues: {
       email: '',
       password: '',
-      acceptPrivacyNotice: undefined as unknown as true,
       acceptOptionalData: false,
     },
   });

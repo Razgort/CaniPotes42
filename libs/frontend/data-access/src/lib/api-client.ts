@@ -26,9 +26,14 @@ export class ApiClientError extends Error {
 }
 
 let tokenGetter: (() => string | null) | null = null;
+let onUnauthorized: (() => void) | null = null;
 
 export function setTokenGetter(fn: () => string | null) {
   tokenGetter = fn;
+}
+
+export function setOnUnauthorized(fn: () => void) {
+  onUnauthorized = fn;
 }
 
 function getErrorMessage(status: number, serverMessage?: string): string {
@@ -56,6 +61,7 @@ async function request<T>(
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     method,
     headers,
+    credentials: 'include',
     body: body ? JSON.stringify(body) : undefined,
   });
 
@@ -70,6 +76,10 @@ async function request<T>(
       errorBody = await response.json() as typeof errorBody;
     } catch {
       // response body is not JSON
+    }
+
+    if (response.status === 401 && tokenGetter?.()) {
+      onUnauthorized?.();
     }
 
     throw new ApiClientError(

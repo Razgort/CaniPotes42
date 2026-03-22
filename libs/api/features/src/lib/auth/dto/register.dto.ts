@@ -3,9 +3,7 @@ import { z } from 'zod';
 
 export const registerWithConsentSchema = registerSchema.extend({
   acceptPrivacyNotice: z.literal(true, {
-    errorMap: () => ({
-      message: 'Vous devez accepter la politique de confidentialite',
-    }),
+    error: 'Vous devez accepter la politique de confidentialite',
   }),
   acceptOptionalData: z.boolean().default(false),
 });
