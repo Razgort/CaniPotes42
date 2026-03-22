@@ -52,7 +52,7 @@
     },
     { "plugin": "@nx/eslint/plugin", "options": { "targetName": "lint" } }
   ],
-  "nxCloudId": "69c01f02d96c7f3e33736ef4",
+  "nxCloudId": "69c023413191a96e86a66625",
   "analytics": false,
   "sync": { "applyChanges": true },
   "generators": {
