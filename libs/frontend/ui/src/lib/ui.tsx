@@ -1,10 +1,2 @@
-export function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <div>
-      <header>
-        <h1>CaniFed</h1>
-      </header>
-      <main>{children}</main>
-    </div>
-  );
-}
+// Re-export AppShell as Layout for backward compatibility during migration
+export { AppShell as Layout } from './AppShell';

@@ -6,7 +6,7 @@
 project_knowledge: "{project-root}/docs"
 project_type: digital_product
 design_artifacts: "{project-root}/design-artifacts"
-design_system_mode: none
+design_system_mode: building_library
 methodology_version: wds-v6
 product_languages:
   - en
