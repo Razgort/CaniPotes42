@@ -87,7 +87,7 @@ export function CertificateUpload({
               type="button"
               onClick={handleRetake}
               className="absolute top-2 right-2 rounded-full bg-background/80 p-1 shadow hover:bg-background"
-              aria-label="Reprendre la photo"
+              aria-label="Effacer l'aperçu"
             >
               <X className="h-4 w-4" />
             </button>

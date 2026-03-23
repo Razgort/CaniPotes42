@@ -1,6 +1,6 @@
 # Story 6.2: Vaccine Records & Certificate Upload
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -31,82 +31,82 @@ so that my dog's health status is tracked digitally and admins can verify it.
 
 ### Backend
 
-- [ ] **Task 1: Vaccine CRUD endpoints** (AC: 1, 2, 4, 5, 7)
-  - [ ] 1.1 Create `VaccineController` at `libs/api/features/src/lib/dog/vaccine.controller.ts`
-  - [ ] 1.2 Create `VaccineService` at `libs/api/features/src/lib/dog/vaccine.service.ts`
-  - [ ] 1.3 Create DTOs importing from `@canifed/shared-types` (`createVaccineSchema`)
-  - [ ] 1.4 Implement endpoints:
+- [x] **Task 1: Vaccine CRUD endpoints** (AC: 1, 2, 4, 5, 7)
+  - [x] 1.1 Create `VaccineController` at `libs/api/features/src/lib/dog/vaccine.controller.ts`
+  - [x] 1.2 Create `VaccineService` at `libs/api/features/src/lib/dog/vaccine.service.ts`
+  - [x] 1.3 Create DTOs importing from `@canifed/shared-types` (`createVaccineSchema`)
+  - [x] 1.4 Implement endpoints:
     - `POST /dogs/:dogId/vaccines` — create vaccine record
     - `GET /dogs/:dogId/vaccines` — list vaccines for a dog
     - `PATCH /dogs/:dogId/vaccines/:vaccineId` — update vaccine record
     - `DELETE /dogs/:dogId/vaccines/:vaccineId` — delete vaccine record
-  - [ ] 1.5 Add ownership validation: verify `request.user.sub === dog.userId` for write operations
-  - [ ] 1.6 All queries scoped by `clubId` from ClubGuard
+  - [x] 1.5 Add ownership validation: verify `request.user.sub === dog.userId` for write operations
+  - [x] 1.6 All queries scoped by `clubId` from ClubGuard
 
-- [ ] **Task 2: Certificate upload endpoint** (AC: 3)
-  - [ ] 2.1 Add `POST /dogs/:dogId/vaccines/:vaccineId/certificate` endpoint using `FileInterceptor`
-  - [ ] 2.2 Validate file: MIME type (image/jpeg, image/png, image/webp), max 5MB
-  - [ ] 2.3 Upload to R2 via `R2Service` with key: `clubs/${clubId}/dogs/${dogId}/vaccines/${vaccineId}/certificate.${ext}`
-  - [ ] 2.4 Save signed URL to `VaccineRecord.certificateUrl`
-  - [ ] 2.5 Add `DELETE /dogs/:dogId/vaccines/:vaccineId/certificate` to remove certificate
+- [x] **Task 2: Certificate upload endpoint** (AC: 3)
+  - [x] 2.1 Add `POST /dogs/:dogId/vaccines/:vaccineId/certificate` endpoint using `FileInterceptor`
+  - [x] 2.2 Validate file: MIME type (image/jpeg, image/png, image/webp), max 5MB
+  - [x] 2.3 Upload to R2 via `R2Service` with key: `clubs/${clubId}/dogs/${dogId}/vaccines/${vaccineId}/certificate.${ext}`
+  - [x] 2.4 Save signed URL to `VaccineRecord.certificateUrl`
+  - [x] 2.5 Add `DELETE /dogs/:dogId/vaccines/:vaccineId/certificate` to remove certificate
 
-- [ ] **Task 3: Vaccine status calculation utility** (AC: 2, 5, 6)
-  - [ ] 3.1 Create `calculateVaccineStatus(expiryDate: Date): VaccineStatus` utility
-  - [ ] 3.2 Create `calculateDogOverallStatus(vaccines: VaccineRecord[]): VaccineStatus` — worst status wins
-  - [ ] 3.3 Status is computed at query time (not stored) — derive from `expiryDate` vs current date
+- [x] **Task 3: Vaccine status calculation utility** (AC: 2, 5, 6)
+  - [x] 3.1 Create `calculateVaccineStatus(expiryDate: Date): VaccineStatus` utility
+  - [x] 3.2 Create `calculateDogOverallStatus(vaccines: VaccineRecord[]): VaccineStatus` — worst status wins
+  - [x] 3.3 Status is computed at query time (not stored) — derive from `expiryDate` vs current date
 
-- [ ] **Task 4: Register DogModule** (AC: all)
-  - [ ] 4.1 Create `DogModule` at `libs/api/features/src/lib/dog/dog.module.ts`
-  - [ ] 4.2 Import `R2Service` from document module (or create shared provider)
-  - [ ] 4.3 Register in `ApiFeatures` module (`libs/api/features/src/lib/api-features.ts`)
+- [x] **Task 4: Register DogModule** (AC: all)
+  - [x] 4.1 Create `DogModule` at `libs/api/features/src/lib/dog/dog.module.ts`
+  - [x] 4.2 Import `R2Service` from document module (or create shared provider)
+  - [x] 4.3 Register in `ApiFeatures` module (`libs/api/features/src/lib/api-features.ts`)
 
-- [ ] **Task 5: Backend tests** (AC: all)
-  - [ ] 5.1 Create `vaccine.service.spec.ts` — unit tests for CRUD + status calculation
-  - [ ] 5.2 Create `vaccine.controller.spec.ts` — endpoint tests with auth/ownership mocking
+- [x] **Task 5: Backend tests** (AC: all)
+  - [x] 5.1 Create `vaccine.service.spec.ts` — unit tests for CRUD + status calculation
+  - [x] 5.2 Create `vaccine.controller.spec.ts` — endpoint tests with auth/ownership mocking
 
 ### Frontend
 
-- [ ] **Task 6: Vaccine list & status badge components** (AC: 4, 5, 6)
-  - [ ] 6.1 Create `VaccineStatusBadge` component in `libs/frontend/ui/src/lib/VaccineStatusBadge.tsx`
+- [x] **Task 6: Vaccine list & status badge components** (AC: 4, 5, 6)
+  - [x] 6.1 Create `VaccineStatusBadge` component in `libs/frontend/ui/src/lib/VaccineStatusBadge.tsx`
     - Props: `status: 'UP_TO_DATE' | 'EXPIRING_SOON' | 'EXPIRED'`
     - Green/Orange/Red with text label + aria-label
     - Never color alone — always text + color
-  - [ ] 6.2 Create `VaccineList` component in `libs/frontend/features/src/lib/dogs/VaccineList.tsx`
+  - [x] 6.2 Create `VaccineList` component in `libs/frontend/features/src/lib/dogs/VaccineList.tsx`
     - Shows all vaccines for a dog with status badges
     - "View certificate" link if certificateUrl exists
     - Edit/Delete actions for owner only
 
-- [ ] **Task 7: Add vaccine form** (AC: 1, 2)
-  - [ ] 7.1 Create `VaccineForm` component in `libs/frontend/features/src/lib/dogs/VaccineForm.tsx`
-  - [ ] 7.2 Use React Hook Form + Zod validation (`createVaccineSchema` from `@canifed/shared-types`)
-  - [ ] 7.3 Fields: vaccineName (text input), dateAdministered (date picker), expiryDate (date picker)
-  - [ ] 7.4 Validate on blur, labels above inputs, 16px min font size
-  - [ ] 7.5 On success: toast "Vaccin ajouté", then offer certificate upload
+- [x] **Task 7: Add vaccine form** (AC: 1, 2)
+  - [x] 7.1 Create `VaccineForm` component in `libs/frontend/features/src/lib/dogs/VaccineForm.tsx`
+  - [x] 7.2 Use React Hook Form + Zod validation (`createVaccineSchema` from `@canifed/shared-types`)
+  - [x] 7.3 Fields: vaccineName (text input), dateAdministered (date picker), expiryDate (date picker)
+  - [x] 7.4 Validate on blur, labels above inputs, 16px min font size
+  - [x] 7.5 On success: toast "Vaccin ajouté", then offer certificate upload
 
-- [ ] **Task 8: Certificate upload component** (AC: 3)
-  - [ ] 8.1 Create `CertificateUpload` component in `libs/frontend/features/src/lib/dogs/CertificateUpload.tsx`
-  - [ ] 8.2 Camera-first pattern: prominent camera button ("Prendre en photo"), secondary file picker ("Choisir un fichier")
-  - [ ] 8.3 Use `<input type="file" accept="image/*" capture="environment">` for camera
-  - [ ] 8.4 Photo preview before confirmation with "Retake" option
-  - [ ] 8.5 Upload via `multipart/form-data` POST to certificate endpoint
-  - [ ] 8.6 "Skip" button to save vaccine without certificate
-  - [ ] 8.7 Show progress indicator during upload (exception to skeleton pattern — use progress bar)
+- [x] **Task 8: Certificate upload component** (AC: 3)
+  - [x] 8.1 Create `CertificateUpload` component in `libs/frontend/features/src/lib/dogs/CertificateUpload.tsx`
+  - [x] 8.2 Camera-first pattern: prominent camera button ("Prendre en photo"), secondary file picker ("Choisir un fichier")
+  - [x] 8.3 Use `<input type="file" accept="image/*" capture="environment">` for camera
+  - [x] 8.4 Photo preview before confirmation with "Retake" option
+  - [x] 8.5 Upload via `multipart/form-data` POST to certificate endpoint
+  - [x] 8.6 "Skip" button to save vaccine without certificate
+  - [x] 8.7 Show progress indicator during upload (exception to skeleton pattern — use progress bar)
 
-- [ ] **Task 9: Data access hooks** (AC: all)
-  - [ ] 9.1 Create `useVaccines` hook in `libs/frontend/features/src/lib/dogs/hooks/useVaccines.ts`
-  - [ ] 9.2 TanStack Query keys: `['vaccines', clubId, dogId]` for list, `['vaccines', clubId, dogId, vaccineId]` for single
-  - [ ] 9.3 Mutations for create, update, delete vaccine + upload/delete certificate
-  - [ ] 9.4 Invalidate dog queries on vaccine mutations (overall status changes)
+- [x] **Task 9: Data access hooks** (AC: all)
+  - [x] 9.1 Create `useVaccines` hook in `libs/frontend/features/src/lib/dogs/hooks/useVaccines.ts`
+  - [x] 9.2 TanStack Query keys: `['vaccines', clubId, dogId]` for list, `['vaccines', clubId, dogId, vaccineId]` for single
+  - [x] 9.3 Mutations for create, update, delete vaccine + upload/delete certificate
+  - [x] 9.4 Invalidate dog queries on vaccine mutations (overall status changes)
 
-- [ ] **Task 10: Integration into DogDetail page** (AC: 4, 6)
-  - [ ] 10.1 Add VaccineList to dog detail page (from story 6.1's DogDetail.tsx)
-  - [ ] 10.2 Show dog overall status badge on dog card/profile
-  - [ ] 10.3 "+ Add Vaccine" button visible only to dog owner
+- [x] **Task 10: Integration into DogDetail page** (AC: 4, 6)
+  - [x] 10.1 Add VaccineList to dog detail page (from story 6.1's DogDetail.tsx)
+  - [x] 10.2 Show dog overall status badge on dog card/profile
+  - [x] 10.3 "+ Add Vaccine" button visible only to dog owner
 
-- [ ] **Task 11: Frontend tests** (AC: all)
-  - [ ] 11.1 `VaccineStatusBadge.test.tsx` — renders correct color/text/aria-label for each status
-  - [ ] 11.2 `VaccineForm.test.tsx` — form validation, submission
-  - [ ] 11.3 `CertificateUpload.test.tsx` — file selection, preview, skip flow
+- [x] **Task 11: Frontend tests** (AC: all)
+  - [x] 11.1 `VaccineStatusBadge.test.tsx` — renders correct color/text/aria-label for each status
+  - [x] 11.2 `VaccineForm.test.tsx` — form validation, submission
+  - [x] 11.3 `CertificateUpload.test.tsx` — file selection, preview, skip flow
 
 ## Dev Notes
 
@@ -276,8 +276,44 @@ This story implements generic vaccine tracking. Federation-specific compliance l
 
 ### Agent Model Used
 
+claude-sonnet-4-6
+
 ### Debug Log References
+
+- VaccineStatusBadge labels matched existing story 6.1 test: "À renouveler" / "Manquant / expiré" (not "Expire bientôt" / "Expiré")
+- `<input type="date">` requires `fireEvent.change` in Vitest/jsdom tests, not `userEvent.type`
+- DogDetail.tsx bash heredoc write failed due to single quotes in file content — used Write tool instead
+- Pre-existing test failures in RegisterForm.test.tsx and ClubRegistrationFlow.test.tsx are unrelated to this story
 
 ### Completion Notes List
 
+- VaccineRecord CRUD: GET/POST/PATCH/DELETE at `/dogs/:dogId/vaccines`, all guarded by JwtAuthGuard+ClubGuard with service-level ownership check
+- Certificate upload/delete: POST/DELETE at `/dogs/:dogId/vaccines/:vaccineId/certificate`, MIME+size validated, stored in R2
+- Status calculation in `vaccine-status.util.ts`: boundary at exact `now` → EXPIRING_SOON (not EXPIRED), boundary at `now+30d` → EXPIRING_SOON
+- DogModule registers VaccineController, VaccineService, R2Service and is imported in FeaturesModule
+- Frontend `VaccineView` discriminated union in DogDetail: list → add → certificate (after create), list → edit (update), all transitions explicit
+- `calculateDogOverallStatus` util in `libs/frontend/features/src/lib/dogs/utils/vaccineStatus.ts` works from `VaccineDto.status` (already computed by API)
+- All 30 dog/vaccine frontend tests pass; all 40+ backend dog/vaccine tests pass
+
 ### File List
+
+**New files:**
+- `libs/api/features/src/lib/dog/vaccine-status.util.ts`
+- `libs/api/features/src/lib/dog/vaccine.service.ts`
+- `libs/api/features/src/lib/dog/vaccine.controller.ts`
+- `libs/api/features/src/lib/dog/dog.module.ts`
+- `libs/api/features/src/lib/dog/vaccine.service.spec.ts`
+- `libs/api/features/src/lib/dog/vaccine.controller.spec.ts`
+- `libs/frontend/features/src/lib/dogs/hooks/useVaccines.ts`
+- `libs/frontend/features/src/lib/dogs/VaccineList.tsx`
+- `libs/frontend/features/src/lib/dogs/VaccineForm.tsx`
+- `libs/frontend/features/src/lib/dogs/CertificateUpload.tsx`
+- `libs/frontend/features/src/lib/dogs/VaccineForm.test.tsx`
+- `libs/frontend/features/src/lib/dogs/CertificateUpload.test.tsx`
+- `libs/frontend/features/src/lib/dogs/utils/vaccineStatus.ts`
+
+**Modified files:**
+- `libs/api/features/src/lib/api-features.ts` — added DogModule import
+- `libs/frontend/features/src/lib/dogs/DogDetail.tsx` — integrated VaccineList/VaccineForm/CertificateUpload, overall status badge
+- `libs/frontend/features/src/lib/dogs/DogDetail.test.tsx` — added mocks for useVaccines + vaccine sub-components
+- `libs/frontend/ui/src/lib/VaccineStatusBadge.tsx` — rewritten to match test expectations (variant/count props, French labels)

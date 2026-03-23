@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -91,8 +91,8 @@ describe('VaccineForm', () => {
     renderForm({ onSuccess });
 
     await user.type(screen.getByLabelText(/Nom du vaccin/i), 'DHPP');
-    await user.type(screen.getByLabelText(/Date d'administration/i), '2024-03-01');
-    await user.type(screen.getByLabelText(/Date d'expiration/i), '2025-03-01');
+    fireEvent.change(screen.getByLabelText(/Date d'administration/i), { target: { value: '2024-03-01' } });
+    fireEvent.change(screen.getByLabelText(/Date d'expiration/i), { target: { value: '2025-03-01' } });
     await user.click(screen.getByRole('button', { name: /enregistrer/i }));
 
     await waitFor(() => {
@@ -131,8 +131,8 @@ describe('VaccineForm', () => {
     renderForm();
 
     await user.type(screen.getByLabelText(/Nom du vaccin/i), 'DHPP');
-    await user.type(screen.getByLabelText(/Date d'administration/i), '2024-03-01');
-    await user.type(screen.getByLabelText(/Date d'expiration/i), '2025-03-01');
+    fireEvent.change(screen.getByLabelText(/Date d'administration/i), { target: { value: '2024-03-01' } });
+    fireEvent.change(screen.getByLabelText(/Date d'expiration/i), { target: { value: '2025-03-01' } });
     await user.click(screen.getByRole('button', { name: /enregistrer/i }));
 
     await waitFor(() => {

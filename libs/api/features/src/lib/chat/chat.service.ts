@@ -4,12 +4,17 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '@org/api-core';
+import { randomUUID } from 'crypto';
+import { R2Service } from '../document/r2.service.js';
 
 @Injectable()
 export class ChatService {
   private readonly logger = new Logger(ChatService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly r2Service: R2Service,
+  ) {}
 
   async listChannels(clubId: string) {
     const channels = await this.prisma.chatChannel.findMany({
@@ -47,6 +52,92 @@ export class ChatService {
 
     // Return in chronological order (oldest first)
     return messages.reverse().map((m) => this.mapMessage(m));
+  }
+
+  async getHistory(
+    channelId: string,
+    clubId: string,
+    limit = 50,
+    cursor?: string,
+  ) {
+    await this.verifyChannelBelongsToClub(channelId, clubId);
+
+    const take = Math.min(limit, 100);
+    const where: {
+      channelId: string;
+      createdAt?: { lt: Date };
+    } = { channelId };
+
+    if (cursor) {
+      where.createdAt = { lt: new Date(cursor) };
+    }
+
+    const messages = await this.prisma.chatMessage.findMany({
+      where,
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatarUrl: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: take + 1, // fetch one extra to determine hasMore
+    });
+
+    const hasMore = messages.length > take;
+    const pageMessages = hasMore ? messages.slice(0, take) : messages;
+    // Return in chronological order
+    const ordered = pageMessages.reverse().map((m) => this.mapMessage(m));
+
+    const nextCursor =
+      hasMore && pageMessages[0]
+        ? pageMessages[0].createdAt.toISOString()
+        : null;
+
+    return {
+      data: ordered,
+      meta: { hasMore, nextCursor },
+    };
+  }
+
+  async uploadImage(
+    channelId: string,
+    userId: string,
+    clubId: string,
+    file: Express.Multer.File,
+  ) {
+    await this.verifyChannelBelongsToClub(channelId, clubId);
+
+    const mimeToExt: Record<string, string> = {
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/webp': 'webp',
+    };
+    const ext = mimeToExt[file.mimetype] ?? 'jpg';
+    const key = `${clubId}/chat/${channelId}/${randomUUID()}.${ext}`;
+
+    const signedUrl = await this.r2Service.upload(key, file.buffer, file.mimetype);
+
+    const message = await this.prisma.chatMessage.create({
+      data: { channelId, userId, content: '', imageUrl: signedUrl },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+
+    this.logger.log(`Image message created: ${message.id} in channel ${channelId}`);
+    return this.mapMessage(message);
   }
 
   async createMessage(
@@ -91,6 +182,30 @@ export class ChatService {
     }
 
     return channel;
+  }
+
+  async getMissedMessages(channelId: string, since: Date, clubId: string) {
+    await this.verifyChannelBelongsToClub(channelId, clubId);
+
+    const messages = await this.prisma.chatMessage.findMany({
+      where: {
+        channelId,
+        createdAt: { gt: since },
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatarUrl: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return { data: messages.map((m) => this.mapMessage(m)) };
   }
 
   async ensureGeneralChannel(clubId: string) {

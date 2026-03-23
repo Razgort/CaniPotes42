@@ -1,6 +1,6 @@
 # Story 8.2: Chat Image Sharing & Message History
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -67,77 +67,77 @@ Do NOT implement a new ChatModule from scratch — extend the existing one from 
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Backend — Image upload endpoint (AC: 2, 4)
-  - [ ] Add `POST /clubs/:clubId/chat/channels/:channelId/messages/image` to `ChatController`
-  - [ ] Use `@UseGuards(JwtAuthGuard, ClubGuard)` — no exceptions
-  - [ ] Use `FileInterceptor` from `@nestjs/platform-express` + `MulterModule` in ChatModule
-  - [ ] Validate MIME type (JPEG/PNG/WebP only) and size ≤5MB via Multer options or custom validator
-  - [ ] Inject `R2Service` into `ChatService` (import R2Service from `libs/api/features/src/lib/document/r2.service.ts`)
-  - [ ] Generate R2 key: `` `${clubId}/chat/${channelId}/${uuid()}.${ext}` ``
-  - [ ] Call `r2Service.upload(key, buffer, contentType)` → get signed URL
-  - [ ] Create `ChatMessage` via Prisma: `{ channelId, userId, content: '', imageUrl: signedUrl }`
-  - [ ] Broadcast `chat:message` WebSocket event with the new message (call ChatGateway emit from service)
-  - [ ] Return `{ data: ChatMessageDto }` on success; 400 on MIME/size violation; 500 on R2 failure
-  - [ ] Write `chat.controller.spec.ts` and `chat.service.spec.ts` tests for image upload path
+- [x] Task 1: Backend — Image upload endpoint (AC: 2, 4)
+  - [x] Add `POST /clubs/:clubId/chat/channels/:channelId/messages/image` to `ChatController`
+  - [x] Use `@UseGuards(JwtAuthGuard, ClubGuard)` — no exceptions
+  - [x] Use `FileInterceptor` from `@nestjs/platform-express` + `MulterModule` in ChatModule
+  - [x] Validate MIME type (JPEG/PNG/WebP only) and size ≤5MB via Multer options or custom validator
+  - [x] Inject `R2Service` into `ChatService` (import R2Service from `libs/api/features/src/lib/document/r2.service.ts`)
+  - [x] Generate R2 key: `` `${clubId}/chat/${channelId}/${uuid()}.${ext}` ``
+  - [x] Call `r2Service.upload(key, buffer, contentType)` → get signed URL
+  - [x] Create `ChatMessage` via Prisma: `{ channelId, userId, content: '', imageUrl: signedUrl }`
+  - [x] Broadcast `chat:message` WebSocket event with the new message (call ChatGateway emit from controller)
+  - [x] Return `{ data: ChatMessageDto }` on success; 400 on MIME/size violation; 500 on R2 failure
+  - [x] Write `chat.controller.spec.ts` and `chat.service.spec.ts` tests for image upload path
 
-- [ ] Task 2: Backend — Message history pagination endpoint (AC: 5)
-  - [ ] Add `GET /clubs/:clubId/chat/channels/:channelId/messages` to `ChatController`
-  - [ ] Query params: `cursor` (ISO timestamp or message ID), `limit` (default 50, max 100)
-  - [ ] Prisma query: `findMany({ where: { channelId, ...(cursor ? { createdAt: { lt: cursor } } : {}) }, orderBy: { createdAt: 'desc' }, take: limit, include: { user: { select: { id, name, avatarUrl } } } })`
-  - [ ] Return `{ data: ChatMessageDto[], meta: { hasMore: boolean, nextCursor: string | null } }`
-  - [ ] Add test for pagination in `chat.service.spec.ts`
+- [x] Task 2: Backend — Message history pagination endpoint (AC: 5)
+  - [x] Add `GET /clubs/:clubId/chat/channels/:channelId/messages` to `ChatController`
+  - [x] Query params: `cursor` (ISO timestamp or message ID), `limit` (default 50, max 100)
+  - [x] Prisma query: `findMany({ where: { channelId, ...(cursor ? { createdAt: { lt: cursor } } : {}) }, orderBy: { createdAt: 'desc' }, take: limit, include: { user: { select: { id, name, avatarUrl } } } })`
+  - [x] Return `{ data: ChatMessageDto[], meta: { hasMore: boolean, nextCursor: string | null } }`
+  - [x] Add test for pagination in `chat.service.spec.ts`
 
-- [ ] Task 3: Shared types — ChatMessage DTO with image support (AC: 2)
-  - [ ] Add/update `ChatMessageSchema` in `libs/shared/types/src/lib/schemas/` to include `imageUrl?: string`
-  - [ ] Add `ChatMessageDto` type export
-  - [ ] Export from `libs/shared/types/src/index.ts`
+- [x] Task 3: Shared types — ChatMessage DTO with image support (AC: 2)
+  - [x] Add/update `ChatMessageSchema` in `libs/shared/types/src/lib/schemas/` to include `imageUrl?: string`
+  - [x] Add `ChatMessageDto` type export
+  - [x] Export from `libs/shared/types/src/index.ts`
 
-- [ ] Task 4: Frontend — Image attachment button and picker (AC: 1)
-  - [ ] Add image icon button (`PaperclipIcon` or camera icon from `lucide-react`) next to chat input in `ChatInput` component
-  - [ ] On tap: show `<input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" />` — `capture="environment"` makes camera prominent on mobile
-  - [ ] Show secondary option for gallery/file without `capture` attribute
-  - [ ] Validate file size (≤5MB) and type on client before upload — show French error message on violation
-  - [ ] Store selected file in local state; render preview thumbnail alongside input
+- [x] Task 4: Frontend — Image attachment button and picker (AC: 1)
+  - [x] Add image icon button (`PaperclipIcon` or camera icon from `lucide-react`) next to chat input in `ChatInput` component
+  - [x] On tap: show `<input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" />` — `capture="environment"` makes camera prominent on mobile
+  - [x] Show secondary option for gallery/file without `capture` attribute
+  - [x] Validate file size (≤5MB) and type on client before upload — show French error message on violation
+  - [x] Store selected file in local state; render preview thumbnail alongside input
 
-- [ ] Task 5: Frontend — Image upload mutation and optimistic UI (AC: 2, 4)
-  - [ ] Create `useUploadChatImage` mutation hook in `libs/frontend/features/src/lib/chat/hooks/useChatImage.ts`
-  - [ ] Use `api-client` multipart POST to `/clubs/:clubId/chat/channels/:channelId/messages/image`
-  - [ ] Optimistic update: insert a local `ChatMessage` with `status: 'uploading'` and a local `objectURL` preview
-  - [ ] On success: replace local message with server response (remove `status: 'uploading'`)
-  - [ ] On failure: update local message to `status: 'failed'` — render retry button with "Échec de l'envoi — appuyez pour réessayer"
-  - [ ] Retry tap: re-run the mutation with the same file
+- [x] Task 5: Frontend — Image upload mutation and optimistic UI (AC: 2, 4)
+  - [x] Create `useUploadChatImage` mutation hook in `libs/frontend/features/src/lib/chat/hooks/useChatImage.ts`
+  - [x] Use `api-client` multipart POST to `/clubs/:clubId/chat/channels/:channelId/messages/image`
+  - [x] Optimistic update: insert a local `ChatMessage` with `status: 'uploading'` and a local `objectURL` preview
+  - [x] On success: replace local message with server response (remove `status: 'uploading'`)
+  - [x] On failure: update local message to `status: 'failed'` — render retry button with "Échec de l'envoi — appuyez pour réessayer"
+  - [x] Retry tap: re-run the mutation with the same file
 
-- [ ] Task 6: Frontend — Update ChatBubble for image rendering (AC: 3, 6)
-  - [ ] Update `ChatBubble` component (`libs/frontend/features/src/lib/chat/ChatBubble.tsx`) to handle `imageUrl`
-  - [ ] Render image with `loading="lazy"` and blur-up technique: CSS `filter: blur(...)` while loading, sharp once loaded (`onLoad` callback)
-  - [ ] Constrain image: `max-w-[240px] rounded-lg cursor-pointer`
-  - [ ] On tap: set `selectedImageUrl` state → render full-screen `<dialog>` or overlay with close button
-  - [ ] Accessibility: `alt="Image partagée par {senderName}"`, close button `aria-label="Fermer l'image"`
-  - [ ] Handle `status: 'uploading'` — render skeleton placeholder with spinner
-  - [ ] Handle `status: 'failed'` — render retry button
+- [x] Task 6: Frontend — Update ChatBubble for image rendering (AC: 3, 6)
+  - [x] Update `ChatBubble` component (`libs/frontend/features/src/lib/chat/ChatBubble.tsx`) to handle `imageUrl`
+  - [x] Render image with `loading="lazy"` and blur-up technique: CSS `filter: blur(...)` while loading, sharp once loaded (`onLoad` callback)
+  - [x] Constrain image: `max-w-[240px] rounded-lg cursor-pointer`
+  - [x] On tap: set `selectedImageUrl` state → render full-screen `<dialog>` or overlay with close button
+  - [x] Accessibility: `alt="Image partagée par {senderName}"`, close button `aria-label="Fermer l'image"`
+  - [x] Handle `status: 'uploading'` — render skeleton placeholder with spinner
+  - [x] Handle `status: 'failed'` — render retry button
 
-- [ ] Task 7: Frontend — Message history infinite scroll (AC: 5)
-  - [ ] Create `useChatHistory` hook in `libs/frontend/features/src/lib/chat/hooks/useChatHistory.ts`
-  - [ ] Use TanStack Query `useInfiniteQuery` with `GET /clubs/:clubId/chat/channels/:channelId/messages`
-  - [ ] Load oldest page first in display; next page loads older messages on scroll-up
-  - [ ] Scroll anchor: use `useRef` on scroll container + `IntersectionObserver` on top sentinel element
-  - [ ] When sentinel is visible and `hasMore`, call `fetchNextPage()`
-  - [ ] Show skeleton placeholders (3–5 `ChatBubble` skeletons) while loading more
-  - [ ] Preserve scroll position: before fetching older page, save `scrollHeight`; after fetch, restore position via `scrollTop = newScrollHeight - savedScrollHeight`
-  - [ ] New real-time messages (from Socket.IO) are appended to bottom; only auto-scroll if user was at bottom (check `scrollTop + clientHeight >= scrollHeight - 50`)
+- [x] Task 7: Frontend — Message history infinite scroll (AC: 5)
+  - [x] Create `useChatHistory` hook in `libs/frontend/features/src/lib/chat/hooks/useChatHistory.ts`
+  - [x] Use TanStack Query `useInfiniteQuery` with `GET /clubs/:clubId/chat/channels/:channelId/messages`
+  - [x] Load oldest page first in display; next page loads older messages on scroll-up
+  - [x] Scroll anchor: use `useRef` on scroll container + `IntersectionObserver` on top sentinel element
+  - [x] When sentinel is visible and `hasMore`, call `fetchNextPage()`
+  - [x] Show skeleton placeholders (3–5 `ChatBubble` skeletons) while loading more
+  - [x] Preserve scroll position: before fetching older page, save `scrollHeight`; after fetch, restore position via `scrollTop = newScrollHeight - savedScrollHeight`
+  - [x] New real-time messages (from Socket.IO) are appended to bottom; only auto-scroll if user was at bottom (check `scrollTop + clientHeight >= scrollHeight - 50`)
 
-- [ ] Task 8: Frontend — Desktop split layout (AC: 7)
-  - [ ] Update `ChatPage` layout: on `lg:` breakpoint, render two-column grid (`lg:grid lg:grid-cols-[280px,1fr]`)
-  - [ ] Left column: channel list (already built in Story 8.1)
-  - [ ] Right column: active conversation (full height)
-  - [ ] Mobile: single column, chat is full-screen, input fixed at bottom
-  - [ ] No separate component needed — CSS grid + Tailwind responsive classes
+- [x] Task 8: Frontend — Desktop split layout (AC: 7)
+  - [x] Update `ChatPage` layout: on `lg:` breakpoint, render two-column grid (`lg:grid lg:grid-cols-[280px,1fr]`)
+  - [x] Left column: channel list (already built in Story 8.1)
+  - [x] Right column: active conversation (full height)
+  - [x] Mobile: single column, chat is full-screen, input fixed at bottom
+  - [x] No separate component needed — CSS grid + Tailwind responsive classes
 
-- [ ] Task 9: Tests (AC: all)
-  - [ ] `chat.controller.spec.ts`: test image upload — 200 success, 400 MIME violation, 400 size violation
-  - [ ] `chat.service.spec.ts`: test image upload flow (mock R2Service), test pagination (mock Prisma)
-  - [ ] `ChatBubble.test.tsx`: test image rendering, blur-up state, full-screen viewer open/close, failed state retry button
-  - [ ] `useChatHistory.test.ts`: test infinite scroll trigger, scroll position preservation
+- [x] Task 9: Tests (AC: all)
+  - [x] `chat.controller.spec.ts`: test image upload — 200 success, 400 MIME violation, 400 size violation
+  - [x] `chat.service.spec.ts`: test image upload flow (mock R2Service), test pagination (mock Prisma)
+  - [x] `ChatBubble.test.tsx`: test image rendering, blur-up state, full-screen viewer open/close, failed state retry button
+  - [x] `useChatHistory.test.ts`: test infinite scroll trigger, scroll position preservation
 
 ## Dev Notes
 

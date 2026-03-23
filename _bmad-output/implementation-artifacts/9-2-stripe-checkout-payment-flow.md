@@ -1,6 +1,6 @@
 # Story 9.2: Stripe Checkout Payment Flow
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 

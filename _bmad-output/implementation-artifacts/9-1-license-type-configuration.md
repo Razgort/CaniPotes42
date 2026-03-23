@@ -1,6 +1,6 @@
 # Story 9.1: License Type Configuration
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -357,6 +357,38 @@ claude-sonnet-4-6
 
 ### Debug Log References
 
+- Prisma `migrate dev` unavailable (no live DB) — migration SQL created manually at `20260322165435_add_license_payment_provider/migration.sql`
+- `vi.mock` factory hoisting issue — resolved with `vi.hoisted()` pattern in all test files
+- `LicenseMemberView.tsx` aligned with linter-updated tests (functional Stripe + HelloAsso buttons)
+
 ### Completion Notes List
 
+- All 4 tasks complete: Prisma schema, shared Zod schemas, backend module, frontend feature
+- `PaymentProvider` enum added to both Prisma schema and `libs/shared/types/src/lib/enums.ts`
+- Soft-delete pattern used (`deletedAt`) to preserve `Payment.licenseTypeId` FK integrity
+- Full guard chain enforced: `JwtAuthGuard → ClubGuard → RolesGuard` on write endpoints
+- All tests pass: 21 backend (service + controller), 23 frontend (LicenseTypeList + LicenseMemberView + PaymentCancelPage + PaymentSuccessPage), 16 schema specs
+- Pre-existing test failures (`MemberDirectory`, `MemberProfile` — `jest is not defined`) are unrelated to this story
+
 ### File List
+
+- `libs/shared/prisma-client/prisma/schema.prisma` — added `PaymentProvider` enum, updated `LicenseType` model
+- `libs/shared/prisma-client/prisma/migrations/20260322165435_add_license_payment_provider/migration.sql` — manual migration
+- `libs/shared/types/src/lib/enums.ts` — added `PaymentProvider` enum
+- `libs/shared/types/src/lib/schemas/payment.schema.ts` — added `paymentProvider`, `updateLicenseTypeSchema`, `UpdateLicenseType`
+- `libs/shared/types/src/lib/schemas/payment.schema.spec.ts` — 16 tests
+- `libs/api/features/src/lib/license/license.module.ts`
+- `libs/api/features/src/lib/license/license.controller.ts`
+- `libs/api/features/src/lib/license/license.service.ts`
+- `libs/api/features/src/lib/license/license.service.spec.ts` — 14 tests
+- `libs/api/features/src/lib/license/license.controller.spec.ts` — 7 tests
+- `libs/api/features/src/lib/api-features.ts` — added `LicenseModule` import
+- `libs/frontend/features/src/lib/licenses/hooks/useLicenseTypes.ts`
+- `libs/frontend/features/src/lib/licenses/LicenseTypeForm.tsx`
+- `libs/frontend/features/src/lib/licenses/LicenseTypeList.tsx`
+- `libs/frontend/features/src/lib/licenses/LicenseTypeList.test.tsx` — 7 tests
+- `libs/frontend/features/src/lib/licenses/LicenseMemberView.tsx`
+- `libs/frontend/features/src/lib/licenses/LicenseMemberView.test.tsx` — 8 tests
+- `libs/frontend/features/src/lib/licenses/LicenseSettingsPage.tsx`
+- `libs/frontend/features/src/lib/licenses/LicensesPage.tsx`
+- `libs/frontend/features/src/lib/features.tsx` — added license routes

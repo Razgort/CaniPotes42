@@ -11,7 +11,7 @@ export default defineConfig(() => ({
     conditions: ['@org/source'],
   },
   plugins: [
-    react(),
+    react({ jsxRuntime: 'automatic' }),
     dts({
       entryRoot: 'src',
       tsconfigPath: path.join(import.meta.dirname, 'tsconfig.lib.json'),

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@org/data-access';
 import { DateGroupHeader, SkeletonCard } from '@org/ui';
 import { useEvents } from './hooks/useEvents';
@@ -16,6 +17,7 @@ const FILTER_OPTIONS = [
 
 export default function EventFeed() {
   const { role } = useAuth();
+  const navigate = useNavigate();
   const isAdmin = role === 'ADMIN' || role === 'OWNER';
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(undefined);
 
@@ -78,6 +80,7 @@ export default function EventFeed() {
                 </p>
                 <button
                   type="button"
+                  onClick={() => navigate('/events/new')}
                   className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                 >
                   <Plus className="h-4 w-4" />
@@ -108,6 +111,18 @@ export default function EventFeed() {
           </div>
         )}
       </div>
+
+      {/* FAB — create new event (admin/owner only) */}
+      {isAdmin && !isEmpty && (
+        <button
+          type="button"
+          onClick={() => navigate('/events/new')}
+          aria-label="Créer un événement"
+          className="fixed bottom-20 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 active:scale-95 md:bottom-6"
+        >
+          <Plus className="h-6 w-6" />
+        </button>
+      )}
 
       {/* Desktop map sidebar placeholder (Story 5.3) */}
       <div className="hidden lg:block lg:w-80 xl:w-96">

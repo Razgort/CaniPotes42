@@ -135,6 +135,37 @@ export class ChatGateway
     }
   }
 
+  @SubscribeMessage('chat:leave-channel')
+  async handleLeaveChannel(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { channelId: string },
+  ) {
+    try {
+      const clubId = client.data['clubId'] as string | undefined;
+
+      if (!clubId) {
+        client.emit('chat:error', { message: 'Not authenticated' });
+        return { error: 'Not authenticated' };
+      }
+
+      if (!data?.channelId) {
+        client.emit('chat:error', { message: 'Invalid payload' });
+        return { error: 'Invalid payload' };
+      }
+
+      const room = `club:${clubId}:channel:${data.channelId}`;
+      await client.leave(room);
+      this.logger.log(
+        `Client ${client.id} left room ${room}`,
+      );
+      return { channelId: data.channelId };
+    } catch (err) {
+      const errMsg = (err as Error).message;
+      client.emit('chat:error', { message: errMsg });
+      return { error: errMsg };
+    }
+  }
+
   @SubscribeMessage('chat:join-channel')
   async handleJoinChannel(
     @ConnectedSocket() client: Socket,

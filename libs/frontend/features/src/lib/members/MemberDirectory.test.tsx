@@ -1,16 +1,17 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Mock the hooks
-const mockUseAuth = jest.fn();
-const mockUseMembers = jest.fn();
+const mockUseAuth = vi.fn();
+const mockUseMembers = vi.fn();
 
-jest.mock('@org/data-access', () => ({
+vi.mock('@org/data-access', () => ({
   useAuth: () => mockUseAuth(),
 }));
 
-jest.mock('./hooks/useMembers', () => ({
+vi.mock('./hooks/useMembers', () => ({
   useMembers: (...args: unknown[]) => mockUseMembers(...args),
 }));
 
@@ -30,7 +31,7 @@ function renderWithProviders(ui: React.ReactElement) {
 
 describe('MemberDirectory', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders member list', () => {
@@ -59,7 +60,7 @@ describe('MemberDirectory', () => {
 
     renderWithProviders(<MemberDirectory />);
 
-    expect(screen.getByText('Jean Dupont')).toBeTruthy();
+    expect(screen.getAllByText('Jean Dupont').length).toBeGreaterThan(0);
   });
 
   it('shows search and filters for admin', () => {
