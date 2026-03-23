@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CaniFed — Design Direction Showcase</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #2563EB;
+    --primary-hover: #1D4ED8;
+    --primary-light: #DBEAFE;
+    --primary-fg: #FFFFFF;
+    --accent: #F97316;
+    --accent-hover: #EA580C;
+    --accent-light: #FFF7ED;
+    --success: #16A34A;
+    --success-light: #DCFCE7;
+    --warning: #D97706;
+    --warning-light: #FEF3C7;
+    --danger: #DC2626;
+    --danger-light: #FEE2E2;
+    --bg: #FAFAFA;
+    --card: #FFFFFF;
+    --muted: #71717A;
+    --muted-fg: #A1A1AA;
+    --border: #E4E4E7;
+    --fg: #18181B;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#111; color:#fff; }
+
+  /* Navigation */
+  .nav { position:fixed; top:0; left:0; right:0; z-index:100; background:rgba(17,17,17,0.95); backdrop-filter:blur(10px); border-bottom:1px solid #333; padding:12px 24px; display:flex; align-items:center; gap:16px; }
+  .nav h1 { font-size:18px; font-weight:700; color:var(--accent); }
+  .nav-tabs { display:flex; gap:4px; margin-left:auto; flex-wrap:wrap; }
+  .nav-tab { padding:6px 14px; border-radius:6px; border:1px solid #444; background:transparent; color:#aaa; cursor:pointer; font-size:13px; font-family:inherit; transition:all .2s; }
+  .nav-tab:hover { border-color:#666; color:#fff; }
+  .nav-tab.active { background:var(--primary); border-color:var(--primary); color:#fff; }
+
+  /* Sections */
+  .section { display:none; padding:80px 24px 40px; min-height:100vh; }
+  .section.active { display:block; }
+  .section-title { font-size:28px; font-weight:700; margin-bottom:8px; }
+  .section-subtitle { font-size:15px; color:#999; margin-bottom:32px; max-width:700px; }
+
+  /* Phone Frame */
+  .phone-row { display:flex; gap:32px; flex-wrap:wrap; justify-content:center; margin-top:24px; }
+  .phone-wrapper { text-align:center; }
+  .phone-label { font-size:13px; color:#888; margin-bottom:8px; }
+  .phone { width:375px; height:812px; border-radius:40px; border:3px solid #333; background:var(--bg); overflow:hidden; position:relative; color:var(--fg); font-size:14px; display:flex; flex-direction:column; }
+  .phone.dark { background:#0F172A; color:#E2E8F0; --card:#1E293B; --border:#334155; --muted:#94A3B8; --bg:#0F172A; }
+
+  /* Phone Header */
+  .p-header { background:var(--card); border-bottom:1px solid var(--border); padding:12px 16px; display:flex; align-items:center; gap:12px; flex-shrink:0; }
+  .p-header .club-logo { width:32px; height:32px; border-radius:8px; background:var(--primary); display:flex; align-items:center; justify-content:center; color:white; font-size:14px; font-weight:700; }
+  .p-header .club-name { font-weight:600; font-size:16px; flex:1; }
+  .p-header .club-switcher { font-size:12px; color:var(--muted); display:flex; align-items:center; gap:4px; cursor:pointer; }
+  .p-header .club-switcher svg { width:12px; height:12px; }
+
+  /* Phone Content */
+  .p-content { flex:1; overflow-y:auto; padding:12px 16px; display:flex; flex-direction:column; gap:12px; }
+
+  /* Event Cards */
+  .event-card { background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  .event-card .map-thumb { height:120px; background:linear-gradient(135deg, #DBEAFE 0%, #93C5FD 100%); position:relative; display:flex; align-items:center; justify-content:center; }
+  .event-card .map-thumb .pin { width:32px; height:32px; background:var(--danger); border-radius:50% 50% 50% 0; transform:rotate(-45deg); display:flex; align-items:center; justify-content:center; }
+  .event-card .map-thumb .pin-inner { width:12px; height:12px; background:white; border-radius:50%; transform:rotate(45deg); }
+  .event-card .map-thumb .nav-btn { position:absolute; bottom:8px; right:8px; background:var(--accent); color:white; border:none; padding:8px 16px; border-radius:8px; font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; display:flex; align-items:center; gap:6px; }
+  .event-card-body { padding:12px; }
+  .event-card-body .event-title { font-weight:600; font-size:15px; margin-bottom:4px; }
+  .event-card-body .event-meta { font-size:12px; color:var(--muted); display:flex; gap:12px; margin-bottom:8px; }
+  .event-card-body .event-rsvp { display:flex; gap:6px; align-items:center; }
+  .rsvp-btn { padding:6px 12px; border-radius:6px; border:1px solid var(--border); background:transparent; font-size:12px; font-family:inherit; cursor:pointer; color:var(--fg); }
+  .rsvp-btn.active { background:var(--primary); border-color:var(--primary); color:white; }
+  .rsvp-count { font-size:12px; color:var(--muted); margin-left:auto; }
+  .draft-badge { display:inline-block; padding:2px 8px; border-radius:4px; background:var(--warning-light); color:var(--warning); font-size:11px; font-weight:600; margin-left:8px; }
+
+  /* Bottom Tab Bar */
+  .p-tabbar { display:flex; background:var(--card); border-top:1px solid var(--border); padding:8px 0 20px; flex-shrink:0; }
+  .p-tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; font-size:10px; color:var(--muted); cursor:pointer; padding:4px; }
+  .p-tab.active { color:var(--primary); }
+  .p-tab svg { width:22px; height:22px; }
+  .p-tab .badge { position:relative; }
+  .p-tab .badge::after { content:'3'; position:absolute; top:-6px; right:-10px; background:var(--accent); color:white; font-size:9px; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:600; }
+
+  /* Vaccine Dashboard */
+  .vacc-summary { display:flex; gap:8px; margin-bottom:12px; }
+  .vacc-stat { flex:1; padding:12px; border-radius:8px; text-align:center; }
+  .vacc-stat.green { background:var(--success-light); color:var(--success); }
+  .vacc-stat.orange { background:var(--warning-light); color:var(--warning); }
+  .vacc-stat.red { background:var(--danger-light); color:var(--danger); }
+  .vacc-stat .num { font-size:24px; font-weight:700; }
+  .vacc-stat .label { font-size:11px; font-weight:500; }
+
+  .vacc-row { display:flex; align-items:center; gap:12px; padding:12px; background:var(--card); border:1px solid var(--border); border-radius:8px; }
+  .vacc-avatar { width:40px; height:40px; border-radius:50%; background:var(--primary-light); display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .vacc-info { flex:1; }
+  .vacc-name { font-weight:600; font-size:14px; }
+  .vacc-owner { font-size:12px; color:var(--muted); }
+  .vacc-badge { padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+  .vacc-badge.green { background:var(--success-light); color:var(--success); }
+  .vacc-badge.orange { background:var(--warning-light); color:var(--warning); }
+  .vacc-badge.red { background:var(--danger-light); color:var(--danger); }
+
+  /* Chat */
+  .chat-msg { display:flex; gap:8px; align-items:flex-end; }
+  .chat-msg.sent { flex-direction:row-reverse; }
+  .chat-avatar { width:28px; height:28px; border-radius:50%; background:var(--primary-light); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; color:var(--primary); flex-shrink:0; }
+  .chat-bubble { max-width:260px; padding:8px 12px; border-radius:16px; font-size:14px; line-height:1.4; }
+  .chat-msg:not(.sent) .chat-bubble { background:var(--card); border:1px solid var(--border); border-bottom-left-radius:4px; }
+  .chat-msg.sent .chat-bubble { background:var(--primary); color:white; border-bottom-right-radius:4px; }
+  .chat-sender { font-size:11px; font-weight:600; color:var(--primary); margin-bottom:2px; }
+  .chat-time { font-size:10px; color:var(--muted); margin-top:2px; }
+  .chat-img { width:200px; height:140px; border-radius:12px; background:linear-gradient(135deg,#DBEAFE,#93C5FD); margin-top:4px; display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--primary); }
+
+  /* Onboarding */
+  .onb-step { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:24px; text-align:center; }
+  .onb-icon { width:64px; height:64px; border-radius:50%; background:var(--primary-light); display:flex; align-items:center; justify-content:center; font-size:28px; margin:0 auto 16px; }
+  .onb-title { font-size:20px; font-weight:700; margin-bottom:8px; }
+  .onb-desc { font-size:14px; color:var(--muted); margin-bottom:20px; line-height:1.5; }
+  .onb-input { width:100%; padding:12px 16px; border:1px solid var(--border); border-radius:8px; font-size:16px; font-family:inherit; margin-bottom:12px; background:var(--bg); color:var(--fg); }
+  .onb-btn { width:100%; padding:14px; background:var(--primary); color:white; border:none; border-radius:8px; font-size:16px; font-weight:600; font-family:inherit; cursor:pointer; }
+  .onb-btn:hover { background:var(--primary-hover); }
+  .onb-progress { display:flex; gap:6px; justify-content:center; margin-bottom:20px; }
+  .onb-dot { width:8px; height:8px; border-radius:50%; background:var(--border); }
+  .onb-dot.active { background:var(--primary); }
+  .onb-dot.done { background:var(--success); }
+
+  /* Club Switcher */
+  .switcher-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.5); z-index:10; display:flex; align-items:flex-start; padding-top:56px; }
+  .switcher-panel { background:var(--card); width:100%; border-radius:0 0 16px 16px; padding:16px; }
+  .switcher-title { font-size:13px; font-weight:600; color:var(--muted); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px; }
+  .switcher-item { display:flex; align-items:center; gap:12px; padding:10px; border-radius:8px; cursor:pointer; }
+  .switcher-item:hover { background:var(--bg); }
+  .switcher-item.active { background:var(--primary-light); }
+  .switcher-item .club-logo { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:14px; font-weight:700; }
+  .switcher-item .club-info { flex:1; }
+  .switcher-item .club-info .name { font-weight:600; font-size:14px; }
+  .switcher-item .club-info .type { font-size:12px; color:var(--muted); }
+  .switcher-check { color:var(--primary); font-size:18px; }
+
+  /* Admin Desktop */
+  .desktop-frame { width:100%; max-width:1200px; margin:0 auto; background:var(--bg); border-radius:12px; border:2px solid #333; overflow:hidden; color:var(--fg); font-size:14px; }
+  .desktop-layout { display:flex; min-height:700px; }
+  .desktop-sidebar { width:240px; background:var(--card); border-right:1px solid var(--border); padding:16px; flex-shrink:0; }
+  .desktop-sidebar .logo-area { display:flex; align-items:center; gap:10px; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+  .desktop-sidebar .logo-area .club-logo { width:36px; height:36px; border-radius:8px; background:var(--primary); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; }
+  .desktop-sidebar .logo-area .club-name { font-weight:600; font-size:15px; }
+  .sidebar-nav { display:flex; flex-direction:column; gap:2px; }
+  .sidebar-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; cursor:pointer; font-size:14px; color:var(--muted); }
+  .sidebar-item:hover { background:var(--bg); color:var(--fg); }
+  .sidebar-item.active { background:var(--primary-light); color:var(--primary); font-weight:600; }
+  .sidebar-item svg { width:18px; height:18px; }
+  .desktop-main { flex:1; padding:24px 32px; overflow-y:auto; }
+  .desktop-main h2 { font-size:22px; font-weight:700; margin-bottom:4px; }
+  .desktop-main .subtitle { font-size:14px; color:var(--muted); margin-bottom:24px; }
+
+  /* Data Table */
+  .data-table { width:100%; border-collapse:collapse; }
+  .data-table th { text-align:left; padding:10px 12px; font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid var(--border); }
+  .data-table td { padding:12px; border-bottom:1px solid var(--border); }
+  .data-table tr:hover td { background:var(--bg); }
+
+  /* Comparison section */
+  .compare-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:24px; }
+  @media (max-width:900px) { .compare-grid { grid-template-columns:1fr; } .phone-row { flex-direction:column; align-items:center; } }
+
+  .direction-card { background:#1a1a1a; border:1px solid #333; border-radius:12px; padding:20px; }
+  .direction-card h3 { font-size:16px; font-weight:600; margin-bottom:8px; color:var(--accent); }
+  .direction-card p { font-size:13px; color:#999; line-height:1.5; }
+  .direction-card ul { font-size:13px; color:#ccc; list-style:none; margin-top:8px; }
+  .direction-card ul li::before { content:'→ '; color:var(--accent); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <h1>CaniFed Design Directions</h1>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showSection('overview')">Overview</button>
+    <button class="nav-tab" onclick="showSection('events')">Events Feed</button>
+    <button class="nav-tab" onclick="showSection('event-detail')">Event Detail</button>
+    <button class="nav-tab" onclick="showSection('vaccine')">Vaccine Dashboard</button>
+    <button class="nav-tab" onclick="showSection('chat')">Chat</button>
+    <button class="nav-tab" onclick="showSection('onboarding')">Onboarding</button>
+    <button class="nav-tab" onclick="showSection('switcher')">Club Switcher</button>
+    <button class="nav-tab" onclick="showSection('admin')">Admin Desktop</button>
+  </div>
+</nav>
+
+<!-- OVERVIEW -->
+<section id="overview" class="section active">
+  <h2 class="section-title">CaniFed — Design Direction Showcase</h2>
+  <p class="section-subtitle">Explore each screen to see how the Blue + Coral palette, Inter typography, and our UX patterns come together. Each view demonstrates a key user flow.</p>
+
+  <div class="compare-grid">
+    <div class="direction-card">
+      <h3>Direction A: Clean & Airy</h3>
+      <p>Generous whitespace, card-based layout, prominent map thumbnails. Feels spacious and calm. Best for Patrick (low cognitive load).</p>
+      <ul>
+        <li>Large cards with map previews</li>
+        <li>Generous spacing between elements</li>
+        <li>Prominent Navigate button (coral)</li>
+        <li>Minimal information per card</li>
+      </ul>
+    </div>
+    <div class="direction-card">
+      <h3>Direction B: Information-Dense</h3>
+      <p>Compact cards, more events visible per scroll. Efficient for Julie (power user) and Perrine (admin scanning 30 events/month).</p>
+      <ul>
+        <li>Smaller cards, more visible at once</li>
+        <li>RSVP counts inline</li>
+        <li>Draft badges visible in feed</li>
+        <li>Date grouping headers</li>
+      </ul>
+    </div>
+    <div class="direction-card">
+      <h3>Direction C: Map-Forward</h3>
+      <p>Map takes center stage on event detail. Navigate button is the hero element. Optimized for the "Tap → Navigate → Arrive" flow.</p>
+      <ul>
+        <li>Full-width map on event detail</li>
+        <li>Floating Navigate button</li>
+        <li>Location name prominent</li>
+        <li>Waze/Google Maps icon on button</li>
+      </ul>
+    </div>
+    <div class="direction-card">
+      <h3>Direction D: Dashboard-First (Admin)</h3>
+      <p>Desktop admin view with sidebar navigation, data tables, and vaccine status at a glance. Marie's competition-day view.</p>
+      <ul>
+        <li>Sidebar navigation with sections</li>
+        <li>Summary cards with counts</li>
+        <li>Color-coded status table</li>
+        <li>Filter/search prominent</li>
+      </ul>
+    </div>
+    <div class="direction-card">
+      <h3>Direction E: Community-Warm</h3>
+      <p>Chat-forward design with member presence, avatars everywhere, "who's going" prominent. Feels like the club, not a tool.</p>
+      <ul>
+        <li>Member avatars on event cards</li>
+        <li>Chat integrated with events</li>
+        <li>"Who's going" expanded by default</li>
+        <li>Club logo and identity prominent</li>
+      </ul>
+    </div>
+    <div class="direction-card">
+      <h3>Direction F: Guided Onboarding</h3>
+      <p>Step-by-step club setup for Aude. Minimal fields, progress dots, encouraging copy. The "I did this myself" moment.</p>
+      <ul>
+        <li>Single question per screen</li>
+        <li>Progress indicators</li>
+        <li>Friendly, encouraging tone</li>
+        <li>Skip options for optional fields</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- EVENTS FEED -->
+<section id="events" class="section">
+  <h2 class="section-title">Events Feed — Mobile</h2>
+  <p class="section-subtitle">Direction A (Clean & Airy) vs Direction B (Information-Dense). Both use bottom tab navigation, card-based feeds, and the Blue + Coral palette.</p>
+
+  <div class="phone-row">
+    <div class="phone-wrapper">
+      <div class="phone-label">Direction A: Clean & Airy</div>
+      <div class="phone">
+        <div class="p-header">
+          <div class="club-logo">CF</div>
+          <div>
+            <div class="club-name">cani'potes 42</div>
+            <div class="club-switcher">FFSLC <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg></div>
+          </div>
+        </div>
+        <div class="p-content">
+          <div style="font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">This Week</div>
+          <div class="event-card">
+            <div class="map-thumb">
+              <div class="pin"><div class="pin-inner"></div></div>
+              <div class="nav-btn">Navigate</div>
+            </div>
+            <div class="event-card-body">
+              <div class="event-title">Canitrail — Forêt de Bonson</div>
+              <div class="event-meta">
+                <span>Sun 23 Mar · 9:00</span>
+                <span>📍 Bonson</span>
+              </div>
+              <div class="event-rsvp">
+                <button class="rsvp-btn active">Going</button>
+                <button class="rsvp-btn">Maybe</button>
+                <span class="rsvp-count">12 going</span>
+              </div>
+            </div>
+          </div>
+          <div class="event-card">
+            <div class="event-card-body">
+              <div class="event-title">Canirando du dimanche<span class="draft-badge">Draft</span></div>
+              <div class="event-meta">
+                <span>Sun 30 Mar · 14:00</span>
+                <span>📍 Saint-Étienne</span>
+              </div>
+              <div class="event-rsvp">
+                <span class="rsvp-count" style="margin-left:0">Admin only — not published</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="p-tabbar">
+          <div class="p-tab active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Events
+          </div>
+          <div class="p-tab">
+            <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span>
+            Chat
+          </div>
+          <div class="p-tab">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" opacity="0.3"/></svg>
+            Dogs
+          </div>
+          <div class="p-tab">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Profile
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone-wrapper">
+      <div class="phone-label">Direction B: Information-Dense</div>
+      <div class="phone">
+        <div class="p-header">
+          <div class="club-logo">CF</div>
+          <div>
+            <div class="club-name">cani'potes 42</div>
+            <div class="club-switcher">FFSLC <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg></div>
+          </div>
+        </div>
+        <div class="p-content">
+          <div style="font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Sunday 23 March</div>
+          <div class="event-card">
+            <div class="event-card-body" style="display:flex;gap:12px;align-items:center;">
+              <div style="width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,#DBEAFE,#93C5FD);display:flex;align-items:center;justify-content:center;flex-shrink:0;">📍</div>
+              <div style="flex:1;min-width:0;">
+                <div class="event-title" style="font-size:14px;">Canitrail — Forêt de Bonson</div>
+                <div class="event-meta" style="margin-bottom:0;">
+                  <span>9:00</span>
+                  <span>12 going</span>
+                  <span style="color:var(--success);">✓ Going</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="event-card">
+            <div class="event-card-body" style="display:flex;gap:12px;align-items:center;">
+              <div style="width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,#DBEAFE,#93C5FD);display:flex;align-items:center;justify-content:center;flex-shrink:0;">🏃</div>
+              <div style="flex:1;min-width:0;">
+                <div class="event-title" style="font-size:14px;">Entraînement canicross</div>
+                <div class="event-meta" style="margin-bottom:0;">
+                  <span>14:00</span>
+                  <span>8 going</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-top:8px;margin-bottom:4px;">Wednesday 26 March</div>
+          <div class="event-card">
+            <div class="event-card-body" style="display:flex;gap:12px;align-items:center;">
+              <div style="width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,#DBEAFE,#93C5FD);display:flex;align-items:center;justify-content:center;flex-shrink:0;">🐕</div>
+              <div style="flex:1;min-width:0;">
+                <div class="event-title" style="font-size:14px;">Canirando — Parc de Montaud</div>
+                <div class="event-meta" style="margin-bottom:0;">
+                  <span>10:00</span>
+                  <span>5 going</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="event-card">
+            <div class="event-card-body" style="display:flex;gap:12px;align-items:center;">
+              <div style="width:48px;height:48px;border-radius:8px;background:var(--warning-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">📝</div>
+              <div style="flex:1;min-width:0;">
+                <div class="event-title" style="font-size:14px;">Sortie Pilat<span class="draft-badge">Draft</span></div>
+                <div class="event-meta" style="margin-bottom:0;">
+                  <span>14:00</span>
+                  <span style="color:var(--warning);">Admin only</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-top:8px;margin-bottom:4px;">Saturday 29 March</div>
+          <div class="event-card">
+            <div class="event-card-body" style="display:flex;gap:12px;align-items:center;">
+              <div style="width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,#DBEAFE,#93C5FD);display:flex;align-items:center;justify-content:center;flex-shrink:0;">🏆</div>
+              <div style="flex:1;min-width:0;">
+                <div class="event-title" style="font-size:14px;">Course FFSLC — Monistrol</div>
+                <div class="event-meta" style="margin-bottom:0;">
+                  <span>8:00</span>
+                  <span>4 going</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="p-tabbar">
+          <div class="p-tab active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Events
+          </div>
+          <div class="p-tab">
+            <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span>
+            Chat
+          </div>
+          <div class="p-tab">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" opacity="0.3"/></svg>
+            Dogs
+          </div>
+          <div class="p-tab">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Profile
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EVENT DETAIL -->
+<section id="event-detail" class="section">
+  <h2 class="section-title">Event Detail — Direction C: Map-Forward</h2>
+  <p class="section-subtitle">The hero interaction: map takes center stage, Navigate button is prominent. "Tap → Navigate → Arrive" in action.</p>
+
+  <div class="phone-row">
+    <div class="phone-wrapper">
+      <div class="phone-label">Event Detail — Member View</div>
+      <div class="phone">
+        <div class="p-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;cursor:pointer;"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <div class="club-name" style="flex:1;">Event Details</div>
+        </div>
+        <div class="p-content" style="padding:0;gap:0;">
+          <div style="height:240px;background:linear-gradient(135deg,#DBEAFE 0%,#93C5FD 50%,#60A5FA 100%);position:relative;display:flex;align-items:center;justify-content:center;">
+            <div class="pin" style="transform:rotate(-45deg) scale(1.5);"><div class="pin-inner"></div></div>
+            <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.4));padding:16px;">
+              <div style="color:white;font-size:13px;font-weight:500;">📍 Parking Forêt de Bonson</div>
+            </div>
+          </div>
+          <div style="padding:0 16px;">
+            <button style="width:100%;padding:14px;background:var(--accent);color:white;border:none;border-radius:10px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:-20px;position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 12px rgba(249,115,22,0.3);">
+              🧭 Navigate with Waze
+            </button>
+          </div>
+          <div style="padding:16px;">
+            <h2 style="font-size:20px;font-weight:700;margin-bottom:4px;">Canitrail — Forêt de Bonson</h2>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">Sunday 23 March · 9:00 — 11:30</div>
+            <div style="font-size:14px;line-height:1.6;color:#555;margin-bottom:16px;">
+              Sortie canitrail dans la forêt de Bonson. Parcours de 12km avec dénivelé modéré. Rendez-vous au parking forestier. Pensez à prendre de l'eau pour vos chiens !
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+              <button class="rsvp-btn active" style="flex:1;padding:10px;font-size:14px;font-weight:600;">✓ Going</button>
+              <button class="rsvp-btn" style="flex:1;padding:10px;font-size:14px;">Maybe</button>
+              <button class="rsvp-btn" style="flex:1;padding:10px;font-size:14px;">Can't go</button>
+            </div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Who's going (12)</div>
+            <div style="display:flex;gap:-4px;">
+              <div style="width:32px;height:32px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--primary);border:2px solid white;">JD</div>
+              <div style="width:32px;height:32px;border-radius:50%;background:#DCFCE7;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--success);border:2px solid white;margin-left:-4px;">PM</div>
+              <div style="width:32px;height:32px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--accent);border:2px solid white;margin-left:-4px;">SL</div>
+              <div style="width:32px;height:32px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--primary);border:2px solid white;margin-left:-4px;">AB</div>
+              <div style="width:32px;height:32px;border-radius:50%;background:#E4E4E7;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--muted);border:2px solid white;margin-left:-4px;">+8</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VACCINE DASHBOARD -->
+<section id="vaccine" class="section">
+  <h2 class="section-title">Vaccine Dashboard — CNEAC Hero Moment</h2>
+  <p class="section-subtitle">"Open → All Green → Ready" — Marie checks 20 dogs in 30 seconds. Green/orange/red at a glance.</p>
+
+  <div class="phone-row">
+    <div class="phone-wrapper">
+      <div class="phone-label">Admin — Vaccine Status</div>
+      <div class="phone">
+        <div class="p-header">
+          <div class="club-logo" style="background:var(--success);">A</div>
+          <div>
+            <div class="club-name">Club Agility Loire</div>
+            <div class="club-switcher">CNEAC <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg></div>
+          </div>
+        </div>
+        <div class="p-content">
+          <div style="font-size:16px;font-weight:700;margin-bottom:12px;">Vaccine Status</div>
+          <div class="vacc-summary">
+            <div class="vacc-stat green"><div class="num">18</div><div class="label">Up to date</div></div>
+            <div class="vacc-stat orange"><div class="num">2</div><div class="label">Expiring</div></div>
+            <div class="vacc-stat red"><div class="num">1</div><div class="label">Expired</div></div>
+          </div>
+
+          <div style="display:flex;gap:6px;margin-bottom:12px;">
+            <button style="padding:6px 12px;border-radius:6px;background:var(--danger-light);color:var(--danger);border:1px solid var(--danger);font-size:12px;font-family:inherit;font-weight:600;cursor:pointer;">Expired (1)</button>
+            <button style="padding:6px 12px;border-radius:6px;background:var(--warning-light);color:var(--warning);border:1px solid var(--warning);font-size:12px;font-family:inherit;font-weight:600;cursor:pointer;">Expiring (2)</button>
+            <button style="padding:6px 12px;border-radius:6px;background:transparent;color:var(--muted);border:1px solid var(--border);font-size:12px;font-family:inherit;cursor:pointer;">All (21)</button>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="vacc-row">
+              <div class="vacc-avatar">🐕</div>
+              <div class="vacc-info">
+                <div class="vacc-name">Médor</div>
+                <div class="vacc-owner">Owner: Pierre D. · Rabies expired Feb 2026</div>
+              </div>
+              <div class="vacc-badge red">Expired</div>
+            </div>
+            <div class="vacc-row">
+              <div class="vacc-avatar">🐕</div>
+              <div class="vacc-info">
+                <div class="vacc-name">Luna</div>
+                <div class="vacc-owner">Owner: Sophie M. · Rabies expires Apr 2026</div>
+              </div>
+              <div class="vacc-badge orange">Expiring</div>
+            </div>
+            <div class="vacc-row">
+              <div class="vacc-avatar">🐕</div>
+              <div class="vacc-info">
+                <div class="vacc-name">Rex</div>
+                <div class="vacc-owner">Owner: Jean L. · DHPP expires Apr 2026</div>
+              </div>
+              <div class="vacc-badge orange">Expiring</div>
+            </div>
+            <div class="vacc-row">
+              <div class="vacc-avatar">🐕</div>
+              <div class="vacc-info">
+                <div class="vacc-name">Bella</div>
+                <div class="vacc-owner">Owner: Marie C. · All vaccines current</div>
+              </div>
+              <div class="vacc-badge green">Up to date</div>
+            </div>
+            <div class="vacc-row">
+              <div class="vacc-avatar">🐕</div>
+              <div class="vacc-info">
+                <div class="vacc-name">Max</div>
+                <div class="vacc-owner">Owner: Aude R. · All vaccines current</div>
+              </div>
+              <div class="vacc-badge green">Up to date</div>
+            </div>
+          </div>
+        </div>
+        <div class="p-tabbar">
+          <div class="p-tab">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Events
+          </div>
+          <div class="p-tab">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            Chat
+          </div>
+          <div class="p-tab active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" opacity="0.3"/></svg>
+            Dogs
+          </div>
+          <div class="p-tab">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Profile
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHAT -->
+<section id="chat" class="section">
+  <h2 class="section-title">Chat — WhatsApp-Familiar Patterns</h2>
+  <p class="section-subtitle">Message bubbles, image sharing, sender names — everything users already know from WhatsApp. No new patterns to learn.</p>
+
+  <div class="phone-row">
+    <div class="phone-wrapper">
+      <div class="phone-label">Club Chat — General Channel</div>
+      <div class="phone">
+        <div class="p-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;cursor:pointer;"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <div style="flex:1;">
+            <div class="club-name" style="font-size:15px;"># Général</div>
+            <div style="font-size:11px;color:var(--muted);">28 members</div>
+          </div>
+        </div>
+        <div class="p-content" style="gap:10px;justify-content:flex-end;">
+          <div class="chat-msg">
+            <div class="chat-avatar">PD</div>
+            <div>
+              <div class="chat-sender">Perrine D.</div>
+              <div class="chat-bubble">RDV au parking à côté du pont pour dimanche. J'ai mis les coordonnées dans l'événement !</div>
+              <div class="chat-time">14:32</div>
+            </div>
+          </div>
+          <div class="chat-msg">
+            <div class="chat-avatar">PD</div>
+            <div>
+              <div class="chat-sender">Perrine D.</div>
+              <div class="chat-bubble" style="padding:4px;">
+                <div class="chat-img">📷 Photo du parking</div>
+              </div>
+              <div class="chat-time">14:33</div>
+            </div>
+          </div>
+          <div class="chat-msg sent">
+            <div>
+              <div class="chat-bubble">Super merci Perrine ! On y sera avec Rex 🐕</div>
+              <div class="chat-time" style="text-align:right;">14:45</div>
+            </div>
+          </div>
+          <div class="chat-msg">
+            <div class="chat-avatar" style="background:var(--accent-light);color:var(--accent);">JD</div>
+            <div>
+              <div class="chat-sender" style="color:var(--accent);">Julie D.</div>
+              <div class="chat-bubble">Quelqu'un pour du covoiturage depuis Saint-Étienne ?</div>
+              <div class="chat-time">15:02</div>
+            </div>
+          </div>
+          <div class="chat-msg">
+            <div class="chat-avatar" style="background:var(--success-light);color:var(--success);">PM</div>
+            <div>
+              <div class="chat-sender" style="color:var(--success);">Patrick M.</div>
+              <div class="chat-bubble">Je peux prendre 2 personnes + chiens. Départ 8h15 de Firminy.</div>
+              <div class="chat-time">15:10</div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:8px 12px;background:var(--card);border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;">
+          <button style="width:36px;height:36px;border-radius:50%;background:var(--primary-light);border:none;cursor:pointer;font-size:16px;">📷</button>
+          <input type="text" placeholder="Message..." style="flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:20px;font-size:14px;font-family:inherit;background:var(--bg);">
+          <button style="width:36px;height:36px;border-radius:50%;background:var(--primary);border:none;cursor:pointer;color:white;font-size:16px;">↑</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ONBOARDING -->
+<section id="onboarding" class="section">
+  <h2 class="section-title">Onboarding — Aude's 10-Minute Setup</h2>
+  <p class="section-subtitle">Direction F: Guided step-by-step. One question per screen. Progress dots. Encouraging copy. "I did this myself?"</p>
+
+  <div class="phone-row">
+    <div class="phone-wrapper">
+      <div class="phone-label">Step 1: Club Name</div>
+      <div class="phone">
+        <div class="p-content" style="justify-content:center;">
+          <div class="onb-step">
+            <div class="onb-progress">
+              <div class="onb-dot active"></div>
+              <div class="onb-dot"></div>
+              <div class="onb-dot"></div>
+              <div class="onb-dot"></div>
+            </div>
+            <div class="onb-icon">🐕</div>
+            <div class="onb-title">Welcome to CaniFed!</div>
+            <div class="onb-desc">Let's set up your club's digital home. It only takes a few minutes.</div>
+            <input class="onb-input" placeholder="Your club's name" value="Club Agility Loire">
+            <button class="onb-btn">Continue</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone-wrapper">
+      <div class="phone-label">Step 2: Federation</div>
+      <div class="phone">
+        <div class="p-content" style="justify-content:center;">
+          <div class="onb-step">
+            <div class="onb-progress">
+              <div class="onb-dot done"></div>
+              <div class="onb-dot active"></div>
+              <div class="onb-dot"></div>
+              <div class="onb-dot"></div>
+            </div>
+            <div class="onb-icon">🏅</div>
+            <div class="onb-title">Which federation?</div>
+            <div class="onb-desc">This helps us customize your experience. You can change this later.</div>
+            <div style="display:flex;flex-direction:column;gap:8px;text-align:left;">
+              <label style="display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--border);border-radius:10px;cursor:pointer;">
+                <input type="radio" name="fed"> <span>FFSLC (Canicross, Canitrail...)</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--primary);border-radius:10px;cursor:pointer;background:var(--primary-light);">
+                <input type="radio" name="fed" checked> <span style="font-weight:600;">CNEAC (Agility, Obedience...)</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--border);border-radius:10px;cursor:pointer;">
+                <input type="radio" name="fed"> <span>Other / None</span>
+              </label>
+            </div>
+            <button class="onb-btn" style="margin-top:16px;">Continue</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone-wrapper">
+      <div class="phone-label">Step 4: Done!</div>
+      <div class="phone">
+        <div class="p-content" style="justify-content:center;">
+          <div class="onb-step">
+            <div class="onb-progress">
+              <div class="onb-dot done"></div>
+              <div class="onb-dot done"></div>
+              <div class="onb-dot done"></div>
+              <div class="onb-dot done"></div>
+            </div>
+            <div class="onb-icon" style="background:var(--success-light);">✓</div>
+            <div class="onb-title">Your club is ready!</div>
+            <div class="onb-desc">Club Agility Loire is now on CaniFed. Invite your first members to get started.</div>
+            <button class="onb-btn" style="background:var(--accent);">Invite Members</button>
+            <button style="width:100%;padding:14px;background:transparent;color:var(--muted);border:none;font-size:14px;font-family:inherit;cursor:pointer;margin-top:8px;">I'll do this later</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLUB SWITCHER -->
+<section id="switcher" class="section">
+  <h2 class="section-title">Club Switcher — WhatsApp-Style Context Switch</h2>
+  <p class="section-subtitle">Multi-club member taps the club name → dropdown → instant context switch. Same mental model as WhatsApp groups.</p>
+
+  <div class="phone-row">
+    <div class="phone-wrapper">
+      <div class="phone-label">Club Switcher Open</div>
+      <div class="phone">
+        <div class="p-header" style="z-index:11;">
+          <div class="club-logo">CF</div>
+          <div>
+            <div class="club-name">cani'potes 42</div>
+            <div class="club-switcher" style="color:var(--primary);font-weight:600;">Switch club ▾</div>
+          </div>
+        </div>
+        <div style="position:relative;flex:1;">
+          <div class="switcher-overlay">
+            <div class="switcher-panel">
+              <div class="switcher-title">My Clubs</div>
+              <div class="switcher-item active">
+                <div class="club-logo" style="background:var(--primary);">CF</div>
+                <div class="club-info">
+                  <div class="name">cani'potes 42</div>
+                  <div class="type">FFSLC · Canicross</div>
+                </div>
+                <div class="switcher-check">✓</div>
+              </div>
+              <div class="switcher-item">
+                <div class="club-logo" style="background:var(--success);">A</div>
+                <div class="club-info">
+                  <div class="name">Club Agility Loire</div>
+                  <div class="type">CNEAC · Agility</div>
+                </div>
+              </div>
+              <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;">
+                <div class="switcher-item" style="color:var(--primary);font-weight:600;font-size:14px;">
+                  + Join another club
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ADMIN DESKTOP -->
+<section id="admin" class="section">
+  <h2 class="section-title">Admin Desktop — Direction D: Dashboard-First</h2>
+  <p class="section-subtitle">Sidebar navigation, data tables, member management. Marie's view on tablet/desktop for bulk operations.</p>
+
+  <div class="desktop-frame">
+    <div class="desktop-layout">
+      <div class="desktop-sidebar">
+        <div class="logo-area">
+          <div class="club-logo">A</div>
+          <div>
+            <div class="club-name">Club Agility Loire</div>
+            <div style="font-size:11px;color:var(--muted);">CNEAC</div>
+          </div>
+        </div>
+        <div class="sidebar-nav">
+          <div class="sidebar-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Events
+          </div>
+          <div class="sidebar-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            Chat
+          </div>
+          <div class="sidebar-item active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            Members
+          </div>
+          <div class="sidebar-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4m-7.07-3.93l2.83-2.83m8.48-8.48l2.83-2.83M2 12h4m12 0h4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83"/></svg>
+            Dogs & Health
+          </div>
+          <div class="sidebar-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Documents
+          </div>
+          <div class="sidebar-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Payments
+          </div>
+          <div class="sidebar-item" style="margin-top:auto;border-top:1px solid var(--border);padding-top:12px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            Settings
+          </div>
+        </div>
+      </div>
+      <div class="desktop-main">
+        <h2>Members</h2>
+        <div class="subtitle">58 members · 10 admins · Club Agility Loire</div>
+
+        <div style="display:flex;gap:8px;margin-bottom:20px;">
+          <input type="text" placeholder="Search members..." style="flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;">
+          <select style="padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:white;">
+            <option>All roles</option>
+            <option>Admin</option>
+            <option>Member</option>
+          </select>
+          <button style="padding:10px 20px;background:var(--primary);color:white;border:none;border-radius:8px;font-size:14px;font-family:inherit;font-weight:600;cursor:pointer;">+ Invite</button>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Member</th>
+              <th>Role</th>
+              <th>Dogs</th>
+              <th>Vaccine Status</th>
+              <th>License</th>
+              <th>Joined</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="display:flex;align-items:center;gap:10px;">
+                <div style="width:32px;height:32px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--primary);">MC</div>
+                <div><div style="font-weight:600;">Marie C.</div><div style="font-size:12px;color:var(--muted);">marie@email.com</div></div>
+              </td>
+              <td><span style="padding:2px 8px;border-radius:4px;background:var(--accent-light);color:var(--accent);font-size:12px;font-weight:600;">Owner</span></td>
+              <td>Bella, Max</td>
+              <td><span class="vacc-badge green">All current</span></td>
+              <td><span class="vacc-badge green">Paid</span></td>
+              <td style="color:var(--muted);font-size:13px;">Jan 2026</td>
+            </tr>
+            <tr>
+              <td style="display:flex;align-items:center;gap:10px;">
+                <div style="width:32px;height:32px;border-radius:50%;background:var(--success-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--success);">PD</div>
+                <div><div style="font-weight:600;">Pierre D.</div><div style="font-size:12px;color:var(--muted);">pierre@email.com</div></div>
+              </td>
+              <td><span style="padding:2px 8px;border-radius:4px;background:var(--primary-light);color:var(--primary);font-size:12px;font-weight:600;">Admin</span></td>
+              <td>Médor</td>
+              <td><span class="vacc-badge red">1 expired</span></td>
+              <td><span class="vacc-badge green">Paid</span></td>
+              <td style="color:var(--muted);font-size:13px;">Jan 2026</td>
+            </tr>
+            <tr>
+              <td style="display:flex;align-items:center;gap:10px;">
+                <div style="width:32px;height:32px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--accent);">SM</div>
+                <div><div style="font-weight:600;">Sophie M.</div><div style="font-size:12px;color:var(--muted);">sophie@email.com</div></div>
+              </td>
+              <td><span style="padding:2px 8px;border-radius:4px;background:var(--bg);color:var(--muted);font-size:12px;font-weight:600;">Member</span></td>
+              <td>Luna</td>
+              <td><span class="vacc-badge orange">Expiring</span></td>
+              <td><span class="vacc-badge orange">Pending</span></td>
+              <td style="color:var(--muted);font-size:13px;">Feb 2026</td>
+            </tr>
+            <tr>
+              <td style="display:flex;align-items:center;gap:10px;">
+                <div style="width:32px;height:32px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--primary);">JL</div>
+                <div><div style="font-weight:600;">Jean L.</div><div style="font-size:12px;color:var(--muted);">jean@email.com</div></div>
+              </td>
+              <td><span style="padding:2px 8px;border-radius:4px;background:var(--bg);color:var(--muted);font-size:12px;font-weight:600;">Member</span></td>
+              <td>Rex</td>
+              <td><span class="vacc-badge orange">Expiring</span></td>
+              <td><span class="vacc-badge green">Paid</span></td>
+              <td style="color:var(--muted);font-size:13px;">Feb 2026</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

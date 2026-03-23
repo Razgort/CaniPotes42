@@ -1,0 +1,119 @@
+# generated: 2026-03-22
+# last_updated: 2026-03-22  # Story 5.5 review
+# project: CaniFed
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: {project-root}/_bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-03-22
+last_updated: 2026-03-22  # Story 5.1 review
+project: CaniFed
+project_key: NOKEY
+tracking_system: file-system
+story_location: "{project-root}/_bmad-output/implementation-artifacts"
+
+development_status:
+  # Epic 1: Project Foundation & Multi-Tenant Core
+  epic-1: in-progress
+  1-1-prisma-schema-database-setup: review
+  1-2-api-core-infrastructure: review
+  1-3-shared-zod-schemas: review
+  1-4-frontend-shell-design-system-foundation: backlog
+  1-5-ci-cd-pipeline-developer-experience: review
+  1-6-test-environment-deployment-pipeline: review
+  epic-1-retrospective: optional
+
+  # Epic 2: Authentication & User Accounts
+  epic-2: in-progress
+  2-1-user-registration-with-privacy-notice: review
+  2-2-user-login-jwt-session: review
+  2-3-token-refresh-session-management: review
+  epic-2-retrospective: optional
+
+  # Epic 3: Club Creation & Onboarding
+  epic-3: in-progress
+  3-1-guided-club-registration-flow: review
+  3-2-club-settings-management: complete
+  3-3-club-deletion: backlog
+  epic-3-retrospective: optional
+
+  # Epic 4: Member Management & Invitations
+  epic-4: in-progress
+  4-1-email-invitation-member-join-flow: review
+  4-2-member-directory-profile-management: review
+  4-3-role-management-member-administration: review
+  4-4-club-switcher-multi-club-navigation: review
+  epic-4-retrospective: optional
+
+  # Epic 5: Event Management & GPS Navigation
+  epic-5: in-progress
+  5-1-event-creation-with-gps-pin-placement: review
+  5-2-event-feed-date-grouped-list: review
+  5-3-event-detail-map-one-tap-navigation: in-progress
+  5-4-rsvp-participation-tracking: review
+  5-5-draft-publish-workflow-event-management: review
+  epic-5-retrospective: optional
+
+  # Epic 6: Dog Profiles & Vaccine Tracking
+  epic-6: in-progress
+  6-1-dog-registration-profile-management: review
+  6-2-vaccine-records-certificate-upload: review
+  6-3-admin-vaccine-dashboard: in-progress
+  epic-6-retrospective: optional
+
+  # Epic 7: Document Management
+  epic-7: in-progress
+  7-1-document-upload-association: review
+  7-2-document-viewing-download-expiry-tracking: review
+  7-3-admin-document-expiry-dashboard: ready-for-dev
+  epic-7-retrospective: optional
+
+  # Epic 8: Real-Time Chat
+  epic-8: in-progress
+  8-1-chat-channels-text-messaging: in-progress
+  8-2-chat-image-sharing-message-history: review
+  8-3-chat-reconnection-reliability: review
+  epic-8-retrospective: optional
+
+  # Epic 9: License Payments
+  epic-9: in-progress
+  9-1-license-type-configuration: review
+  9-2-stripe-checkout-payment-flow: review
+  9-3-helloasso-payment-integration: review
+  9-4-license-status-payment-history: review
+  epic-9-retrospective: optional
+
+  # Epic 10: Data Privacy & Account Management
+  epic-10: in-progress
+  10-1-account-data-export: ready-for-dev
+  10-2-account-deletion: ready-for-dev
+  epic-10-retrospective: optional
