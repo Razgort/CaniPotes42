@@ -1,18 +1,19 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const mockUseAuth = jest.fn();
-const mockUseMemberDetail = jest.fn();
+const mockUseAuth = vi.fn();
+const mockUseMemberDetail = vi.fn();
 
-jest.mock('@org/data-access', () => ({
+vi.mock('@org/data-access', () => ({
   useAuth: () => mockUseAuth(),
 }));
 
-jest.mock('./hooks/useMembers', () => ({
+vi.mock('./hooks/useMembers', () => ({
   useMemberDetail: (...args: unknown[]) => mockUseMemberDetail(...args),
-  useUpdateProfile: () => ({ mutateAsync: jest.fn() }),
-  useUploadAvatar: () => ({ mutateAsync: jest.fn() }),
+  useUpdateProfile: () => ({ mutateAsync: vi.fn() }),
+  useUploadAvatar: () => ({ mutateAsync: vi.fn() }),
 }));
 
 import { MemberProfile } from './MemberProfile';
@@ -34,7 +35,7 @@ function renderWithRoute(memberId: string) {
 
 describe('MemberProfile', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const member = {

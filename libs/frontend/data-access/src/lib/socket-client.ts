@@ -8,10 +8,14 @@ const SOCKET_ORIGIN =
     : '';
 
 type MessageListener = (message: ChatMessage) => void;
+type ConnectionListener = () => void;
 
 class ChatSocketClient {
   private socket: Socket | null = null;
   private messageListeners: Set<MessageListener> = new Set();
+  private connectListeners: Set<ConnectionListener> = new Set();
+  private disconnectListeners: Set<ConnectionListener> = new Set();
+  private reconnectingListeners: Set<ConnectionListener> = new Set();
   private connectedClubId: string | null = null;
 
   connect(token: string, clubId: string): void {
@@ -30,11 +34,16 @@ class ChatSocketClient {
       auth: { token },
       transports: ['websocket', 'polling'] as const,
       autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 10000,
+      randomizationFactor: 0.5,
     };
     this.socket = SOCKET_ORIGIN ? io(SOCKET_ORIGIN, opts) : io(opts);
 
     this.socket.on('connect', () => {
-      // Connected — rooms are joined automatically in gateway handleConnection
+      this.connectListeners.forEach((cb) => cb());
     });
 
     this.socket.on('chat:message', (message: ChatMessage) => {
@@ -42,7 +51,11 @@ class ChatSocketClient {
     });
 
     this.socket.on('disconnect', () => {
-      // Basic disconnect handling — reconnection strategy handled in story 8.3
+      this.disconnectListeners.forEach((cb) => cb());
+    });
+
+    this.socket.on('reconnect_attempt', () => {
+      this.reconnectingListeners.forEach((cb) => cb());
     });
   }
 
@@ -68,10 +81,38 @@ class ChatSocketClient {
     this.socket.emit('chat:join-channel', { channelId });
   }
 
+  leaveChannel(channelId: string): void {
+    if (!this.socket?.connected) {
+      return;
+    }
+    this.socket.emit('chat:leave-channel', { channelId });
+  }
+
   onMessage(listener: MessageListener): () => void {
     this.messageListeners.add(listener);
     return () => {
       this.messageListeners.delete(listener);
+    };
+  }
+
+  onConnect(listener: ConnectionListener): () => void {
+    this.connectListeners.add(listener);
+    return () => {
+      this.connectListeners.delete(listener);
+    };
+  }
+
+  onDisconnect(listener: ConnectionListener): () => void {
+    this.disconnectListeners.add(listener);
+    return () => {
+      this.disconnectListeners.delete(listener);
+    };
+  }
+
+  onReconnecting(listener: ConnectionListener): () => void {
+    this.reconnectingListeners.add(listener);
+    return () => {
+      this.reconnectingListeners.delete(listener);
     };
   }
 

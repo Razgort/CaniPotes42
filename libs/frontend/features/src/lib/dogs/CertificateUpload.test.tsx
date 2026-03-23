@@ -123,7 +123,7 @@ describe('CertificateUpload', () => {
     await user.upload(fileInput, file);
 
     expect(screen.getByAltText(/aperçu/i)).toBeTruthy();
-    await user.click(screen.getByRole('button', { name: /reprendre/i }));
+    await user.click(screen.getByRole('button', { name: 'Reprendre' }));
 
     expect(screen.queryByAltText(/aperçu/i)).toBeNull();
     expect(screen.getByRole('button', { name: /prendre en photo/i })).toBeTruthy();

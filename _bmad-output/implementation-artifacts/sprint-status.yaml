@@ -1,5 +1,5 @@
 # generated: 2026-03-22
-# last_updated: 2026-03-22  # Story 5.4 review
+# last_updated: 2026-03-22  # Story 5.5 review
 # project: CaniFed
 # project_key: NOKEY
 # tracking_system: file-system
@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-03-22
-last_updated: 2026-03-22  # Story 6.1 review
+last_updated: 2026-03-22  # Story 5.1 review
 project: CaniFed
 project_key: NOKEY
 tracking_system: file-system
@@ -76,39 +76,39 @@ development_status:
 
   # Epic 5: Event Management & GPS Navigation
   epic-5: in-progress
-  5-1-event-creation-with-gps-pin-placement: in-progress
+  5-1-event-creation-with-gps-pin-placement: review
   5-2-event-feed-date-grouped-list: review
   5-3-event-detail-map-one-tap-navigation: in-progress
   5-4-rsvp-participation-tracking: review
-  5-5-draft-publish-workflow-event-management: in-progress
+  5-5-draft-publish-workflow-event-management: review
   epic-5-retrospective: optional
 
   # Epic 6: Dog Profiles & Vaccine Tracking
   epic-6: in-progress
   6-1-dog-registration-profile-management: review
-  6-2-vaccine-records-certificate-upload: in-progress
+  6-2-vaccine-records-certificate-upload: review
   6-3-admin-vaccine-dashboard: in-progress
   epic-6-retrospective: optional
 
   # Epic 7: Document Management
   epic-7: in-progress
   7-1-document-upload-association: review
-  7-2-document-viewing-download-expiry-tracking: in-progress
+  7-2-document-viewing-download-expiry-tracking: review
   7-3-admin-document-expiry-dashboard: ready-for-dev
   epic-7-retrospective: optional
 
   # Epic 8: Real-Time Chat
   epic-8: in-progress
   8-1-chat-channels-text-messaging: in-progress
-  8-2-chat-image-sharing-message-history: ready-for-dev
-  8-3-chat-reconnection-reliability: ready-for-dev
+  8-2-chat-image-sharing-message-history: review
+  8-3-chat-reconnection-reliability: review
   epic-8-retrospective: optional
 
   # Epic 9: License Payments
   epic-9: in-progress
-  9-1-license-type-configuration: in-progress
-  9-2-stripe-checkout-payment-flow: in-progress
-  9-3-helloasso-payment-integration: in-progress
+  9-1-license-type-configuration: review
+  9-2-stripe-checkout-payment-flow: review
+  9-3-helloasso-payment-integration: review
   9-4-license-status-payment-history: review
   epic-9-retrospective: optional
 

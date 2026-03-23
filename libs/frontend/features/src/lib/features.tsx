@@ -22,6 +22,7 @@ const InvitePage = lazy(() => import('./pages/InvitePage'));
 const DocumentsPage = lazy(() => import('./pages/DocumentsPage'));
 const VaccineDashboard = lazy(() => import('./vaccine-dashboard/VaccineDashboard'));
 const EventDetailPage = lazy(() => import('./events/EventDetail'));
+const EventCreatePage = lazy(() => import('./events/EventCreateForm'));
 const EventEditPage = lazy(() => import('./events/EventForm'));
 const LicenseSettingsPage = lazy(() => import('./licenses/LicenseSettingsPage'));
 const LicensesPage = lazy(() => import('./licenses/LicensesPage'));
@@ -40,6 +41,14 @@ export function AppRoutes() {
           element={
             <ProtectedRoute>
               <EventsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/events/new"
+          element={
+            <ProtectedRoute>
+              <EventCreatePage />
             </ProtectedRoute>
           }
         />

@@ -4,6 +4,37 @@ import { toast } from '@org/ui';
 import type { EventDetail } from '@org/data-access';
 import type { EventStatus } from '@org/types';
 
+// ─── Create event ────────────────────────────────────────────────────────────
+
+export interface CreateEventData {
+  title: string;
+  description?: string;
+  dateTime: string;
+  latitude: number;
+  longitude: number;
+  locationName?: string;
+}
+
+export function useCreateEvent() {
+  const { activeClub } = useAuth();
+  const clubId = activeClub?.id;
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateEventData) =>
+      apiClient.post<{ data: EventDetail }>('/events', data),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['events', clubId] });
+      toast.success('Evenement cree en brouillon');
+    },
+
+    onError: () => {
+      toast.error("Impossible de creer l'evenement");
+    },
+  });
+}
+
 // ─── Publish / Unpublish ────────────────────────────────────────────────────
 
 export function useUpdateEventStatus(eventId: string) {

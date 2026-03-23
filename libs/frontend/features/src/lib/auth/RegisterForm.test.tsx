@@ -21,6 +21,18 @@ vi.mock('./hooks/useRegister', () => ({
   }),
 }));
 
+vi.mock('@org/data-access', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@org/data-access')>();
+  return {
+    ...actual,
+    useAuth: vi.fn(() => ({ login: vi.fn() })),
+  };
+});
+
+vi.mock('../members/hooks/useInvitations', () => ({
+  useInvitationStatus: vi.fn(() => ({ data: null })),
+}));
+
 vi.mock('@org/ui', () => ({
   toast: {
     success: mockToastSuccess,

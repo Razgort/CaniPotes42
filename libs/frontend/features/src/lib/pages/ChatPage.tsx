@@ -1,10 +1,10 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { MessageCircle, ChevronRight } from 'lucide-react';
-import { SkeletonList } from '@org/ui';
+import { SkeletonList, cn } from '@org/ui';
 import { useChannels } from '../chat/hooks/useChat';
 import { ChatChannel } from '../chat/ChatChannel';
 
-function ChannelList() {
+function ChannelList({ activeChannelId }: { activeChannelId?: string }) {
   const navigate = useNavigate();
   const { data, isLoading } = useChannels();
 
@@ -33,7 +33,10 @@ function ChannelList() {
           <li key={channel.id}>
             <button
               type="button"
-              className="flex w-full items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left"
+              className={cn(
+                'flex w-full items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left',
+                activeChannelId === channel.id && 'bg-muted/70',
+              )}
               onClick={() => navigate(`/chat/${channel.id}`)}
             >
               <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
@@ -52,14 +55,44 @@ function ChannelList() {
 export default function ChatPage() {
   const { channelId } = useParams<{ channelId: string }>();
 
-  if (channelId) {
-    return <ChatChannel channelId={channelId} />;
-  }
-
   return (
-    <div className="py-4">
-      <h1 className="text-lg font-semibold">Chat</h1>
-      <ChannelList />
-    </div>
+    <>
+      {/* Mobile: show channel list OR conversation */}
+      <div className="lg:hidden">
+        {channelId ? (
+          <ChatChannel channelId={channelId} />
+        ) : (
+          <div className="py-4">
+            <h1 className="text-lg font-semibold">Chat</h1>
+            <ChannelList />
+          </div>
+        )}
+      </div>
+
+      {/* Desktop: split layout — channel list on left, conversation on right */}
+      <div className="hidden lg:grid lg:grid-cols-[280px,1fr] h-[calc(100dvh-3.5rem)]">
+        {/* Left column: channel list */}
+        <div className="border-r border-border overflow-y-auto px-3">
+          <div className="py-4">
+            <h1 className="text-lg font-semibold">Chat</h1>
+            <ChannelList activeChannelId={channelId} />
+          </div>
+        </div>
+
+        {/* Right column: active conversation */}
+        <div className="overflow-hidden">
+          {channelId ? (
+            <ChatChannel channelId={channelId} />
+          ) : (
+            <div className="flex h-full items-center justify-center text-muted-foreground">
+              <div className="text-center">
+                <MessageCircle className="mx-auto h-12 w-12 opacity-30" />
+                <p className="mt-2 text-sm">Sélectionnez un canal</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   );
 }

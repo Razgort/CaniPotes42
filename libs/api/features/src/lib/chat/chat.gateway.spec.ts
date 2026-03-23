@@ -31,6 +31,7 @@ function createMockSocket(overrides: Record<string, unknown> = {}) {
     },
     disconnect: vi.fn(),
     join: vi.fn().mockResolvedValue(undefined),
+    leave: vi.fn().mockResolvedValue(undefined),
     emit: vi.fn(),
   };
   return { ...base, ...overrides };
@@ -144,6 +145,37 @@ describe('ChatGateway', () => {
       expect(client.data['clubId']).toBe('club-1');
       // Should join the club-scoped channel room
       expect(client.join).toHaveBeenCalledWith('club:club-1:channel:ch-1');
+    });
+  });
+
+  describe('handleLeaveChannel', () => {
+    it('returns error if client is not authenticated', async () => {
+      const client = createMockSocket({ data: {} as Record<string, unknown> });
+
+      const result = await gateway.handleLeaveChannel(client as never, { channelId: 'ch-1' });
+
+      expect(result).toEqual({ error: 'Not authenticated' });
+      expect(client.leave).not.toHaveBeenCalled();
+    });
+
+    it('calls socket.leave with correct club-scoped room', async () => {
+      const clientData: Record<string, unknown> = { userId: 'user-1', clubId: 'club-1' };
+      const client = createMockSocket({ data: clientData });
+
+      const result = await gateway.handleLeaveChannel(client as never, { channelId: 'ch-1' });
+
+      expect(client.leave).toHaveBeenCalledWith('club:club-1:channel:ch-1');
+      expect(result).toEqual({ channelId: 'ch-1' });
+    });
+
+    it('returns error for missing channelId', async () => {
+      const clientData: Record<string, unknown> = { userId: 'user-1', clubId: 'club-1' };
+      const client = createMockSocket({ data: clientData });
+
+      const result = await gateway.handleLeaveChannel(client as never, { channelId: '' });
+
+      expect(result).toEqual({ error: 'Invalid payload' });
+      expect(client.leave).not.toHaveBeenCalled();
     });
   });
 

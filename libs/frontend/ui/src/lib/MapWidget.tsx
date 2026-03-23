@@ -145,3 +145,146 @@ export function MapWidgetError({
 export function MapWidgetSkeleton({ className }: { className?: string }) {
   return <SkeletonCard height={200} className={cn('rounded-xl', className)} />;
 }
+
+// ─── Edit mode: interactive pin placement for event creation ─────────────────
+
+export interface MapWidgetEditorProps {
+  latitude: number | null;
+  longitude: number | null;
+  onLocationChange: (lat: number, lng: number, locationName?: string) => void;
+  className?: string;
+}
+
+let reverseGeocodeTimer: ReturnType<typeof setTimeout> | null = null;
+
+function reverseGeocode(lat: number, lng: number, callback: (name: string | undefined) => void) {
+  if (reverseGeocodeTimer) clearTimeout(reverseGeocodeTimer);
+  reverseGeocodeTimer = setTimeout(() => {
+    fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=fr`,
+    )
+      .then((r) => r.json())
+      .then((data) => {
+        const name = data?.display_name as string | undefined;
+        callback(name || undefined);
+      })
+      .catch(() => callback(undefined));
+  }, 500);
+}
+
+export function MapWidgetEditor({
+  latitude,
+  longitude,
+  onLocationChange,
+  className,
+}: MapWidgetEditorProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<import('leaflet').Map | null>(null);
+  const markerRef = useRef<import('leaflet').Marker | null>(null);
+  const loadedRef = useRef(false);
+  const errorRef = useRef(false);
+
+  // Default center: France center if no coords
+  const defaultLat = latitude ?? 46.6;
+  const defaultLng = longitude ?? 2.3;
+  const defaultZoom = latitude !== null ? 15 : 6;
+
+  useEffect(() => {
+    if (!containerRef.current || loadedRef.current) return;
+
+    let map: import('leaflet').Map | null = null;
+
+    import('leaflet')
+      .then((L) => {
+        if (!containerRef.current || loadedRef.current) return;
+        loadedRef.current = true;
+        fixLeafletIcons();
+
+        // Import CSS
+        import('leaflet/dist/leaflet.css');
+
+        map = L.map(containerRef.current, {
+          center: [defaultLat, defaultLng],
+          zoom: defaultZoom,
+          zoomControl: true,
+          dragging: true,
+          scrollWheelZoom: true,
+          doubleClickZoom: false,
+          touchZoom: true,
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors',
+        }).addTo(map);
+
+        // Place initial marker if coords exist
+        if (latitude !== null && longitude !== null) {
+          const marker = L.marker([latitude, longitude], { draggable: true });
+          marker.addTo(map);
+          markerRef.current = marker;
+
+          marker.on('dragend', () => {
+            const pos = marker.getLatLng();
+            reverseGeocode(pos.lat, pos.lng, (name) => {
+              onLocationChange(pos.lat, pos.lng, name);
+            });
+          });
+        }
+
+        // Click to place or move pin
+        map.on('click', (e: import('leaflet').LeafletMouseEvent) => {
+          const { lat, lng } = e.latlng;
+
+          if (markerRef.current) {
+            markerRef.current.setLatLng([lat, lng]);
+          } else {
+            const marker = L.marker([lat, lng], { draggable: true });
+            marker.addTo(map!);
+            markerRef.current = marker;
+
+            marker.on('dragend', () => {
+              const pos = marker.getLatLng();
+              reverseGeocode(pos.lat, pos.lng, (name) => {
+                onLocationChange(pos.lat, pos.lng, name);
+              });
+            });
+          }
+
+          reverseGeocode(lat, lng, (name) => {
+            onLocationChange(lat, lng, name);
+          });
+        });
+
+        mapRef.current = map;
+      })
+      .catch(() => {
+        errorRef.current = true;
+        loadedRef.current = false;
+      });
+
+    return () => {
+      if (map) {
+        map.remove();
+        mapRef.current = null;
+        markerRef.current = null;
+        loadedRef.current = false;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div className={cn('relative w-full', className)}>
+      <div
+        ref={containerRef}
+        className="w-full rounded-xl overflow-hidden"
+        style={{ height: 300, minHeight: 300 }}
+        role="application"
+        aria-label="Carte interactive — cliquez pour placer un repère"
+      />
+      <p className="mt-1 text-xs text-muted-foreground text-center">
+        Cliquez sur la carte pour placer le repère, puis glissez-le pour ajuster
+      </p>
+    </div>
+  );
+}
